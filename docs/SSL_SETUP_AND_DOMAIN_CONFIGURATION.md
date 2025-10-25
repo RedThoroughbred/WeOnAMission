@@ -107,23 +107,7 @@ With your domain, multi-tenant URLs work like:
 
 ---
 
-## Part 4: What to Tell Your Brother (Simple Version)
-
-> "Hey, I deployed the platform to Vercel. They gave me some DNS records.
->
-> Can you log into [GoDaddy/Namecheap/whatever] and update the nameservers for the domain to:
-> - ns1.vercel-dns.com
-> - ns2.vercel-dns.com
-> - ns3.vercel-dns.com
-> - ns4.vercel-dns.com
->
-> OR if that's not possible, add a CNAME record pointing to: cname.vercel-dns.com
->
-> Once you do that and it propagates (24-48 hours), the site will be live with HTTPS automatically."
-
----
-
-## Part 5: Common Issues & Troubleshooting
+## Part 4: Common Issues & Troubleshooting
 
 ### Issue: Domain shows "Not Configured" after adding
 - **Cause**: DNS hasn't propagated yet
@@ -153,7 +137,7 @@ With your domain, multi-tenant URLs work like:
 
 ---
 
-## Part 6: After DNS is Working - Environment Setup
+## Part 5: After DNS is Working - Environment Setup
 
 Once your domain is live, update your configuration:
 
@@ -175,7 +159,7 @@ Once your domain is live, update your configuration:
 
 ---
 
-## Part 7: HTTPS/SSL Details
+## Part 6: HTTPS/SSL Details
 
 ### What Vercel Does Automatically
 - ✅ Issues free SSL certificate via Let's Encrypt
@@ -194,7 +178,7 @@ Once your domain is live, update your configuration:
 
 ---
 
-## Part 8: Checking Your SSL Certificate
+## Part 7: Checking Your SSL Certificate
 
 ### On the Web Browser
 1. Visit https://yourdomain.com
@@ -214,7 +198,7 @@ This shows detailed certificate info.
 
 ---
 
-## Part 9: What NOT to Do
+## Part 8: What NOT to Do
 
 ❌ **Don't manually manage SSL certificates** - Vercel handles it
 ❌ **Don't create A records if using nameservers** - Causes conflicts
