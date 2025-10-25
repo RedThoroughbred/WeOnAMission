@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal - Mission Trip Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .portal-header {
+            background: linear-gradient(135deg, #c62828 0%, #d84315 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .portal-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .user-details p {
+            margin: 0.25rem 0;
+            opacity: 0.95;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #c62828;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .student-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .student-name {
+            font-size: 1.5rem;
+            color: #c62828;
+            font-weight: 600;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            padding: 0.75rem;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .payment-summary {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-summary.partial {
+            background: linear-gradient(135deg, #FF9800 0%, #FFA726 100%);
+        }
+
+        .payment-summary.pending {
+            background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #c62828;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #c62828;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-area {
+            border: 2px dashed #c62828;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #fff9f9;
+        }
+
+        .upload-area.dragover {
+            background: #ffebee;
+            border-color: #d84315;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .document-list {
+            margin-top: 1.5rem;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .document-meta {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: #c62828;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #d84315;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #888;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .question-modal.show {
+            display: flex;
+        }
+
+        .question-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .question-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .question-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .question-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .question-form-group input,
+        .question-form-group textarea,
+        .question-form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .question-form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .question-form-group button {
+            background: #c62828;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .question-form-group button:hover {
+            background: #b71c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-header">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h1>Parent Portal</h1>
+                </div>
+                <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <p><strong id="userName">Loading...</strong></p>
+                    <p id="userEmail"></p>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="studentsContainer">
+            <div class="loading">Loading your students...</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn" onclick="showAddStudentModal()">+ Add Student</button>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Student</h2>
+                <button class="modal-close" onclick="closeModal('addStudentModal')">&times;</button>
+            </div>
+            <form onsubmit="handleAddStudent(event)">
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label>Grade</label>
+                    <input type="number" id="studentGrade" min="7" max="12">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="studentDob">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Name</label>
+                    <input type="text" id="emergencyName">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Phone</label>
+                    <input type="tel" id="emergencyPhone">
+                </div>
+                <div class="form-group">
+                    <label>Medical Information</label>
+                    <textarea id="medicalInfo" placeholder="Any medical conditions, medications, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Allergies</label>
+                    <textarea id="allergies"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Dietary Restrictions</label>
+                    <textarea id="dietary"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Add Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Question Modal -->
+    <div id="questionModal" class="question-modal">
+        <div class="question-modal-content">
+            <div class="question-modal-header">
+                <h2>Ask a Question</h2>
+                <button class="question-modal-close" onclick="closeQuestionModal()">✕</button>
+            </div>
+            <form onsubmit="handleQuestionSubmit(event)">
+                <div class="question-form-group">
+                    <label>Your Email *</label>
+                    <input type="email" id="questionEmail" required placeholder="your@email.com">
+                </div>
+                <div class="question-form-group">
+                    <label>Question Type *</label>
+                    <select id="questionType" required>
+                        <option value="">Select a type...</option>
+                        <option value="question">Question</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="bug_report">Bug Report</option>
+                    </select>
+                </div>
+                <div class="question-form-group">
+                    <label>Your Question *</label>
+                    <textarea id="questionText" required placeholder="Type your question here..."></textarea>
+                </div>
+                <div class="question-form-group">
+                    <button type="submit">Submit Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        let currentStudents = [];
+
+        // Initialize page
+        (async function() {
+            const user = await Auth.initializePage('parent');
+            if (!user) return;
+
+            await loadStudents();
+        })();
+
+        async function loadStudents() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                currentStudents = await API.getMyStudents(church.id);
+                renderStudents();
+            } catch (error) {
+                console.error('Error loading students:', error);
+                document.getElementById('studentsContainer').innerHTML =
+                    '<div class="error-message">Error loading students. Please refresh the page.</div>';
+            }
+        }
+
+        function renderStudents() {
+            const container = document.getElementById('studentsContainer');
+            
+            if (currentStudents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👨‍👩‍👧</div>
+                        <h2>No Students Added Yet</h2>
+                        <p>Add your students to get started with trip registration.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = currentStudents.map(student => `
+                <div class="student-card" id="student-${student.id}">
+                    <div class="student-header">
+                        <div class="student-name">${student.full_name}</div>
+                    </div>
+
+                    <div class="student-info">
+                        ${student.grade ? `
+                            <div class="info-item">
+                                <div class="info-label">Grade</div>
+                                <div class="info-value">${student.grade}</div>
+                            </div>
+                        ` : ''}
+                        ${student.date_of_birth ? `
+                            <div class="info-item">
+                                <div class="info-label">Date of Birth</div>
+                                <div class="info-value">${Auth.formatDate(student.date_of_birth)}</div>
+                            </div>
+                        ` : ''}
+                        ${student.emergency_contact_name ? `
+                            <div class="info-item">
+                                <div class="info-label">Emergency Contact</div>
+                                <div class="info-value">${student.emergency_contact_name}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div id="payment-${student.id}">
+                        <div class="loading">Loading payment info...</div>
+                    </div>
+
+                    <div class="section-tabs">
+                        <button class="tab-btn active" onclick="switchStudentTab('${student.id}', 'documents')">Documents</button>
+                        <button class="tab-btn" onclick="switchStudentTab('${student.id}', 'info')">Details</button>
+                    </div>
+
+                    <div id="documents-tab-${student.id}" class="tab-content active">
+                        <div class="upload-area" onclick="triggerFileUpload('${student.id}')" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)"
+                             ondrop="handleDrop(event, '${student.id}')">
+                            <p style="font-size: 2rem; margin-bottom: 0.5rem;">📄</p>
+                            <p><strong>Click to upload or drag and drop</strong></p>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                                PDF, DOC, or image files (max 10MB)
+                            </p>
+                            <input type="file" 
+                                   id="fileInput-${student.id}" 
+                                   class="file-input"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                   onchange="handleFileSelect(event, '${student.id}')">
+                        </div>
+
+                        <div class="document-list" id="documents-${student.id}">
+                            <div class="loading">Loading documents...</div>
+                        </div>
+                    </div>
+
+                    <div id="info-tab-${student.id}" class="tab-content">
+                        ${renderStudentDetails(student)}
+                    </div>
+                </div>
+            `).join('');
+
+            // Load payment and documents for each student
+            currentStudents.forEach(async (student) => {
+                await loadPaymentInfo(student.id);
+                await loadDocuments(student.id);
+            });
+        }
+
+        function renderStudentDetails(student) {
+            return `
+                <div class="student-info">
+                    ${student.medical_info ? `
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Medical Information</div>
+                            <div class="info-value">${student.medical_info}</div>
+                        </div>
+                    ` : ''}
+                    ${student.allergies ? `
+                        <div class="info-item">
+                            <div class="info-label">Allergies</div>
+                            <div class="info-value">${student.allergies}</div>
+                        </div>
+                    ` : ''}
+                    ${student.dietary_restrictions ? `
+                        <div class="info-item">
+                            <div class="info-label">Dietary Restrictions</div>
+                            <div class="info-value">${student.dietary_restrictions}</div>
+                        </div>
+                    ` : ''}
+                    ${student.additional_notes ? `
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Additional Notes</div>
+                            <div class="info-value">${student.additional_notes}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function loadPaymentInfo(studentId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const payment = await API.getPaymentSummary(studentId, church.id);
+
+                // Determine status based on balance due
+                let statusClass = 'pending';
+                if (payment.balance_due <= 0) {
+                    statusClass = 'paid';
+                } else if (payment.total_paid > 0) {
+                    statusClass = 'partial';
+                }
+
+                document.getElementById(`payment-${studentId}`).innerHTML = `
+                    <div class="payment-summary ${statusClass}">
+                        <h3 style="margin-bottom: 1rem;">Payment Status</h3>
+                        <div class="payment-row">
+                            <span>Trip Cost:</span>
+                            <strong>${Auth.formatCurrency(payment.trip_cost)}</strong>
+                        </div>
+                        <div class="payment-row">
+                            <span>Amount Paid:</span>
+                            <strong>${Auth.formatCurrency(payment.total_paid)}</strong>
+                        </div>
+                        <div class="payment-row" style="border-top: 2px solid rgba(255,255,255,0.3); padding-top: 0.5rem; margin-top: 0.5rem;">
+                            <span>Balance Due:</span>
+                            <strong>${Auth.formatCurrency(payment.balance_due)}</strong>
+                        </div>
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <span class="status-badge" style="background: rgba(255,255,255,0.3);">
+                                ${statusClass.toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading payment info:', error);
+                document.getElementById(`payment-${studentId}`).innerHTML =
+                    '<div class="info-box">Payment information not available</div>';
+            }
+        }
+
+        async function loadDocuments(studentId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const documents = await API.getDocumentsForStudent(studentId, church.id);
+                const container = document.getElementById(`documents-${studentId}`);
+
+                if (documents.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">No documents uploaded yet</p>';
+                    return;
+                }
+
+                container.innerHTML = documents.map(doc => `
+                    <div class="document-item">
+                        <div class="document-info">
+                            <div class="document-name">${doc.file_name}</div>
+                            <div class="document-meta">
+                                Uploaded ${Auth.formatDate(doc.created_at)}
+                                ${doc.document_type ? ` • ${doc.document_type}` : ''}
+                            </div>
+                        </div>
+                        <span class="status-badge status-${doc.status}">${doc.status.toUpperCase()}</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                document.getElementById(`documents-${studentId}`).innerHTML =
+                    '<p style="text-align: center; color: #c62828;">Error loading documents</p>';
+            }
+        }
+
+        function switchStudentTab(studentId, tab) {
+            // Update tab buttons
+            const card = document.getElementById(`student-${studentId}`);
+            card.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            card.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tab}-tab-${studentId}`).classList.add('active');
+        }
+
+        function triggerFileUpload(studentId) {
+            document.getElementById(`fileInput-${studentId}`).click();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e, studentId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFile(studentId, files[0]);
+            }
+        }
+
+        async function handleFileSelect(e, studentId) {
+            const file = e.target.files[0];
+            if (file) {
+                await uploadFile(studentId, file);
+            }
+        }
+
+        async function uploadFile(studentId, file) {
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const documentType = prompt('What type of document is this? (passport, medical, permission, etc.)') || 'other';
+
+                // Show loading
+                const container = document.getElementById(`documents-${studentId}`);
+                const originalContent = container.innerHTML;
+                container.innerHTML = '<div class="loading">Uploading document...</div>';
+
+                await API.uploadDocument(studentId, file, documentType, church.id);
+                await loadDocuments(studentId);
+
+                alert('Document uploaded successfully!');
+            } catch (error) {
+                console.error('Error uploading document:', error);
+                alert('Error uploading document. Please try again.');
+                await loadDocuments(studentId);
+            }
+        }
+
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        async function handleAddStudent(event) {
+            event.preventDefault();
+
+            const studentData = {
+                full_name: document.getElementById('studentName').value,
+                grade: document.getElementById('studentGrade').value || null,
+                date_of_birth: document.getElementById('studentDob').value || null,
+                emergency_contact_name: document.getElementById('emergencyName').value || null,
+                emergency_contact_phone: document.getElementById('emergencyPhone').value || null,
+                medical_info: document.getElementById('medicalInfo').value || null,
+                allergies: document.getElementById('allergies').value || null,
+                dietary_restrictions: document.getElementById('dietary').value || null
+            };
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.createStudent(studentData, church.id);
+                closeModal('addStudentModal');
+                await loadStudents();
+                alert('Student added successfully!');
+
+                // Reset form
+                event.target.reset();
+            } catch (error) {
+                console.error('Error adding student:', error);
+                alert('Error adding student. Please try again.');
+            }
+        }
+
+        // ==================== QUESTION MODAL ====================
+
+        function openQuestionModal() {
+            document.getElementById('questionModal').classList.add('show');
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.remove('show');
+        }
+
+        async function handleQuestionSubmit(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('questionEmail').value;
+            const questionType = document.getElementById('questionType').value;
+            const question = document.getElementById('questionText').value;
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.submitQuestion(email, question, questionType, church.id);
+                alert('Question submitted! Admins will review and respond shortly.');
+                closeQuestionModal();
+                event.target.reset();
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('There was an error. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

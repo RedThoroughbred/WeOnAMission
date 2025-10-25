@@ -1,0 +1,30 @@
+-- Supabase Permissions Fix
+-- Run this in Supabase SQL Editor to fix RLS and permission issues
+
+-- Check current RLS status
+SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'public';
+
+-- Force disable RLS on all tables
+ALTER TABLE IF EXISTS events DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS resources DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS faqs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS content_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS trip_memories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS user_questions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS question_responses DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS students DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS payments DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS payment_config DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS documents DISABLE ROW LEVEL SECURITY;
+
+-- Grant all permissions to service_role on all tables
+GRANT USAGE ON SCHEMA public TO service_role;
+GRANT CREATE ON SCHEMA public TO service_role;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+
+-- Make sure anonymous role has minimal access
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;

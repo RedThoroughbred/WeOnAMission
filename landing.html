@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeOnAMission - Mission Trip Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+            width: 100%;
+        }
+
+        .intro-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .intro-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .intro-section p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .churches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .church-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .church-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .church-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .church-card-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .church-card-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .trip-info {
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        .trip-info-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .trip-info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .trip-info-value {
+            color: #666;
+        }
+
+        .church-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .btn-login, .btn-signup {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+
+        .btn-login {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-login:hover {
+            background: #5568d3;
+        }
+
+        .btn-signup {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-signup:hover {
+            background: #e8e8e8;
+            border-color: #999;
+        }
+
+        .admin-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .admin-section p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-admin {
+            background: #764ba2;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1rem;
+        }
+
+        .btn-admin:hover {
+            background: #634191;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .churches-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            .intro-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WeOnAMission</h1>
+        <p>Mission Trip Platform for Churches</p>
+    </div>
+
+    <div class="container">
+        <div class="intro-section">
+            <h2>Welcome to WeOnAMission</h2>
+            <p>A comprehensive platform for organizing and managing mission trips for your church.</p>
+            <p>Select your church below to get started.</p>
+        </div>
+
+        <div id="churchesContainer" class="loading">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 1rem;">Loading churches...</p>
+        </div>
+
+        <div id="adminSection" style="display: none;">
+            <div class="admin-section">
+                <h3>Are you an admin?</h3>
+                <p>Manage churches and configure the platform</p>
+                <a href="super-admin-portal.html" class="btn-admin">Go to Admin Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 WeOnAMission. All rights reserved.</p>
+    </div>
+
+    <script>
+        const supabaseClient = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+
+        async function loadChurches() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('churches')
+                    .select('id, name, slug, settings')
+                    .order('name');
+
+                if (error) throw error;
+
+                const container = document.getElementById('churchesContainer');
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏛️</div>
+                            <h3>No Churches Yet</h3>
+                            <p>This platform hasn't been set up with any churches yet.</p>
+                            <p><a href="super-admin-portal.html" class="btn-admin">Create First Church</a></p>
+                        </div>
+                    `;
+                    document.getElementById('adminSection').style.display = 'block';
+                    return;
+                }
+
+                // Build church cards
+                const html = `
+                    <div class="churches-grid">
+                        ${data.map(church => {
+                            const settings = church.settings || {};
+                            const tripName = settings.tripName || 'Mission Trip';
+                            const tripYear = settings.tripYear || new Date().getFullYear();
+                            const country = settings.country || 'TBD';
+
+                            return `
+                                <div class="church-card">
+                                    <div class="church-card-header">
+                                        <h3>${church.name}</h3>
+                                    </div>
+                                    <div class="church-card-body">
+                                        <div class="trip-info">
+                                            <div class="trip-info-item">
+                                                <div class="trip-info-label">Trip:</div>
+                                                <div class="trip-info-value">${tripName} ${tripYear}</div>
+                                            </div>
+                                            <div class="trip-info-item">
+                                                <div class="trip-info-label">Location:</div>
+                                                <div class="trip-info-value">${country}</div>
+                                            </div>
+                                        </div>
+                                        <div class="church-actions">
+                                            <a href="/login.html?church=${church.slug}" class="btn-login">Login</a>
+                                            <a href="/login.html?church=${church.slug}&signup=true" class="btn-signup">Sign Up</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+
+                container.innerHTML = html;
+                document.getElementById('adminSection').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading churches:', error);
+                document.getElementById('churchesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Error Loading Churches</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load churches when page loads
+        document.addEventListener('DOMContentLoaded', loadChurches);
+    </script>
+</body>
+</html>

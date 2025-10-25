@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Portal - WeOnAMission</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .portal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .portal-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .user-details p {
+            margin: 0.25rem 0;
+            opacity: 0.95;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-danger {
+            background: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .churches-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .churches-table th {
+            background: #f5f5f5;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .churches-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .churches-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .church-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .church-actions button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .portal-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .user-info {
+                flex-direction: column;
+            }
+
+            .churches-table {
+                font-size: 0.9rem;
+            }
+
+            .churches-table th,
+            .churches-table td {
+                padding: 0.75rem;
+            }
+
+            .church-actions {
+                flex-direction: column;
+            }
+
+            .church-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-header">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h1>Super Admin Dashboard</h1>
+                    <p>Manage churches and platform settings</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <p><strong id="userName">Loading...</strong></p>
+                    <p id="userEmail"></p>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalChurches">0</div>
+                <div class="stat-label">Total Churches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alertContainer"></div>
+
+        <!-- Add Church Section -->
+        <div class="section">
+            <h2>Add New Church</h2>
+            <form id="addChurchForm">
+                <div class="form-group">
+                    <label>Church Name *</label>
+                    <input type="text" id="churchName" placeholder="e.g., Crossroads Church" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Church Slug *</label>
+                    <input type="text" id="churchSlug" placeholder="e.g., crossroads (used in URLs)" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Trip Name</label>
+                    <input type="text" id="tripName" placeholder="e.g., Peru Mission Trip 2026">
+                </div>
+
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" id="country" placeholder="e.g., Peru">
+                </div>
+
+                <div class="form-group">
+                    <label>Trip Year</label>
+                    <input type="number" id="tripYear" placeholder="2026" min="2024" max="2100">
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Email *</label>
+                    <input type="email" id="adminEmail" placeholder="Email of the church admin">
+                </div>
+
+                <button type="submit" class="btn">Create Church</button>
+            </form>
+        </div>
+
+        <!-- Churches List -->
+        <div class="section">
+            <h2>Manage Churches</h2>
+            <div id="churchesContainer" class="loading">Loading churches...</div>
+        </div>
+
+        <!-- User Management -->
+        <div class="section">
+            <h2>Manage Church Users</h2>
+            <div class="form-group">
+                <label for="userChurchSelect">Select Church to View Users:</label>
+                <select id="userChurchSelect" onchange="loadChurchUsersForManagement()">
+                    <option value="">-- Select a church --</option>
+                </select>
+            </div>
+            <div id="usersContainer" class="loading" style="display:none;">Loading users...</div>
+        </div>
+    </div>
+
+    <!-- Edit Church Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Church</h3>
+            </div>
+            <form id="editChurchForm">
+                <input type="hidden" id="editChurchId">
+
+                <div class="form-group">
+                    <label>Church Name</label>
+                    <input type="text" id="editChurchName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Trip Name</label>
+                    <input type="text" id="editTripName">
+                </div>
+
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" id="editCountry">
+                </div>
+
+                <div class="form-group">
+                    <label>Trip Year</label>
+                    <input type="number" id="editTripYear" min="2024" max="2100">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const supabaseClient = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+        let allChurches = [];
+
+        (async function() {
+            // Check authentication
+            const user = await Auth.initializePage();
+            if (!user) {
+                window.location.href = '/landing.html';
+                return;
+            }
+
+            // Check if user is super admin (this is a basic check, ideally verify in database)
+            if (user.role !== 'admin') {
+                alert('You do not have permission to access this page.');
+                window.location.href = '/landing.html';
+                return;
+            }
+
+            await loadChurches();
+            await loadStats();
+        })();
+
+        async function loadChurches() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('churches')
+                    .select('*')
+                    .order('name');
+
+                if (error) throw error;
+
+                allChurches = data || [];
+                renderChurches();
+            } catch (error) {
+                console.error('Error loading churches:', error);
+                showAlert('Error loading churches: ' + error.message, 'error');
+            }
+        }
+
+        function renderChurches() {
+            const container = document.getElementById('churchesContainer');
+
+            if (allChurches.length === 0) {
+                container.innerHTML = '<p style="color: #999;">No churches found. Create one using the form above.</p>';
+                return;
+            }
+
+            const html = `
+                <table class="churches-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Trip</th>
+                            <th>Country</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allChurches.map(church => {
+                            const settings = church.settings || {};
+                            return `
+                                <tr>
+                                    <td>${church.name}</td>
+                                    <td><code>${church.slug}</code></td>
+                                    <td>${settings.tripName || '-'}</td>
+                                    <td>${settings.country || '-'}</td>
+                                    <td>
+                                        <div class="church-actions">
+                                            <button class="btn btn-secondary" onclick="openEditModal('${church.id}')">Edit</button>
+                                            <button class="btn btn-danger" onclick="deleteChurch('${church.id}')">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+
+            // Also populate the user management select dropdown
+            const userSelect = document.getElementById('userChurchSelect');
+            userSelect.innerHTML = '<option value="">-- Select a church --</option>' +
+                allChurches.map(church => `<option value="${church.id}">${church.name}</option>`).join('');
+        }
+
+        async function loadStats() {
+            try {
+                // Count churches
+                const { count: churchCount } = await supabaseClient
+                    .from('churches')
+                    .select('id', { count: 'exact', head: true });
+
+                // Count users
+                const { count: userCount } = await supabaseClient
+                    .from('users')
+                    .select('id', { count: 'exact', head: true });
+
+                document.getElementById('totalChurches').textContent = churchCount || 0;
+                document.getElementById('totalUsers').textContent = userCount || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        document.getElementById('addChurchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const churchName = document.getElementById('churchName').value;
+            const churchSlug = document.getElementById('churchSlug').value.toLowerCase();
+            const tripName = document.getElementById('tripName').value;
+            const country = document.getElementById('country').value;
+            const tripYear = document.getElementById('tripYear').value;
+            const adminEmail = document.getElementById('adminEmail').value;
+
+            try {
+                // Create church record
+                const { data: churchData, error: churchError } = await supabaseClient
+                    .from('churches')
+                    .insert([{
+                        name: churchName,
+                        slug: churchSlug,
+                        settings: {
+                            tripName: tripName || churchName,
+                            country: country || 'TBD',
+                            tripYear: tripYear || new Date().getFullYear()
+                        }
+                    }])
+                    .select()
+                    .single();
+
+                if (churchError) throw churchError;
+
+                // If admin email provided, we should associate the user when they sign up
+                showAlert(`Church "${churchName}" created successfully! Users can now sign up at /login.html?church=${churchSlug}`, 'success');
+                document.getElementById('addChurchForm').reset();
+                await loadChurches();
+                await loadStats();
+
+            } catch (error) {
+                console.error('Error creating church:', error);
+                showAlert('Error creating church: ' + error.message, 'error');
+            }
+        });
+
+        function openEditModal(churchId) {
+            const church = allChurches.find(c => c.id === churchId);
+            if (!church) return;
+
+            const settings = church.settings || {};
+            document.getElementById('editChurchId').value = churchId;
+            document.getElementById('editChurchName').value = church.name;
+            document.getElementById('editTripName').value = settings.tripName || '';
+            document.getElementById('editCountry').value = settings.country || '';
+            document.getElementById('editTripYear').value = settings.tripYear || new Date().getFullYear();
+
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        document.getElementById('editChurchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const churchId = document.getElementById('editChurchId').value;
+            const churchName = document.getElementById('editChurchName').value;
+            const tripName = document.getElementById('editTripName').value;
+            const country = document.getElementById('editCountry').value;
+            const tripYear = document.getElementById('editTripYear').value;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('churches')
+                    .update({
+                        name: churchName,
+                        settings: {
+                            tripName: tripName,
+                            country: country,
+                            tripYear: tripYear
+                        }
+                    })
+                    .eq('id', churchId);
+
+                if (error) throw error;
+
+                showAlert('Church updated successfully!', 'success');
+                closeEditModal();
+                await loadChurches();
+
+            } catch (error) {
+                console.error('Error updating church:', error);
+                showAlert('Error updating church: ' + error.message, 'error');
+            }
+        });
+
+        async function deleteChurch(churchId) {
+            if (!confirm('Are you sure you want to delete this church? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('churches')
+                    .delete()
+                    .eq('id', churchId);
+
+                if (error) throw error;
+
+                showAlert('Church deleted successfully!', 'success');
+                await loadChurches();
+                await loadStats();
+
+            } catch (error) {
+                console.error('Error deleting church:', error);
+                showAlert('Error deleting church: ' + error.message, 'error');
+            }
+        }
+
+        async function loadChurchUsersForManagement() {
+            const churchId = document.getElementById('userChurchSelect').value;
+
+            if (!churchId) {
+                document.getElementById('usersContainer').style.display = 'none';
+                return;
+            }
+
+            const usersContainer = document.getElementById('usersContainer');
+            usersContainer.innerHTML = '<div class="loading">Loading users...</div>';
+            usersContainer.style.display = 'block';
+
+            try {
+                const users = await API.getChurchUsers(churchId);
+                renderChurchUsers(users, churchId);
+            } catch (error) {
+                console.error('Error loading church users:', error);
+                showAlert('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        function renderChurchUsers(users, churchId) {
+            const container = document.getElementById('usersContainer');
+
+            if (users.length === 0) {
+                container.innerHTML = '<p style="color: #999;">No users found for this church.</p>';
+                return;
+            }
+
+            const html = `
+                <table class="churches-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => {
+                            const joinDate = new Date(user.created_at).toLocaleDateString();
+                            const isAdmin = user.role === 'admin';
+                            return `
+                                <tr>
+                                    <td>${user.email}</td>
+                                    <td>${user.full_name || '-'}</td>
+                                    <td>
+                                        <span style="
+                                            display: inline-block;
+                                            padding: 0.25rem 0.75rem;
+                                            border-radius: 12px;
+                                            font-size: 0.85rem;
+                                            font-weight: 600;
+                                            background: ${isAdmin ? '#e3f2fd' : '#f5f5f5'};
+                                            color: ${isAdmin ? '#1976d2' : '#666'};
+                                        ">
+                                            ${isAdmin ? 'Admin' : 'Parent'}
+                                        </span>
+                                    </td>
+                                    <td>${joinDate}</td>
+                                    <td>
+                                        <div class="church-actions">
+                                            ${isAdmin ? `
+                                                <button class="btn btn-secondary" onclick="demoteUser('${user.id}', '${churchId}')">Demote to Parent</button>
+                                            ` : `
+                                                <button class="btn" onclick="promoteUser('${user.id}', '${churchId}')">Promote to Admin</button>
+                                            `}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        async function promoteUser(userId, churchId) {
+            if (!confirm('Promote this user to admin? They will be able to manage church content, events, and responses.')) {
+                return;
+            }
+
+            try {
+                await API.promoteUserToAdmin(userId, churchId);
+                showAlert('User promoted to admin successfully!', 'success');
+                await loadChurchUsersForManagement();
+            } catch (error) {
+                console.error('Error promoting user:', error);
+                showAlert('Error promoting user: ' + error.message, 'error');
+            }
+        }
+
+        async function demoteUser(userId, churchId) {
+            if (!confirm('Demote this user from admin? They will lose admin privileges.')) {
+                return;
+            }
+
+            try {
+                await API.demoteUserFromAdmin(userId, churchId);
+                showAlert('User demoted from admin successfully!', 'success');
+                await loadChurchUsersForManagement();
+            } catch (error) {
+                console.error('Error demoting user:', error);
+                showAlert('Error demoting user: ' + error.message, 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+
+            const html = `
+                <div id="${alertId}" class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
+
+            container.innerHTML += html;
+
+            setTimeout(() => {
+                const alert = document.getElementById(alertId);
+                if (alert) alert.remove();
+            }, 5000);
+        }
+
+        // Close modal on outside click
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('editModal')) {
+                closeEditModal();
+            }
+        });
+    </script>
+</body>
+</html>

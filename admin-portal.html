@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Mission Trip Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .portal-header {
+            background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .portal-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .user-details p {
+            margin: 0.25rem 0;
+            opacity: 0.95;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #d32f2f;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            position: relative;
+            white-space: nowrap;
+            transition: color 0.3s;
+        }
+
+        .nav-tab.active {
+            color: #d32f2f;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #d32f2f;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #d32f2f;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #c62828;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #888;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .data-table thead {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-paid {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-partial {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border-color: #c62828;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-color: #2e7d32;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-buttons button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .approve-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background: #45a049;
+        }
+
+        .reject-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .reject-btn:hover {
+            background: #da190b;
+        }
+
+        .edit-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #0b7dda;
+        }
+
+        .delete-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #e68900;
+        }
+
+        .search-box {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+            font-family: inherit;
+        }
+
+        .text-muted {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .currency {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-header">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                </div>
+                <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <p><strong id="userName">Loading...</strong></p>
+                    <p id="userEmail"></p>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalStudents">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="paidCount">0</div>
+                <div class="stat-label">Payments Complete</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingDocs">0</div>
+                <div class="stat-label">Pending Documents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingMemories">0</div>
+                <div class="stat-label">Pending Memories</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('students')">Students</button>
+            <button class="nav-tab" onclick="switchTab('payments')">Payments</button>
+            <button class="nav-tab" onclick="switchTab('documents')">Documents</button>
+            <button class="nav-tab" onclick="switchTab('memories')">Memories</button>
+            <button class="nav-tab" onclick="switchTab('events')">Events</button>
+            <button class="nav-tab" onclick="switchTab('resources')">Resources</button>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students-tab" class="tab-content active">
+            <h2 class="section-title">Student Roster</h2>
+            <div class="action-bar">
+                <input type="text" class="search-box" id="studentSearch" placeholder="Search students...">
+                <button class="btn" onclick="showAddStudentModal()">+ Add Student</button>
+            </div>
+            <div id="studentsContainer" class="loading">Loading students...</div>
+        </div>
+
+        <!-- Payments Tab -->
+        <div id="payments-tab" class="tab-content">
+            <h2 class="section-title">Payment Management</h2>
+            <div class="action-bar">
+                <button class="btn" onclick="showAddPaymentModal()">+ Record Payment</button>
+            </div>
+            <div id="paymentsContainer" class="loading">Loading payment data...</div>
+        </div>
+
+        <!-- Documents Tab -->
+        <div id="documents-tab" class="tab-content">
+            <h2 class="section-title">Document Approvals</h2>
+            <div class="action-bar">
+                <input type="text" class="search-box" id="docSearch" placeholder="Search documents...">
+            </div>
+            <div id="documentsContainer" class="loading">Loading documents...</div>
+        </div>
+
+        <!-- Memories Tab -->
+        <div id="memories-tab" class="tab-content">
+            <h2 class="section-title">Trip Memory Approvals</h2>
+            <div id="memoriesContainer" class="loading">Loading memories...</div>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events-tab" class="tab-content">
+            <h2 class="section-title">Calendar Events</h2>
+            <div class="action-bar">
+                <button class="btn" onclick="showAddEventModal()">+ Add Event</button>
+            </div>
+            <div id="eventsContainer" class="loading">Loading events...</div>
+        </div>
+
+        <!-- Resources Tab -->
+        <div id="resources-tab" class="tab-content">
+            <h2 class="section-title">Resource Library</h2>
+            <div class="action-bar">
+                <button class="btn" onclick="showAddResourceModal()">+ Add Resource</button>
+            </div>
+            <div id="resourcesContainer" class="loading">Loading resources...</div>
+        </div>
+    </div>
+
+    <!-- Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ask a Question</h2>
+                <button class="modal-close" onclick="closeModal('questionModal')">&times;</button>
+            </div>
+            <form onsubmit="handleQuestionSubmit(event)">
+                <div class="form-group">
+                    <label>Your Email *</label>
+                    <input type="email" id="questionEmail" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Question Type *</label>
+                    <select id="questionType" required style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 4px; font-family: inherit;">
+                        <option value="">Select a type...</option>
+                        <option value="question">General Question</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="bug_report">Bug Report</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Question or Message *</label>
+                    <textarea id="questionText" placeholder="Tell us what you're wondering about..." required style="min-height: 120px;"></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%;">Submit Question</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Student</h2>
+                <button class="modal-close" onclick="closeModal('addStudentModal')">&times;</button>
+            </div>
+            <form onsubmit="handleAddStudent(event)">
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Grade</label>
+                        <input type="number" id="studentGrade" min="7" max="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="studentDob">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Name</label>
+                    <input type="text" id="emergencyName">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Phone</label>
+                    <input type="tel" id="emergencyPhone">
+                </div>
+                <div class="form-group">
+                    <label>Medical Information</label>
+                    <textarea id="medicalInfo"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Allergies</label>
+                    <textarea id="allergies"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Dietary Restrictions</label>
+                    <textarea id="dietary"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Add Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div id="addPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Record Payment</h2>
+                <button class="modal-close" onclick="closeModal('addPaymentModal')">&times;</button>
+            </div>
+            <form onsubmit="handleAddPayment(event)">
+                <div class="form-group">
+                    <label>Student *</label>
+                    <select id="paymentStudent" required>
+                        <option value="">Select a student...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount *</label>
+                    <input type="number" id="paymentAmount" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Date *</label>
+                    <input type="date" id="paymentDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Type</label>
+                    <select id="paymentType">
+                        <option value="cash">Cash</option>
+                        <option value="check">Check</option>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="paymentNotes"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Record Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Calendar Event</h2>
+                <button class="modal-close" onclick="closeModal('addEventModal')">&times;</button>
+            </div>
+            <form onsubmit="handleAddEvent(event)">
+                <div class="form-group">
+                    <label>Event Name *</label>
+                    <input type="text" id="eventName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="eventDescription"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="eventTime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="eventType" required>
+                        <option value="">Select type...</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="deadline">Deadline</option>
+                        <option value="activity">Activity</option>
+                        <option value="preparation">Preparation</option>
+                        <option value="travel">Travel</option>
+                        <option value="fundraiser">Fundraiser</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="eventLocation">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="displayOnCalendar" checked>
+                        Display on public calendar
+                    </label>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Add Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Resource Modal -->
+    <div id="addResourceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Resource</h2>
+                <button class="modal-close" onclick="closeModal('addResourceModal')">&times;</button>
+            </div>
+            <form onsubmit="handleAddResource(event)">
+                <div class="form-group">
+                    <label>Resource Name *</label>
+                    <input type="text" id="resourceName" required>
+                </div>
+                <div class="form-group">
+                    <label>URL *</label>
+                    <input type="url" id="resourceUrl" required placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="resourceType" required>
+                        <option value="">Select type...</option>
+                        <option value="document">Document</option>
+                        <option value="video">Video</option>
+                        <option value="website">Website</option>
+                        <option value="form">Form</option>
+                        <option value="guide">Guide</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="resourceDescription"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Add Resource</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        let allStudents = [];
+        let allDocuments = [];
+        let allMemories = [];
+        let allEvents = [];
+        let allResources = [];
+
+        // Initialize page
+        (async function() {
+            const user = await Auth.initializePage('admin');
+            if (!user) return;
+
+            await loadDashboardData();
+        })();
+
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadStudents(),
+                    loadPaymentSummaries(),
+                    loadDocuments(),
+                    loadMemories(),
+                    loadEvents(),
+                    loadResources(),
+                    loadStats()
+                ]);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const students = await API.getAllStudents(church.id);
+                const payments = await API.getAllPaymentSummaries(church.id);
+                const documents = await API.getAllDocuments(church.id);
+                const memories = await API.getAllMemories(church.id);
+
+                document.getElementById('totalStudents').textContent = students.length;
+                document.getElementById('paidCount').textContent = payments.filter(p => p.status === 'paid').length;
+                document.getElementById('pendingDocs').textContent = documents.filter(d => d.status === 'pending').length;
+                document.getElementById('pendingMemories').textContent = memories.filter(m => m.status === 'pending').length;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                allStudents = await API.getAllStudents(church.id);
+                renderStudents(allStudents);
+            } catch (error) {
+                console.error('Error loading students:', error);
+                document.getElementById('studentsContainer').innerHTML =
+                    '<div class="alert alert-error">Error loading students</div>';
+            }
+        }
+
+        function renderStudents(students) {
+            const container = document.getElementById('studentsContainer');
+
+            if (students.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><h3>No Students</h3></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Grade</th>
+                            <th>Emergency Contact</th>
+                            <th>Medical Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${students.map(s => `
+                            <tr>
+                                <td><strong>${s.full_name}</strong></td>
+                                <td>${s.grade || '-'}</td>
+                                <td>${s.emergency_contact_name || '-'}<br><span class="text-muted">${s.emergency_contact_phone || ''}</span></td>
+                                <td>${s.medical_info ? '⚠️ Yes' : '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Search students
+        document.addEventListener('DOMContentLoaded', function() {
+            const studentSearch = document.getElementById('studentSearch');
+            if (studentSearch) {
+                studentSearch.addEventListener('input', function(e) {
+                    const term = e.target.value.toLowerCase();
+                    const filtered = allStudents.filter(s =>
+                        s.full_name.toLowerCase().includes(term) ||
+                        s.emergency_contact_name?.toLowerCase().includes(term)
+                    );
+                    renderStudents(filtered);
+                });
+            }
+        });
+
+        async function loadPaymentSummaries() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const summaries = await API.getAllPaymentSummaries(church.id);
+                renderPayments(summaries);
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                document.getElementById('paymentsContainer').innerHTML =
+                    '<div class="alert alert-error">Error loading payments</div>';
+            }
+        }
+
+        function renderPayments(summaries) {
+            const container = document.getElementById('paymentsContainer');
+
+            if (summaries.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><h3>No Payment Data</h3></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Total Cost</th>
+                            <th>Amount Paid</th>
+                            <th>Balance Due</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${summaries.map(p => `
+                            <tr>
+                                <td><strong>${p.students?.full_name || 'Unknown'}</strong></td>
+                                <td class="currency">${Auth.formatCurrency(p.total_cost)}</td>
+                                <td class="currency">${Auth.formatCurrency(p.amount_paid)}</td>
+                                <td class="currency">${Auth.formatCurrency(p.balance_due)}</td>
+                                <td><span class="status-badge status-${p.status}">${p.status.toUpperCase()}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function loadDocuments() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                allDocuments = await API.getAllDocuments(church.id);
+                renderDocuments(allDocuments);
+                updatePaymentStudentSelect();
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                document.getElementById('documentsContainer').innerHTML =
+                    '<div class="alert alert-error">Error loading documents</div>';
+            }
+        }
+
+        function renderDocuments(documents) {
+            const container = document.getElementById('documentsContainer');
+
+            if (documents.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><h3>No Documents</h3></div>';
+                return;
+            }
+
+            container.innerHTML = documents.map(doc => `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem;">${doc.file_name}</div>
+                            <div style="font-size: 0.9rem; color: #666;">
+                                Student: <strong>${doc.students?.full_name || 'Unknown'}</strong><br>
+                                Uploaded: ${Auth.formatDate(doc.created_at)} • Type: ${doc.document_type || 'Other'}
+                            </div>
+                        </div>
+                        <span class="status-badge status-${doc.status}">${doc.status.toUpperCase()}</span>
+                    </div>
+                    ${doc.status === 'pending' ? `
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="approve-btn btn-small" onclick="approveDocument('${doc.id}')">Approve</button>
+                            <button class="reject-btn btn-small" onclick="rejectDocument('${doc.id}')">Reject</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Search documents
+        const docSearch = document.getElementById('docSearch');
+        if (docSearch) {
+            docSearch.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                const filtered = allDocuments.filter(d =>
+                    d.file_name.toLowerCase().includes(term) ||
+                    d.students?.full_name.toLowerCase().includes(term)
+                );
+                renderDocuments(filtered);
+            });
+        }
+
+        async function approveDocument(docId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.updateDocumentStatus(docId, 'approved', church.id);
+                await loadDocuments();
+                await loadStats();
+                alert('Document approved!');
+            } catch (error) {
+                console.error('Error approving document:', error);
+                alert('Error approving document');
+            }
+        }
+
+        async function rejectDocument(docId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const reason = prompt('Reason for rejection (optional):');
+                await API.updateDocumentStatus(docId, 'rejected', reason, church.id);
+                await loadDocuments();
+                await loadStats();
+                alert('Document rejected');
+            } catch (error) {
+                console.error('Error rejecting document:', error);
+                alert('Error rejecting document');
+            }
+        }
+
+        async function loadMemories() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                allMemories = await API.getAllMemories(church.id);
+                renderMemories(allMemories);
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                document.getElementById('memoriesContainer').innerHTML =
+                    '<div class="alert alert-error">Error loading memories</div>';
+            }
+        }
+
+        function renderMemories(memories) {
+            const container = document.getElementById('memoriesContainer');
+
+            if (memories.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📸</div><h3>No Memories</h3></div>';
+                return;
+            }
+
+            container.innerHTML = memories.map(mem => `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem;">${mem.title}</div>
+                            <div style="font-size: 0.9rem; color: #666;">
+                                Student: <strong>${mem.students?.full_name || 'Unknown'}</strong><br>
+                                Submitted: ${Auth.formatDate(mem.submitted_at)}
+                            </div>
+                        </div>
+                        <span class="status-badge status-${mem.status}">${mem.status.toUpperCase()}</span>
+                    </div>
+                    <div style="color: #555; margin-bottom: 1rem; line-height: 1.5; white-space: pre-wrap;">${mem.content}</div>
+                    ${mem.status === 'pending' ? `
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="approve-btn btn-small" onclick="approveMemory('${mem.id}')">Approve</button>
+                            <button class="reject-btn btn-small" onclick="rejectMemory('${mem.id}')">Reject</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function approveMemory(memoryId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.updateMemoryStatus(memoryId, 'approved', church.id);
+                await loadMemories();
+                await loadStats();
+                alert('Memory approved!');
+            } catch (error) {
+                console.error('Error approving memory:', error);
+                alert('Error approving memory');
+            }
+        }
+
+        async function rejectMemory(memoryId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.updateMemoryStatus(memoryId, 'rejected', church.id);
+                await loadMemories();
+                await loadStats();
+                alert('Memory rejected');
+            } catch (error) {
+                console.error('Error rejecting memory:', error);
+                alert('Error rejecting memory');
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                allEvents = await API.getAllEvents(church.id);
+                renderEvents(allEvents);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                document.getElementById('eventsContainer').innerHTML =
+                    '<div class="alert alert-error">Error loading events</div>';
+            }
+        }
+
+        function renderEvents(events) {
+            const container = document.getElementById('eventsContainer');
+
+            if (events.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><h3>No Events</h3></div>';
+                return;
+            }
+
+            container.innerHTML = events.map(event => `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem;">${event.name}</div>
+                            <div style="font-size: 0.9rem; color: #666;">
+                                ${Auth.formatDateTime(event.event_date + (event.event_time ? 'T' + event.event_time : ''))}
+                                ${event.location ? ' • ' + event.location : ''}
+                                • Type: ${event.event_type}
+                            </div>
+                        </div>
+                        <span class="status-badge" style="background: ${Auth.getEventTypeColor(event.event_type)}33; color: ${Auth.getEventTypeColor(event.event_type)};">
+                            ${event.display_on_calendar ? 'PUBLIC' : 'DRAFT'}
+                        </span>
+                    </div>
+                    ${event.description ? `<div style="color: #555; margin-bottom: 1rem;">${event.description}</div>` : ''}
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="edit-btn btn-small" onclick="editEvent('${event.id}')">Edit</button>
+                        <button class="delete-btn btn-small" onclick="deleteEvent('${event.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteEvent(eventId) {
+            if (confirm('Are you sure you want to delete this event?')) {
+                try {
+                    const church = await Tenant.getCurrentChurchContext();
+                    if (!church) {
+                        console.error('No church context found');
+                        return;
+                    }
+                    await API.deleteEvent(eventId, church.id);
+                    await loadEvents();
+                    alert('Event deleted');
+                } catch (error) {
+                    console.error('Error deleting event:', error);
+                    alert('Error deleting event');
+                }
+            }
+        }
+
+        async function loadResources() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                allResources = await API.getResources(church.id);
+                renderResources(allResources);
+            } catch (error) {
+                console.error('Error loading resources:', error);
+                document.getElementById('resourcesContainer').innerHTML =
+                    '<div class="alert alert-error">Error loading resources</div>';
+            }
+        }
+
+        function renderResources(resources) {
+            const container = document.getElementById('resourcesContainer');
+
+            if (resources.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📚</div><h3>No Resources</h3></div>';
+                return;
+            }
+
+            container.innerHTML = resources.map(resource => `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem;">${resource.name}</div>
+                            <div style="font-size: 0.9rem; color: #666;">
+                                Type: ${resource.resource_type} • <a href="${resource.url}" target="_blank" style="color: #1976d2;">View Link</a>
+                            </div>
+                        </div>
+                    </div>
+                    ${resource.description ? `<div style="color: #555; margin-bottom: 1rem;">${resource.description}</div>` : ''}
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="edit-btn btn-small" onclick="editResource('${resource.id}')">Edit</button>
+                        <button class="delete-btn btn-small" onclick="deleteResource('${resource.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteResource(resourceId) {
+            if (confirm('Are you sure you want to delete this resource?')) {
+                try {
+                    const church = await Tenant.getCurrentChurchContext();
+                    if (!church) {
+                        console.error('No church context found');
+                        return;
+                    }
+                    await API.deleteResource(resourceId, church.id);
+                    await loadResources();
+                    alert('Resource deleted');
+                } catch (error) {
+                    console.error('Error deleting resource:', error);
+                    alert('Error deleting resource');
+                }
+            }
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('show');
+        }
+
+        function showAddPaymentModal() {
+            document.getElementById('addPaymentModal').classList.add('show');
+        }
+
+        function showAddEventModal() {
+            document.getElementById('addEventModal').classList.add('show');
+        }
+
+        function showAddResourceModal() {
+            document.getElementById('addResourceModal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function updatePaymentStudentSelect() {
+            const select = document.getElementById('paymentStudent');
+            select.innerHTML = '<option value="">Select a student...</option>' +
+                allStudents.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
+        }
+
+        async function handleAddStudent(event) {
+            event.preventDefault();
+
+            const studentData = {
+                full_name: document.getElementById('studentName').value,
+                grade: document.getElementById('studentGrade').value || null,
+                date_of_birth: document.getElementById('studentDob').value || null,
+                emergency_contact_name: document.getElementById('emergencyName').value || null,
+                emergency_contact_phone: document.getElementById('emergencyPhone').value || null,
+                medical_info: document.getElementById('medicalInfo').value || null,
+                allergies: document.getElementById('allergies').value || null,
+                dietary_restrictions: document.getElementById('dietary').value || null
+            };
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.createStudent(studentData, church.id);
+                closeModal('addStudentModal');
+                await loadStudents();
+                await loadStats();
+                alert('Student added successfully!');
+                event.target.reset();
+            } catch (error) {
+                console.error('Error adding student:', error);
+                alert('Error adding student');
+            }
+        }
+
+        async function handleAddPayment(event) {
+            event.preventDefault();
+
+            const paymentData = {
+                student_id: document.getElementById('paymentStudent').value,
+                amount: parseFloat(document.getElementById('paymentAmount').value),
+                payment_date: document.getElementById('paymentDate').value,
+                payment_type: document.getElementById('paymentType').value,
+                notes: document.getElementById('paymentNotes').value
+            };
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.addPayment(
+                    paymentData.student_id,
+                    paymentData.amount,
+                    paymentData.payment_date,
+                    paymentData.payment_type,
+                    paymentData.notes,
+                    church.id
+                );
+                closeModal('addPaymentModal');
+                await loadPaymentSummaries();
+                await loadStats();
+                alert('Payment recorded!');
+                event.target.reset();
+            } catch (error) {
+                console.error('Error recording payment:', error);
+                alert('Error recording payment');
+            }
+        }
+
+        async function handleAddEvent(event) {
+            event.preventDefault();
+
+            const eventData = {
+                name: document.getElementById('eventName').value,
+                description: document.getElementById('eventDescription').value,
+                event_date: document.getElementById('eventDate').value,
+                event_time: document.getElementById('eventTime').value || null,
+                event_type: document.getElementById('eventType').value,
+                location: document.getElementById('eventLocation').value || null,
+                display_on_calendar: document.getElementById('displayOnCalendar').checked
+            };
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.createEvent(eventData, church.id);
+                closeModal('addEventModal');
+                await loadEvents();
+                alert('Event created!');
+                event.target.reset();
+            } catch (error) {
+                console.error('Error creating event:', error);
+                alert('Error creating event');
+            }
+        }
+
+        async function handleAddResource(event) {
+            event.preventDefault();
+
+            const resourceData = {
+                name: document.getElementById('resourceName').value,
+                url: document.getElementById('resourceUrl').value,
+                resource_type: document.getElementById('resourceType').value,
+                description: document.getElementById('resourceDescription').value
+            };
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.createResource(resourceData, church.id);
+                closeModal('addResourceModal');
+                await loadResources();
+                alert('Resource added!');
+                event.target.reset();
+            } catch (error) {
+                console.error('Error adding resource:', error);
+                alert('Error adding resource');
+            }
+        }
+
+        function editEvent(eventId) {
+            alert('Edit functionality coming soon');
+        }
+
+        function editResource(resourceId) {
+            alert('Edit functionality coming soon');
+        }
+
+        // ==================== QUESTION SUBMISSION ====================
+
+        function openQuestionModal() {
+            document.getElementById('questionModal').classList.add('show');
+            // Pre-fill email with current user's email if available
+            const userEmail = document.getElementById('userEmail').textContent;
+            if (userEmail) {
+                document.getElementById('questionEmail').value = userEmail;
+            }
+        }
+
+        async function handleQuestionSubmit(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('questionEmail').value.trim();
+            const questionType = document.getElementById('questionType').value;
+            const questionText = document.getElementById('questionText').value.trim();
+
+            if (!email || !questionType || !questionText) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                await API.submitQuestion(email, questionText, questionType, church.id);
+
+                closeModal('questionModal');
+                event.target.reset();
+                alert('Thank you for your question! Our team will review it and respond soon.');
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Question';
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('Error submitting question. Please try again.');
+                event.target.querySelector('button[type="submit"]').disabled = false;
+                event.target.querySelector('button[type="submit"]').textContent = 'Submit Question';
+            }
+        }
+    </script>
+</body>
+</html>

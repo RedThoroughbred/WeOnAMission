@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peru 2026 - Student Mission Trip</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #f8f9fa;
+        }
+
+        /* ==================== HEADER & NAVIGATION ==================== */
+
+        header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .question-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .question-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .hamburger {
+            width: 30px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* ==================== SIDE MENU ==================== */
+
+        .side-menu {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s;
+            z-index: 999;
+            overflow-y: auto;
+            padding-top: 1rem;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .side-menu-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .side-menu nav {
+            padding: 1rem 0;
+        }
+
+        .side-menu nav a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.3s;
+        }
+
+        .side-menu nav a:hover {
+            background: #f0f7ff;
+            color: #1976d2;
+        }
+
+        .side-menu nav a.active {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 1rem 0;
+        }
+
+        .auth-buttons {
+            padding: 1rem 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .auth-buttons a {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-login {
+            background: #f0f7ff;
+            color: #1976d2;
+            border: 2px solid #1976d2;
+        }
+
+        .btn-register {
+            background: #1976d2;
+            color: white;
+        }
+
+        /* ==================== OVERLAY ==================== */
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 998;
+        }
+
+        .menu-overlay.show {
+            display: block;
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* ==================== HERO SECTION ==================== */
+
+        .hero {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin-bottom: 1.5rem;
+        }
+
+        .countdown-timer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .countdown-item {
+            background: rgba(0,0,0,0.2);
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .countdown-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .hero-cta {
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #1976d2;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* ==================== CONTENT SECTIONS ==================== */
+
+        section {
+            padding: 1.5rem 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==================== COLLAPSIBLE CARDS ==================== */
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            user-select: none;
+        }
+
+        .card-header:hover {
+            background: #f0f7ff;
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+            color: #333;
+            margin: 0;
+            flex: 1;
+        }
+
+        .card-toggle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            color: #1976d2;
+        }
+
+        .card.collapsed .card-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .card-content {
+            padding: 1rem;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .card.collapsed .card-content {
+            max-height: 0;
+            padding: 0 1rem;
+        }
+
+        .card-content p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .card-content ul {
+            margin: 0.75rem 0 0.75rem 1.5rem;
+        }
+
+        .card-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==================== GRID LAYOUT ==================== */
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .grid-card h3 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .grid-card p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* ==================== INFO BOX ==================== */
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-left: 4px solid #f57c00;
+        }
+
+        /* ==================== STATUS BADGE ==================== */
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #f0f7ff;
+            color: #1976d2;
+        }
+
+        /* ==================== LOADING & EMPTY STATE ==================== */
+
+        .loading {
+            text-align: center;
+            padding: 1rem;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1rem;
+            color: #999;
+        }
+
+        /* ==================== FOOTER ==================== */
+
+        footer {
+            background: #333;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* ==================== MODALS ==================== */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group button {
+            background: #1976d2;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .form-group button:hover {
+            background: #1565c0;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .countdown-timer {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            section {
+                padding: 1rem 0;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="logo" onclick="window.location.href='#'">🌍 Peru 2026</div>
+        <div class="header-right">
+            <div class="question-icon" title="Ask a Question" onclick="openQuestionModal()">❓</div>
+            <button class="hamburger" onclick="openMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- SIDE MENU -->
+    <div class="side-menu" id="sideMenu">
+        <button class="side-menu-close" onclick="closeMenu()">✕</button>
+        <nav>
+            <a href="#home" onclick="closeMenu()" class="active">Home</a>
+            <a href="#about" onclick="closeMenu()">About</a>
+            <a href="#events" onclick="closeMenu()">Events & Calendar</a>
+            <a href="#resources" onclick="closeMenu()">Resources</a>
+            <a href="#memories" onclick="closeMenu()">Trip Memories</a>
+            <a href="#faq" onclick="closeMenu()">FAQ</a>
+            <a href="nice-to-know.html" onclick="closeMenu()">Nice to Know</a>
+        </nav>
+        <div class="menu-divider"></div>
+        <div class="auth-buttons">
+            <a href="login.html" class="btn-login">Login</a>
+            <a href="login.html" class="btn-register">Register</a>
+        </div>
+    </div>
+
+    <!-- MENU OVERLAY -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Peru Mission Trip 2026</h1>
+            <p class="hero-subtitle">Serve at Luz de Esperanza in Ahuac, Peru</p>
+
+            <div class="countdown-timer">
+                <div class="countdown-item">
+                    <div class="countdown-number" id="days">0</div>
+                    <div class="countdown-label">DAYS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="hours">0</div>
+                    <div class="countdown-label">HOURS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="minutes">0</div>
+                    <div class="countdown-label">MINS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="seconds">0</div>
+                    <div class="countdown-label">SECS</div>
+                </div>
+            </div>
+
+            <div class="hero-cta">
+                <a href="login.html" class="btn-primary">Register Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title">About the Trip</h2>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <h3>Luz de Esperanza Mission</h3>
+                    <div class="card-toggle">▶</div>
+                </div>
+                <div class="card-content">
+                    <p>Luz de Esperanza ("Light of Hope") is a school in the Andes mountains serving low-income families. We're building relationships and supporting their educational mission.</p>
+                    <p>Over 200 students benefit from programs we've supported. Our trips help with school improvements, educational resources, and cross-cultural understanding.</p>
+                </div>
+            </div>
+
+            <div class="info-box alert-warning">
+                <strong>⚠️ High Altitude:</strong> Ahuac is at 10,692 ft (3,260m). Most students will experience some altitude adjustment. See the Nice to Know section for preparation tips.
+            </div>
+        </div>
+    </section>
+
+    <!-- EVENTS SECTION -->
+    <section id="events">
+        <div class="container">
+            <h2 class="section-title">Upcoming Events</h2>
+            <div id="eventsContainer" class="loading">Loading events...</div>
+        </div>
+    </section>
+
+    <!-- RESOURCES SECTION -->
+    <section id="resources">
+        <div class="container">
+            <h2 class="section-title">Resources</h2>
+            <div id="resourcesContainer" class="loading">Loading resources...</div>
+        </div>
+    </section>
+
+    <!-- MEMORIES SECTION -->
+    <section id="memories" style="background: #f8f9fa; padding: 1.5rem 0;">
+        <div class="container">
+            <h2 class="section-title">Trip Memory Book</h2>
+            <div id="memoriesContainer" class="loading">Loading memories...</div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div id="faqContainer" class="loading">Loading FAQs...</div>
+        </div>
+    </section>
+
+    <!-- QUESTION MODAL -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ask a Question</h2>
+                <button class="modal-close" onclick="closeQuestionModal()">✕</button>
+            </div>
+            <form onsubmit="handleQuestionSubmit(event)">
+                <div class="form-group">
+                    <label>Your Email *</label>
+                    <input type="email" id="questionEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Question Type *</label>
+                    <select id="questionType" required>
+                        <option value="">Select a type...</option>
+                        <option value="question">Question</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="bug_report">Bug Report</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Question *</label>
+                    <textarea id="questionText" required placeholder="Type your question here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Submit Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 Peru Mission Trip 2026. Have questions? Click the question mark icon at the top!</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // ==================== MENU FUNCTIONS ====================
+
+        function openMenu() {
+            document.getElementById('sideMenu').classList.add('open');
+            document.getElementById('menuOverlay').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            document.getElementById('sideMenu').classList.remove('open');
+            document.getElementById('menuOverlay').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ==================== CARD TOGGLE ====================
+
+        function toggleCard(header) {
+            const card = header.closest('.card');
+            card.classList.toggle('collapsed');
+        }
+
+        // Collapse all cards by default
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.add('collapsed');
+            });
+        });
+
+        // ==================== COUNTDOWN TIMER ====================
+
+        function updateCountdown() {
+            const departureDate = new Date('2026-06-26T00:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = departureDate - now;
+
+            if (distance < 0) {
+                document.querySelector('.countdown-timer').innerHTML = '<p style="grid-column: 1/-1; font-size: 1.2rem;">The trip is happening now! 🎉</p>';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // ==================== QUESTION MODAL ====================
+
+        function openQuestionModal() {
+            document.getElementById('questionModal').classList.add('show');
+            closeMenu(); // Close menu if open
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.remove('show');
+        }
+
+        async function handleQuestionSubmit(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('questionEmail').value;
+            const questionType = document.getElementById('questionType').value;
+            const question = document.getElementById('questionText').value;
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.submitQuestion(email, question, questionType, church.id);
+                alert('Question submitted! Admins will review and respond shortly.');
+                closeQuestionModal();
+                event.target.reset();
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('There was an error. Please try again.');
+            }
+        }
+
+        // ==================== LOAD DATA ====================
+
+        async function loadEvents() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const events = await API.getEvents(church.id);
+                renderEvents(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                document.getElementById('eventsContainer').innerHTML =
+                    '<p class="empty-state">Unable to load events. Please refresh.</p>';
+            }
+        }
+
+        function renderEvents(events) {
+            const container = document.getElementById('eventsContainer');
+
+            if (events.length === 0) {
+                container.innerHTML = '<p class="empty-state">No upcoming events yet.</p>';
+                return;
+            }
+
+            container.innerHTML = events.map(e => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <h3>${e.name}</h3>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>${Auth.formatDate(e.event_date)}</strong></p>
+                        ${e.event_time ? `<p>Time: ${e.event_time}</p>` : ''}
+                        ${e.location ? `<p>Location: ${e.location}</p>` : ''}
+                        <span class="status-badge">${e.event_type}</span>
+                        ${e.description ? `<p style="margin-top: 0.5rem;">${e.description}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadResources() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const resources = await API.getResources(church.id);
+                renderResources(resources);
+            } catch (error) {
+                console.error('Error loading resources:', error);
+                document.getElementById('resourcesContainer').innerHTML =
+                    '<p class="empty-state">Unable to load resources. Please refresh.</p>';
+            }
+        }
+
+        function renderResources(resources) {
+            const container = document.getElementById('resourcesContainer');
+
+            if (resources.length === 0) {
+                container.innerHTML = '<p class="empty-state">No resources available yet.</p>';
+                return;
+            }
+
+            container.innerHTML = resources.map(r => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <h3>${r.name}</h3>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p>${r.description || ''}</p>
+                        <p><strong>Type:</strong> ${r.resource_type}</p>
+                        <a href="${r.url}" target="_blank" style="color: #1976d2; font-weight: 600;">Access Resource →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMemories() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const memories = await API.getApprovedMemories(church.id);
+                renderMemories(memories);
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                document.getElementById('memoriesContainer').innerHTML =
+                    '<p class="empty-state">Unable to load memories. Please refresh.</p>';
+            }
+        }
+
+        function renderMemories(memories) {
+            const container = document.getElementById('memoriesContainer');
+
+            if (memories.length === 0) {
+                container.innerHTML = '<p class="empty-state">No approved memories yet. Check back soon!</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid">
+                    ${memories.map(m => `
+                        <div class="card">
+                            <div class="card-header" style="cursor: default;">
+                                <h3>${m.title}</h3>
+                            </div>
+                            <div class="card-content" style="max-height: none;">
+                                <p><strong>${m.students?.full_name || 'Anonymous'}</strong></p>
+                                <p style="font-size: 0.9rem; color: #666;">${m.content.substring(0, 100)}...</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function loadFaqs() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const faqs = await API.getFaqs(church.id);
+                renderFaqs(faqs);
+            } catch (error) {
+                console.error('Error loading FAQs:', error);
+                document.getElementById('faqContainer').innerHTML =
+                    '<p class="empty-state">Unable to load FAQs. Please refresh.</p>';
+            }
+        }
+
+        function renderFaqs(faqs) {
+            const container = document.getElementById('faqContainer');
+
+            if (faqs.length === 0) {
+                container.innerHTML = '<p class="empty-state">No FAQs yet. Submit a question to help us build this section!</p>';
+                return;
+            }
+
+            container.innerHTML = faqs.map(faq => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <h3>${faq.question}</h3>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p>${faq.answer}</p>
+                        ${faq.category ? `<p style="font-size: 0.85rem; color: #999; margin-top: 1rem;">Category: ${faq.category}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== INITIALIZE ====================
+
+        (async function() {
+            await Promise.all([
+                loadEvents(),
+                loadResources(),
+                loadMemories(),
+                loadFaqs()
+            ]);
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+Product Requirements Document (PRD)
+Peru Student Trip Website - Luz de Esperanza
+Version: 1.0
+Last Updated: October 20, 2025
+Document Owner: Trip Coordinator
+Status: In Development
+
+1. Executive Summary
+1.1 Product Overview
+A comprehensive web platform to manage, communicate, and coordinate a student volunteer trip to Luz de
+Esperanza school in Ahuac, Peru. The website serves as a central hub for student registration, trip information,
+calendar management, resource distribution, and parent communication.
+1.2 Problem Statement
+Planning international student trips involves coordinating multiple stakeholders (students, parents, school
+administrators, coordinators) with complex information needs including registration, payment deadlines, travel
+preparation, cultural education, and ongoing communication. Current solutions are fragmented across email,
+paper forms, and multiple platforms.
+1.3 Solution
+A single, secure, mobile-responsive website that consolidates all trip-related information, automates data
+collection through Google Forms and Quickbase integration, provides real-time calendar updates, and delivers
+comprehensive preparation resources.
+
+2. Product Goals & Objectives
+2.1 Primary Goals
+1. Streamline Registration: Reduce registration time from days to minutes with automated form submission
+2. Centralize Information: Provide single source of truth for all trip-related information
+3. Improve Communication: Keep stakeholders informed through dynamic calendar and resource updates
+4. Ensure Safety: Collect comprehensive medical and emergency contact information
+
+5. Cultural Preparation: Educate students about Peru, altitude considerations, and cultural practices
+2.2 Success Metrics
+100% of students register through online form (vs. paper forms)
+90%+ parent satisfaction rating with information accessibility
+Zero missed critical deadlines due to communication issues
+95%+ of families report feeling "well-prepared" for the trip
+50% reduction in coordinator time spent answering repetitive questions
+
+3. Target Users
+3.1 Primary Users
+
+ 
+User Type Description Key Needs
+Students (7th-12th
+grade)
+
+Trip participants
+
+Trip information, packing lists, cultural education, calendar of
+events
+
+Parents/Guardians
+
+Decision makers,
+payers
+
+Registration, cost details, safety information, communication
+channels
+
+Trip Coordinators Administrators
+
+Data collection, event management, resource distribution,
+communication
+
+3.2 Secondary Users
+School administrators (oversight)
+Fundraising committee members
+Medical personnel (reviewing medical forms)
+
+4. Core Features & Functionality
+4.1 Trip Information & Branding
+Priority: P0 (Must Have)
+Description: Engaging landing experience with trip overview, mission statement, and visual appeal
+Requirements:
+
+Header with trip name, destination, dates
+Live countdown timer to departure date (June 26, 2026)
+About section describing Luz de Esperanza mission
+High-altitude awareness messaging (Cusco 11,152 ft, Huancayo 10,692 ft)
+Sticky navigation menu for easy section access
+Mobile-responsive design
+Acceptance Criteria:
+Countdown updates every second in real-time
+Navigation menu remains accessible while scrolling
+All text readable on mobile devices (min 14px font)
+Site loads in <3 seconds on standard connection
+
+4.2 Student Registration System
+Priority: P0 (Must Have)
+Description: Secure data collection system integrated with Google Forms and Quickbase backend
+Requirements:
+Embedded Google Form with required fields:
+Student full name, grade, date of birth
+Parent/guardian name, email, phone
+Emergency contact name and phone
+Medical information and allergies
+Dietary restrictions
+Additional notes
+HTTPS/SSL encryption for data transmission
+Form validation (required field enforcement)
+Confirmation email upon submission
+Auto-sync to Quickbase database via Zapier/Make.com
+
+Acceptance Criteria:
+Form submits successfully 99.9% of the time
+Data appears in Quickbase within 5 minutes of submission
+Confirmation email received within 2 minutes
+Mobile form completion rate >85%
+Zero data loss incidents
+Technical Implementation:
+Google Forms for front-end data collection
+Quickbase for secure backend storage
+Zapier/Make.com middleware for automation
+Field mapping documented in integration guide
+
+4.3 Interactive Calendar System
+Priority: P0 (Must Have)
+Description: Dynamic monthly calendar displaying trip-related events with color coding and detailed
+information
+Requirements:
+Monthly grid view (Sun-Sat)
+Previous/Next month navigation
+Today highlighting
+Color-coded event types:
+Meeting (Blue)
+Deadline (Red)
+Activity (Green)
+Preparation (Orange)
+Travel (Purple)
+Fundraiser (Pink)
+
+Other (Gray)
+Hover tooltips showing:
+Event name
+Date/time
+Full description
+Color legend for user reference
+Mobile-responsive layout
+Data Source: Quickbase table "Peru Trip Events" with fields:
+Event Name (text)
+Description (text, multiline)
+Date/Time (datetime)
+Type (multiple choice)
+Display on Calendar (checkbox)
+Acceptance Criteria:
+Events load within 2 seconds
+Month navigation is instant (<100ms)
+Tooltips appear on hover without delay
+Only events with "Display on Calendar" = true are shown
+Events display in correct timezone
+Mobile users can tap to see event details
+Technical Implementation:
+Vanilla JavaScript for calendar rendering
+Quickbase API for event data
+Client-side month calculations (no additional API calls for navigation)
+CSS Grid for calendar layout
+Serverless function proxy for API calls (to avoid CORS)
+
+4.4 Resource Library
+Priority: P1 (Should Have)
+Description: Organized collection of downloadable documents, videos, guides, and links
+Requirements:
+Card-based grid layout
+Resources grouped by type
+Each resource card displays:
+Resource name
+Type badge (color-coded)
+Description
+"Access Resource" button linking to URL
+Hover effects for visual feedback
+Auto-organization by type categories
+Resource Types:
+Document (Blue) - PDFs, forms
+Video (Red) - YouTube, Vimeo links
+Website (Green) - External URLs
+Form (Orange) - Google Forms, surveys
+Guide (Purple) - Trip guides, handbooks
+Other (Gray) - Miscellaneous
+Data Source: Quickbase table "Peru Trip Resources" with fields:
+Name (text)
+URL (URL field)
+Type (multiple choice)
+Description (text, multiline)
+Acceptance Criteria:
+
+Resources load within 2 seconds
+All links open in new tab/window
+Resources automatically organize by type
+Minimum 3 resources per category recommended
+Broken link notification for administrators
+
+4.5 Trip Preparation Guide
+Priority: P0 (Must Have)
+Description: Comprehensive pre-trip information covering health, packing, weather, and logistics
+Content Sections:
+1. Before You Go Considerations:
+Altitude awareness (detailed explanation)
+Weather and seasonal information
+Health precautions and vaccinations
+Safety guidelines
+Money and currency information
+Cultural respect practices
+2. Packing Lists (Checklist Format):
+Essential documents
+Clothing (layered approach)
+Health & hygiene items
+Electronics & accessories
+Cultural exchange items
+3. Weather Information:
+Dry season: May-September
+Rainy season: October-April
+Daily temperature ranges
+Packing recommendations by season
+
+Acceptance Criteria:
+All checklists use visual checkmark indicators
+Information boxes highlight critical safety info
+Sections are scannable with clear headers
+Mobile formatting maintains readability
+Links to additional resources where applicable
+
+4.6 Location & Maps
+Priority: P1 (Should Have)
+Description: Interactive maps showing trip destinations and geographic context
+Requirements:
+Embedded Google Maps for:
+Ahuac, Peru (school location)
+Huancayo (nearest major city)
+Cusco (cultural destination)
+Map markers for key locations
+"Getting There" information box
+Altitude information for each location
+Acceptance Criteria:
+Maps are interactive (zoom, pan)
+Maps load within 3 seconds
+Mobile maps are touch-responsive
+Offline map download instructions provided
+
+4.7 FAQ Section
+Priority: P0 (Must Have)
+
+Description: Comprehensive answers to common questions organized by topic
+Question Categories:
+1. Trip Details (dates, costs, activities)
+2. Altitude & Health (preparation, symptoms, precautions)
+3. Weather & Packing (what to bring, seasonal considerations)
+4. Money & Shopping (currency, ATMs, bargaining)
+5. Safety & Cultural Awareness (guidelines, practices)
+6. Food & Dining (cuisine, dietary accommodations)
+7. Language & Communication (Spanish requirements, WiFi)
+8. Transportation (travel methods, motion sickness)
+Requirements:
+Minimum 20 questions across categories
+Each question in expandable card format
+Color-coded topic headers
+Search functionality (Phase 2)
+"Didn't find your answer?" contact form link
+Acceptance Criteria:
+FAQs answer 80%+ of parent questions
+Average FAQ section time-on-page >2 minutes
+Questions organized logically by topic
+Clear, jargon-free language appropriate for 7th-12th grade reading level
+
+4.8 Spanish Phrases Reference
+Priority: P1 (Should Have)
+Description: Essential Spanish phrases organized by use case
+Phrase Categories:
+
+1. Greetings & Basics (6 phrases)
+2. Getting Around & Shopping (5 phrases)
+3. Emergency & Help (5 phrases)
+4. Politeness & Culture (5 phrases)
+Requirements:
+Card-based grid layout
+Spanish phrase prominently displayed
+English translation in italics
+Visual icons for context (optional)
+Downloadable PDF version (Phase 2)
+Audio pronunciation (Phase 2)
+Acceptance Criteria:
+20-25 essential phrases included
+Phrases are practical and age-appropriate
+Grid responsive on all devices
+Printable format available
+
+5. Technical Requirements
+5.1 Frontend
+Technology: HTML5, CSS3, Vanilla JavaScript
+Framework: None (static site for simplicity)
+Design: Mobile-first responsive design
+Browser Support:
+Chrome 90+
+Safari 14+
+Firefox 88+
+Edge 90+
+
+Mobile Safari iOS 14+
+Chrome Android 90+
+
+5.2 Backend & Integration
+Forms: Google Forms (embedded iframe)
+Database: Quickbase (table storage)
+Automation: Zapier or Make.com
+API: Quickbase REST API v1
+Proxy: Serverless functions (Netlify/Vercel) for CORS handling
+5.3 Hosting & Deployment
+Hosting: Netlify or Vercel (recommended)
+Free SSL certificate
+CDN distribution
+Git-based deployment
+Custom domain support
+Alternative: School IT server (if available)
+Requirements:
+HTTPS/SSL required (for form security)
+Custom domain preferred (peru-trip-2026.school.edu)
+Automatic backups
+5.4 Security & Privacy
+All form submissions encrypted via HTTPS
+No sensitive data stored in browser (localStorage/sessionStorage)
+Quickbase access restricted to authorized personnel
+User tokens rotated regularly (quarterly)
+FERPA compliance for student data
+Parent consent required for registration
+
+5.5 Performance
+Initial page load: <3 seconds
+Time to interactive: <5 seconds
+Lighthouse score: >90 (Performance, Accessibility, Best Practices, SEO)
+Mobile performance: <4 seconds on 4G
+5.6 Accessibility (WCAG 2.1 Level AA)
+Semantic HTML structure
+Sufficient color contrast (4.5:1 minimum)
+Keyboard navigation support
+Screen reader compatible
+Alt text for all images
+Form labels properly associated
+
+6. User Stories
+6.1 Student User Stories
+As a student,
+I want to see a countdown to the trip departure,
+So that I can track how much time I have to prepare.
+As a student,
+I want to view the trip calendar,
+So that I know important dates and deadlines.
+As a student,
+I want to access packing lists and preparation guides,
+So that I can prepare properly for the high-altitude environment.
+As a student,
+I want to learn basic Spanish phrases,
+So that I can communicate respectfully with locals.
+As a student,
+
+6.2 Parent User Stories
+
+6.3 Coordinator User Stories
+I want to see maps of our destination,
+So that I can visualize where I'm going.
+
+As a parent,
+I want to register my child securely online,
+So that I can complete registration quickly without paper forms.
+As a parent,
+I want to see all trip costs and payment deadlines,
+So that I can budget accordingly.
+As a parent,
+I want comprehensive safety and health information,
+So that I can make an informed decision about my child's participation.
+As a parent,
+I want to access FAQs about altitude sickness,
+So that I can prepare my child for high-altitude travel.
+As a parent,
+I want to receive confirmation after form submission,
+So that I know my registration was successful.
+As a parent,
+I want to access all trip documents in one place,
+So that I don't have to search through emails.
+
+As a trip coordinator,
+I want registration data automatically saved to Quickbase,
+So that I don't have to manually enter form submissions.
+As a coordinator,
+I want to add/edit calendar events in Quickbase,
+So that the website calendar updates automatically.
+As a coordinator,
+I want to upload resources to Quickbase,
+So that students and parents can access them on the website.
+
+7. Data Architecture
+7.1 Google Form Fields
+
+ 
+Field Name Type Required Validation
+Student Full Name Text Yes Min 2 characters
+Grade Dropdown Yes 9th-12th
+Date of Birth Date Yes Must be 13-18 years old
+Parent/Guardian Name Text Yes Min 2 characters
+Parent/Guardian Email Email Yes Valid email format
+Parent/Guardian Phone Phone Yes 10 digits
+Emergency Contact Name Text Yes Min 2 characters
+Emergency Contact Phone Phone Yes 10 digits
+Medical Info/Allergies Long Text No Max 500 characters
+Dietary Restrictions Long Text No Max 500 characters
+Additional Notes Long Text No Max 500 characters
+
+7.2 Quickbase Table: Peru Trip Events
+Field Name Type Required Options
+Event Name Text Yes -
+Description Multi-line Text No -
+Date/Time Date/Time Yes -
+Type Multiple Choice Yes Meeting, Deadline, Activity, Preparation, Travel, Fundraiser, Other
+As a coordinator,
+I want to control which events display on the calendar,
+So that I can hide draft events until they're finalized.
+As a coordinator,
+I want to see all registrations in Quickbase,
+So that I can track participation and contact families.
+As a coordinator,
+I want to update trip dates in one place,
+So that the countdown timer and all references update automatically.
+
+ 
+
+ 
+Field Name Type Required Options
+Display on Calendar Checkbox Yes Default: Unchecked
+Record ID Auto Number Auto -
+Date Created Timestamp Auto -
+Last Modified Timestamp Auto -
+
+7.3 Quickbase Table: Peru Trip Resources
+
+ 
+Field Name Type Required Options
+Name Text Yes -
+URL URL Yes -
+Type Multiple Choice Yes Document, Video, Website, Form, Guide, Other
+Description Multi-line Text Yes -
+Record ID Auto Number Auto -
+Date Added Timestamp Auto -
+
+7.4 Quickbase Table: Student Registrations
+(Auto-populated from Google Forms via Zapier/Make.com)
+
+ 
+Field Name Type Source
+All form fields above Various Google Forms
+Registration Date Timestamp Auto
+Registration ID Auto Number Auto
+Status Dropdown Manual (Pending, Approved, Paid, Complete)
+Payment Status Dropdown Manual
+Notes Multi-line Text Manual
+
+8. Integration Architecture
+8.1 Registration Flow
+Parent fills form on website
+↓
+Google Forms receives submission
+↓
+Google Forms sends data to Zapier/Make.com
+
+8.2 Calendar Display Flow
+
+8.3 Resource Display Flow
+↓
+Zapier/Make.com transforms data
+↓
+Zapier/Make.com creates record in Quickbase
+↓
+Confirmation email sent to parent
+↓
+Coordinator notified of new registration
+
+Coordinator adds/updates event in Quickbase
+↓
+Website JavaScript calls Quickbase API (via serverless proxy)
+↓
+API returns events where "Display on Calendar" = true
+↓
+JavaScript renders events on calendar with color coding
+↓
+User hovers over event
+↓
+Tooltip displays full event details
+
+Coordinator adds resource to Quickbase
+↓
+Website JavaScript calls Quickbase API (via serverless proxy)
+↓
+API returns all resources
+↓
+JavaScript groups resources by type
+↓
+Resources displayed in card grid
+↓
+User clicks "Access Resource"
+↓
+Opens URL in new tab
+
+9. Implementation Phases
+Phase 1: Core Foundation (Week 1-2)
+Status: ✅ Complete
+Site structure and navigation
+Header with countdown timer
+About section
+Google Forms integration setup
+Basic styling and responsive design
+Trip preparation guide
+FAQ section (20+ questions)
+Spanish phrases section
+Location maps
+Phase 2: Dynamic Features (Week 3-4)
+Status: ✅ Complete
+Calendar system with Quickbase integration
+Resource library with Quickbase integration
+Event color coding and tooltips
+Resource type organization
+Demo data for testing
+Phase 3: Backend Integration (Week 5-6)
+Status: 🔄 In Progress
+Quickbase tables created and configured
+API credentials obtained and configured
+Serverless proxy functions deployed
+Zapier/Make.com automation for form → Quickbase
+Field ID mapping verified
+End-to-end testing completed
+Phase 4: Content & Testing (Week 7-8)
+Status: ⏳ Upcoming
+All real event data added to Quickbase
+All resource links added to Quickbase
+
+FAQ content reviewed by stakeholders
+Trip dates finalized
+Cross-browser testing
+Mobile device testing
+Load testing (100+ concurrent users)
+Accessibility audit
+Parent/student beta testing
+Phase 5: Launch & Optimization (Week 9-10)
+Status: ⏳ Upcoming
+Custom domain configured
+SSL certificate active
+Analytics tracking installed (Google Analytics)
+Launch announcement sent to families
+Monitor for issues first 48 hours
+Gather user feedback
+Make quick-fix improvements
+
+10. Future Enhancements (Phase 6+)
+10.1 Communication Features
+Email notification system for new calendar events
+SMS alerts for critical deadlines
+Discussion board or Q&A forum
+Live chat support during business hours
+10.2 Advanced Calendar Features
+Export to Google Calendar / iCal
+Email reminders 1 week before events
+Filter calendar by event type
+List view alongside calendar view
+Past events archive
+10.3 Payment Integration
+
+Online payment processing (Stripe/PayPal)
+Payment plan management
+Automatic receipt generation
+Fundraising progress tracker
+10.4 Photo Gallery
+Pre-trip preparation photos
+During-trip photo uploads (post-trip)
+Student testimonials and reflections
+Video highlights reel
+10.5 Enhanced Resources
+Search functionality for resources
+Resource ratings/reviews
+Downloadable offline resource pack (PDF)
+Video tutorials (packing, cultural prep)
+Audio pronunciation for Spanish phrases
+10.6 Student Dashboard
+Individual login for registered students
+Personal checklist tracker
+Document upload (passport copy, forms)
+Roommate preferences
+Flight seat selection
+10.7 Admin Dashboard
+Registration statistics and reports
+Export to Excel functionality
+Bulk email tool
+Payment tracking dashboard
+
+Medical information quick-reference
+10.8 Social Features
+Student bios and photos (opt-in)
+Parent networking/carpooling coordination
+Pre-trip meetups scheduler
+Alumni testimonials from past trips
+
+11. Risks & Mitigation
+
+ 
+Risk Impact Probability Mitigation Strategy
+CORS issues with Quickbase API High High Implement serverless proxy functions
+Low parent technology adoption Medium Low Provide video tutorials, phone support
+Data loss during form submission High Low Auto-save functionality, confirmation emails
+Quickbase API rate limits Medium Medium Cache data client-side, optimize API calls
+Mobile compatibility issues Medium Medium Thorough mobile testing, progressive enhancement
+Incorrect trip dates displayed High Low Single source of truth for dates, validation
+Security breach of student data High Low HTTPS, secure API tokens, regular security audits
+Website downtime during peak usage Medium Low Use reliable hosting (Netlify/Vercel with 99.9% uptime)
+
+12. Dependencies
+12.1 External Services
+Google Forms - Required for registration
+Quickbase - Required for data storage and calendar/resources
+Zapier or Make.com - Required for automation
+Hosting Provider - Netlify or Vercel recommended
+Google Maps API - Required for map embeds
+12.2 Internal Resources
+Trip coordinator time for content creation
+IT support for Quickbase configuration
+
+Student testimonials and photos (optional)
+Marketing materials (logos, images)
+12.3 Required Accounts & Licenses
+Google Workspace account (for Forms)
+Quickbase subscription (check school existing license)
+Zapier/Make.com account (free tier may suffice)
+Domain name registration (optional but recommended)
+Hosting account (free tier available)
+
+13. Success Criteria
+13.1 Launch Criteria (Go/No-Go)
+✅All form fields validated and working
+✅ Calendar loads and displays events correctly
+✅ Resources load and links are functional
+✅ Mobile responsive on iOS and Android
+✅ HTTPS enabled
+✅ Cross-browser testing passed
+✅Accessibility audit passed
+13.2 Post-Launch Success Metrics (30 days)
+Adoption Metrics:
+100% of eligible students registered online (vs. paper)
+75%+ of parents visit site at least 3 times
+80%+ of registrations completed on first attempt
+Engagement Metrics:
+Average time on site: >5 minutes
+Bounce rate: <40%
+FAQ section views: 60%+ of visitors
+Resource downloads: 50%+ of families access at least 1 resource
+
+Satisfaction Metrics:
+Parent satisfaction survey: 4.5/5 or higher
+Student preparedness self-rating: 4/5 or higher
+Coordinator time saved: 10+ hours per week
+Technical Metrics:
+Site uptime: 99.9%
+Page load time: <3 seconds (95th percentile)
+Mobile usage: 40-60% of traffic
+Zero critical bugs reported
+
+14. Maintenance & Support
+14.1 Ongoing Maintenance
+Weekly: Check for broken links, update calendar events
+Monthly: Review analytics, update FAQ based on questions
+Quarterly: Update content, rotate API tokens
+Annually: Duplicate site for next year's trip
+14.2 Support Channels
+Email: perutrip@school.edu (coordinator monitored)
+FAQ section (self-service)
+Parent information meetings (in-person support)
+Phone support during business hours (coordinator)
+14.3 Documentation
+Technical documentation (this PRD)
+User guide for parents/students (to be created)
+Administrator guide for Quickbase management (to be created)
+Video tutorial for form completion (to be created)
+
+15. Appendix
+15.1 Glossary
+Quickbase: Low-code database platform for custom business applications
+Serverless Function: Cloud-hosted code that runs on-demand without server management
+CORS: Cross-Origin Resource Sharing, browser security feature
+API Token: Secure credential for accessing Quickbase API
+SSL/HTTPS: Secure protocol for encrypted web traffic
+Responsive Design: Website adapts layout to different screen sizes
+15.2 Related Documents
+Quickbase API Documentation: https://developer.quickbase.com/
+Google Forms Help: https://support.google.com/docs/topic/9055404
+Zapier Documentation: https://zapier.com/help
+Make.com Documentation: https://www.make.com/en/help
+15.3 Stakeholder Contacts
+Trip Coordinator: [Name, Email, Phone]
+School IT Contact: [Name, Email, Phone]
+Quickbase Administrator: [Name, Email, Phone]
+Web Developer: [Name, Email, Phone]
+15.4 Change Log
+
+ 
+Date Version Changes Author
+2025-10-20 1.0 Initial PRD created Trip Coordinator
+
+16. Sign-Off
+This PRD represents the agreed-upon scope and requirements for the Peru Student Trip website.
+Approved by:
+
+□ Trip Coordinator: _________________ Date: _______
+□ School Administrator: _________________ Date: _______
+□ IT Department: _________________ Date: _______
+□ Parent Representative: _________________ Date: _______
+
+Document End
+For questions or clarifications about this PRD, contact: [Trip Coordinator Email]

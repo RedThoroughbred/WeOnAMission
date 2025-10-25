@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions Dashboard - Mission Trip Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .portal-header {
+            background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .portal-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .user-details p {
+            margin: 0.25rem 0;
+            opacity: 0.95;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #f57c00;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f57c00;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #f57c00;
+            color: white;
+            border-color: #f57c00;
+        }
+
+        .filter-btn:hover {
+            border-color: #f57c00;
+            color: #f57c00;
+        }
+
+        .question-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #f57c00;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .question-meta {
+            flex: 1;
+        }
+
+        .question-email {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .question-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-submitted {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-pending {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-complete {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .response-section {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .response-text {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .response-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #f57c00;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #e65100;
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #888;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .question-header {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-header">
+        <div class="container">
+            <h1>Questions Dashboard</h1>
+            <div class="user-info">
+                <div class="user-details">
+                    <p><strong id="userName">Loading...</strong></p>
+                    <p id="userEmail"></p>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuestions">0</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingQuestions">0</div>
+                <div class="stat-label">Pending Responses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedQuestions">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+
+        <!-- Section -->
+        <h2 class="section-title">Question Management</h2>
+
+        <!-- Filters -->
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterQuestions('all')">All</button>
+            <button class="filter-btn" onclick="filterQuestions('submitted')">Submitted</button>
+            <button class="filter-btn" onclick="filterQuestions('pending')">Pending</button>
+            <button class="filter-btn" onclick="filterQuestions('complete')">Complete</button>
+        </div>
+
+        <!-- Questions List -->
+        <div id="questionsContainer" class="loading">Loading questions...</div>
+    </div>
+
+    <!-- Response Modal -->
+    <div id="responseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Respond to Question</h2>
+                <button class="modal-close" onclick="closeResponseModal()">✕</button>
+            </div>
+            <div id="questionDetails" style="background: #f9f9f9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                <!-- Question text will be inserted here -->
+            </div>
+            <form onsubmit="handleResponseSubmit(event)">
+                <div class="form-group">
+                    <label>Your Response *</label>
+                    <textarea id="responseText" required placeholder="Type your response here..."></textarea>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="addToFaq">
+                    <label for="addToFaq">Add this to FAQ section</label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Send Response</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        let currentQuestionId = null;
+        let allQuestions = [];
+        let currentFilter = 'all';
+
+        // Initialize page
+        (async function() {
+            const user = await Auth.initializePage('admin');
+            if (!user) return;
+
+            await loadQuestions();
+        })();
+
+        async function loadQuestions() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                allQuestions = await API.getAllUserQuestions(church.id);
+                updateStats();
+                renderQuestions(allQuestions);
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                document.getElementById('questionsContainer').innerHTML =
+                    '<div class="empty-state">Error loading questions. Please refresh.</div>';
+            }
+        }
+
+        function updateStats() {
+            const total = allQuestions.length;
+            const pending = allQuestions.filter(q => q.status === 'submitted' || q.status === 'pending').length;
+            const completed = allQuestions.filter(q => q.status === 'complete').length;
+
+            document.getElementById('totalQuestions').textContent = total;
+            document.getElementById('pendingQuestions').textContent = pending;
+            document.getElementById('completedQuestions').textContent = completed;
+        }
+
+        function filterQuestions(status) {
+            currentFilter = status;
+
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Filter and render
+            let filtered = allQuestions;
+            if (status !== 'all') {
+                filtered = allQuestions.filter(q => q.status === status);
+            }
+            renderQuestions(filtered);
+        }
+
+        function renderQuestions(questions) {
+            const container = document.getElementById('questionsContainer');
+
+            if (questions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No Questions</h3>
+                        <p>${currentFilter === 'all' ? 'No questions submitted yet.' : `No ${currentFilter} questions.`}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = questions.map(q => `
+                <div class="question-item">
+                    <div class="question-header">
+                        <div class="question-meta">
+                            <div class="question-email">📧 ${q.email}</div>
+                            <div class="question-text">${q.question}</div>
+                            <div style="margin-top: 0.5rem;">
+                                <span class="question-type">${q.question_type.replace('_', ' ').toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <span class="status-badge status-${q.status}">${q.status.toUpperCase()}</span>
+                    </div>
+
+                    ${q.question_responses && q.question_responses.length > 0 ? `
+                        <div class="response-section">
+                            <strong style="color: #666;">Response:</strong>
+                            ${q.question_responses.map(r => `
+                                <div class="response-text">${r.response}</div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; font-size: 0.85rem; color: #999;">
+                        Submitted ${Auth.formatDateTime(q.created_at)}
+                    </div>
+
+                    <div class="response-actions" style="margin-top: 1rem;">
+                        ${q.status !== 'complete' ? `
+                            <button class="btn btn-primary btn-small" onclick="openResponseModal('${q.id}', '${q.email}', '${q.question.replace(/'/g, "\\'")}')">
+                                ${q.question_responses && q.question_responses.length > 0 ? 'Update Response' : 'Add Response'}
+                            </button>
+                        ` : ''}
+                        ${q.status !== 'complete' && (q.question_responses && q.question_responses.length > 0) ? `
+                            <button class="btn btn-secondary btn-small" onclick="markComplete('${q.id}')">Mark Complete</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openResponseModal(questionId, email, question) {
+            currentQuestionId = questionId;
+            document.getElementById('questionDetails').innerHTML = `
+                <p><strong>From:</strong> ${email}</p>
+                <p><strong>Question:</strong></p>
+                <p style="margin-top: 0.5rem; color: #333;">${question}</p>
+            `;
+            document.getElementById('responseText').value = '';
+            document.getElementById('addToFaq').checked = false;
+            document.getElementById('responseModal').classList.add('show');
+        }
+
+        function closeResponseModal() {
+            document.getElementById('responseModal').classList.remove('show');
+            currentQuestionId = null;
+        }
+
+        async function handleResponseSubmit(event) {
+            event.preventDefault();
+
+            const responseText = document.getElementById('responseText').value;
+            const addToFaq = document.getElementById('addToFaq').checked;
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+
+                // Submit response
+                await API.submitQuestionResponse(currentQuestionId, responseText, addToFaq, church.id);
+
+                // If adding to FAQ, create FAQ entry
+                if (addToFaq) {
+                    const question = allQuestions.find(q => q.id === currentQuestionId);
+                    await API.createFaq(question.question, responseText, 'user_submitted', church.id);
+                }
+
+                // Mark as pending (admin response submitted)
+                await API.updateQuestionStatus(currentQuestionId, 'pending', church.id);
+
+                // Mark as notified
+                await API.markQuestionNotified(currentQuestionId.replace(/'/g, "\\'"), church.id);
+
+                closeResponseModal();
+                await loadQuestions();
+                alert('Response sent! User will be notified.');
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Response';
+            } catch (error) {
+                console.error('Error submitting response:', error);
+                alert('Error sending response. Please try again.');
+                event.target.querySelector('button[type="submit"]').disabled = false;
+                event.target.querySelector('button[type="submit"]').textContent = 'Send Response';
+            }
+        }
+
+        async function markComplete(questionId) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.updateQuestionStatus(questionId, 'complete', church.id);
+                await loadQuestions();
+                alert('Question marked as complete!');
+            } catch (error) {
+                console.error('Error marking complete:', error);
+                alert('Error marking complete. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

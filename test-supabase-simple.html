@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase - Simple</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+    <h1>Supabase Debug</h1>
+    <pre id="output"></pre>
+
+    <script>
+        const output = document.getElementById('output');
+
+        output.textContent = 'URL: ' + CONFIG.supabase.url + '\n';
+        output.textContent += 'Key length: ' + CONFIG.supabase.anonKey.length + '\n';
+        output.textContent += 'Key starts with: ' + CONFIG.supabase.anonKey.substring(0, 20) + '...\n\n';
+
+        try {
+            // Test 1: Can we decode the JWT?
+            const parts = CONFIG.supabase.anonKey.split('.');
+            const decoded = JSON.parse(atob(parts[1]));
+            output.textContent += 'JWT Decoded:\n' + JSON.stringify(decoded, null, 2) + '\n\n';
+
+            // Test 2: Create client
+            const client = supabase.createClient(
+                CONFIG.supabase.url,
+                CONFIG.supabase.anonKey
+            );
+            output.textContent += 'Supabase client created\n\n';
+
+            // Test 3: Simple query
+            output.textContent += 'Attempting to query events...\n';
+
+            client
+                .from('events')
+                .select('count', { count: 'exact', head: true })
+                .then(result => {
+                    output.textContent += 'Result:\n' + JSON.stringify(result, null, 2);
+                })
+                .catch(err => {
+                    output.textContent += 'Error:\n' + JSON.stringify(err, null, 2);
+                });
+        } catch (err) {
+            output.textContent += 'Exception: ' + err.message;
+        }
+    </script>
+</body>
+</html>

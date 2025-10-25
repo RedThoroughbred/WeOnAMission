@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nice to Know - Mission Trip Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #f8f9fa;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #1976d2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #1976d2;
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .card-header:hover {
+            background: #f0f7ff;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .card-toggle {
+            font-size: 1.2rem;
+            color: #1976d2;
+            transition: transform 0.3s;
+        }
+
+        .card.collapsed .card-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: white;
+        }
+
+        .card.collapsed .card-content {
+            max-height: 0;
+            padding: 0;
+        }
+
+        .card-content p {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .card-content ul,
+        .card-content ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        .card-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+
+        .info-box.warning {
+            background: #fff3e0;
+            border-left-color: #f57c00;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid #1976d2;
+        }
+
+        .grid-card h3 {
+            color: #1976d2;
+            margin-bottom: 0.75rem;
+        }
+
+        .grid-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+
+        .question-icon {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .question-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group button {
+            background: #1976d2;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .form-group button:hover {
+            background: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .question-icon {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-title">Nice to Know</div>
+        <div class="header-actions">
+            <button class="back-btn" onclick="window.history.back()">← Back</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Spanish Phrases Section -->
+        <section class="section">
+            <h2 class="section-title"><span class="section-icon">🗣️</span>Essential Spanish Phrases</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">Learn these helpful phrases to communicate respectfully with locals in Peru.</p>
+            <div id="phrasesContainer" class="loading">Loading Spanish phrases...</div>
+        </section>
+
+        <!-- Preparation Tips Section -->
+        <section class="section">
+            <h2 class="section-title"><span class="section-icon">🎒</span>Preparation Tips</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">Important information to help you prepare for the high-altitude environment and cultural experience.</p>
+            <div id="tipsContainer" class="loading">Loading preparation tips...</div>
+        </section>
+
+        <!-- Packing List Section -->
+        <section class="section">
+            <h2 class="section-title"><span class="section-icon">📦</span>Packing Checklist</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">Essential items to bring for your trip to Peru. Remember: pack light and smart!</p>
+            <div id="packingContainer" class="loading">Loading packing list...</div>
+        </section>
+
+        <!-- Altitude Info -->
+        <section class="section">
+            <h2 class="section-title"><span class="section-icon">⛰️</span>About Altitude</h2>
+            <div class="info-box warning">
+                <strong>⚠️ High Altitude Destination</strong>
+                Ahuac is at 10,692 feet (3,260m) above sea level. This is considered high altitude. Most people experience some adjustment, but it's manageable with proper preparation.
+            </div>
+
+            <div class="card collapsed">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <div class="card-title">What is Altitude Sickness?</div>
+                    <div class="card-toggle">▶</div>
+                </div>
+                <div class="card-content">
+                    <p>Altitude sickness (acute mountain sickness - AMS) happens when your body doesn't get enough oxygen at high elevations. Symptoms typically appear 12-24 hours after arrival and can include:</p>
+                    <ul>
+                        <li>Headache (most common)</li>
+                        <li>Fatigue and weakness</li>
+                        <li>Nausea or loss of appetite</li>
+                        <li>Shortness of breath</li>
+                        <li>Dizziness or lightheadedness</li>
+                        <li>Sleep disturbances</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Good news:</strong> Most symptoms are mild and go away within 24-48 hours as your body acclimates.</p>
+                </div>
+            </div>
+
+            <div class="card collapsed">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <div class="card-title">Prevention & Treatment</div>
+                    <div class="card-toggle">▶</div>
+                </div>
+                <div class="card-content">
+                    <p><strong>Before the trip:</strong></p>
+                    <ul>
+                        <li>Get good sleep and rest</li>
+                        <li>Stay hydrated (drink plenty of water)</li>
+                        <li>Avoid alcohol and heavy meals</li>
+                        <li>Consider talking to a doctor about altitude medication</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>During the first days:</strong></p>
+                    <ul>
+                        <li>Drink 3-4 liters of water per day</li>
+                        <li>Eat light, frequent meals</li>
+                        <li>Avoid alcohol for at least 48 hours</li>
+                        <li>Take it easy physically</li>
+                        <li>Try coca tea (local remedy - very popular!)</li>
+                        <li>Sleep with head elevated</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Peru Info -->
+        <section class="section">
+            <h2 class="section-title"><span class="section-icon">🇵🇪</span>About Peru</h2>
+
+            <div class="grid">
+                <div class="grid-card">
+                    <h3>Currency</h3>
+                    <p>Peru uses the Sol (PEN). 1 USD ≈ 3-4 Soles. ATMs are available in major towns. Bring some cash for remote areas.</p>
+                </div>
+                <div class="grid-card">
+                    <h3>Language</h3>
+                    <p>Spanish is the primary language. In tourist areas, some English is spoken. Learning a few phrases helps and locals appreciate the effort!</p>
+                </div>
+                <div class="grid-card">
+                    <h3>Weather (Dry Season)</h3>
+                    <p>June-July (our trip time) is the dry season. Days are cool (50-60°F), nights are cold (32-40°F). Rain is rare but possible.</p>
+                </div>
+                <div class="grid-card">
+                    <h3>Food</h3>
+                    <p>Peruvian cuisine is delicious and diverse. Expect rice, potatoes, corn, quinoa, and local meats. Vegetarian options available.</p>
+                </div>
+                <div class="grid-card">
+                    <h3>Water & Health</h3>
+                    <p>Stick to bottled water, especially in small towns. Most travelers' stomachs adjust fine. Bring anti-diarrheal medication just in case.</p>
+                </div>
+                <div class="grid-card">
+                    <h3>Safety</h3>
+                    <p>Peru is generally safe for tourists. We'll stay together as a group, avoid valuables display, and follow local guidance.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Culture Section -->
+        <section class="section">
+            <h2 class="section-title"><span class="section-icon">🤝</span>Cultural Tips</h2>
+
+            <div class="card collapsed">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <div class="card-title">Showing Respect</div>
+                    <div class="card-toggle">▶</div>
+                </div>
+                <div class="card-content">
+                    <ul>
+                        <li><strong>Greetings:</strong> Always greet with "Buenos días" (morning), "Buenas tardes" (afternoon), or "Buenas noches" (evening)</li>
+                        <li><strong>Dress modestly:</strong> Especially at the school and in churches. Cover shoulders and knees</li>
+                        <li><strong>Ask before photographing:</strong> Always ask permission before taking photos of people</li>
+                        <li><strong>Eye contact:</strong> Direct eye contact shows respect and honesty</li>
+                        <li><strong>Handshakes:</strong> A firm handshake is customary for introductions</li>
+                        <li><strong>Personal space:</strong> Peruvians tend to stand closer during conversation than Americans</li>
+                        <li><strong>Don't point fingers:</strong> Use an open hand to gesture</li>
+                        <li><strong>Loud voices:</strong> Keep your voice moderate - loud talking can be seen as aggressive</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card collapsed">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <div class="card-title">Money & Tipping</div>
+                    <div class="card-toggle">▶</div>
+                </div>
+                <div class="card-content">
+                    <p><strong>Tipping practices in Peru:</strong></p>
+                    <ul>
+                        <li><strong>Restaurants:</strong> 10% tip is customary if service was good (not always included)</li>
+                        <li><strong>Taxis:</strong> No tip needed (but rounding up is nice)</li>
+                        <li><strong>Guides:</strong> $5-10 USD per person for full-day guides</li>
+                        <li><strong>Hotels:</strong> $1-2 per night for housekeeping is appreciated</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Bargaining:</strong> In markets, light haggling is acceptable and even expected, but be respectful and friendly.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Question Button (Floating) -->
+    <button class="question-icon" title="Ask a Question" onclick="openQuestionModal()">❓</button>
+
+    <!-- Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ask a Question</h2>
+                <button class="modal-close" onclick="closeQuestionModal()">✕</button>
+            </div>
+            <form onsubmit="handleQuestionSubmit(event)">
+                <div class="form-group">
+                    <label>Your Email *</label>
+                    <input type="email" id="questionEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Question Type *</label>
+                    <select id="questionType" required>
+                        <option value="">Select a type...</option>
+                        <option value="question">Question</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="bug_report">Bug Report</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Question *</label>
+                    <textarea id="questionText" required placeholder="Type your question here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Submit Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Collapse all cards by default
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.add('collapsed');
+            });
+        });
+
+        function toggleCard(header) {
+            const card = header.closest('.card');
+            card.classList.toggle('collapsed');
+        }
+
+        // Load content
+        async function loadPhrases() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const phrases = await API.getContentItems('spanish_phrases', church.id);
+                renderPhrases(phrases);
+            } catch (error) {
+                console.error('Error loading phrases:', error);
+                document.getElementById('phrasesContainer').innerHTML =
+                    '<p class="empty-state">Unable to load phrases. Please refresh.</p>';
+            }
+        }
+
+        function renderPhrases(phrases) {
+            const container = document.getElementById('phrasesContainer');
+
+            if (phrases.length === 0) {
+                container.innerHTML = '<p class="empty-state">No phrases available.</p>';
+                return;
+            }
+
+            container.innerHTML = phrases.map(phrase => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <div class="card-title">${phrase.title}</div>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p>${phrase.content}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadTips() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const tips = await API.getContentItems('preparation_tips', church.id);
+                renderTips(tips);
+            } catch (error) {
+                console.error('Error loading tips:', error);
+                document.getElementById('tipsContainer').innerHTML =
+                    '<p class="empty-state">Unable to load tips. Please refresh.</p>';
+            }
+        }
+
+        function renderTips(tips) {
+            const container = document.getElementById('tipsContainer');
+
+            if (tips.length === 0) {
+                container.innerHTML = '<p class="empty-state">No tips available.</p>';
+                return;
+            }
+
+            container.innerHTML = tips.map(tip => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <div class="card-title">${tip.title}</div>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p>${tip.content}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadPacking() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const items = await API.getContentItems('packing_list', church.id);
+                renderPacking(items);
+            } catch (error) {
+                console.error('Error loading packing list:', error);
+                document.getElementById('packingContainer').innerHTML =
+                    '<p class="empty-state">Unable to load packing list. Please refresh.</p>';
+            }
+        }
+
+        function renderPacking(items) {
+            const container = document.getElementById('packingContainer');
+
+            if (items.length === 0) {
+                container.innerHTML = '<p class="empty-state">No packing items available.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <ul style="list-style: none; padding: 0;">
+                        ${items.map(item => `
+                            <li style="padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center;">
+                                <input type="checkbox" style="width: 18px; height: 18px; margin-right: 1rem; cursor: pointer;">
+                                <div style="flex: 1;">
+                                    <strong>${item.title}</strong><br>
+                                    <span style="color: #666; font-size: 0.9rem;">${item.content}</span>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Question modal
+        function openQuestionModal() {
+            document.getElementById('questionModal').classList.add('show');
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.remove('show');
+        }
+
+        async function handleQuestionSubmit(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('questionEmail').value;
+            const questionType = document.getElementById('questionType').value;
+            const question = document.getElementById('questionText').value;
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.submitQuestion(email, question, questionType, church.id);
+                alert('Question submitted! Admins will review and respond shortly.');
+                closeQuestionModal();
+                event.target.reset();
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('There was an error. Please try again.');
+            }
+        }
+
+        // Initialize
+        (async function() {
+            await Promise.all([
+                loadPhrases(),
+                loadTips(),
+                loadPacking()
+            ]);
+        })();
+    </script>
+</body>
+</html>
