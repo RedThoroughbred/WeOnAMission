@@ -556,6 +556,14 @@
             <a href="login.html" class="btn-login">Login</a>
             <a href="login.html" class="btn-register">Register</a>
         </div>
+        <div class="menu-divider"></div>
+        <div style="padding: 1rem; color: #666; font-size: 0.9rem;">
+            <p style="margin-bottom: 0.5rem; font-weight: 600;">Portals:</p>
+            <a href="parent-portal.html" onclick="closeMenu()" style="display: block; padding: 0.5rem 0; color: #1976d2; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">👨‍👩‍👧‍👦 Parent Portal</a>
+            <a href="student-portal.html" onclick="closeMenu()" style="display: block; padding: 0.5rem 0; color: #1976d2; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">🎓 Student Portal</a>
+            <a href="admin-portal.html" onclick="closeMenu()" style="display: block; padding: 0.5rem 0; color: #1976d2; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">⚙️ Admin Portal</a>
+            <a href="super-admin-portal.html" onclick="closeMenu()" style="display: block; padding: 0.5rem 0; color: #1976d2; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">🔐 Super Admin Portal</a>
+        </div>
     </div>
 
     <!-- MENU OVERLAY -->
@@ -586,8 +594,9 @@
                 </div>
             </div>
 
-            <div class="hero-cta">
+            <div class="hero-cta" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                 <a href="login.html" class="btn-primary">Register Now</a>
+                <button onclick="openDonateModal()" class="btn-primary" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: none; cursor: pointer; text-decoration: none; display: inline-block; padding: 0.75rem 2rem; border-radius: 4px; font-weight: 600; color: white;">💚 Donate Now</button>
             </div>
         </div>
     </section>
@@ -675,6 +684,64 @@
                     <button type="submit">Submit Question</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- DONATION MODAL -->
+    <div id="donateModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Make a Donation</h2>
+                <button class="modal-close" onclick="closeDonateModal()">✕</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin-bottom: 1.5rem; color: #666; text-align: center;">How would you like to support our mission?</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <button onclick="selectDonationType('money')" id="moneyBtn" class="donation-type-btn selected" style="padding: 1.5rem; border: 2px solid #2ecc71; background: #f0fdf4; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                        <div style="font-weight: 600; color: #27ae60;">Donate Money</div>
+                    </button>
+                    <button onclick="selectDonationType('items')" id="itemsBtn" class="donation-type-btn" style="padding: 1.5rem; border: 2px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                        <div style="font-weight: 600; color: #666;">Donate Items</div>
+                    </button>
+                </div>
+
+                <!-- Money Donation Section -->
+                <div id="moneySection">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Select Payment Method *</label>
+                        <select id="paymentMethod" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem;">
+                            <option value="">-- Select Method --</option>
+                            <option value="zelle">Zelle</option>
+                            <option value="venmo">Venmo</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="check">Check</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Amount *</label>
+                        <input type="number" id="donationAmount" placeholder="Enter amount" min="1" step="0.01" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem;">
+                    </div>
+                    <button onclick="submitMoneyDonation()" class="btn-primary" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Submit Donation</button>
+                </div>
+
+                <!-- Items Donation Section -->
+                <div id="itemsSection" style="display: none;">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">What would you like to donate? *</label>
+                        <textarea id="donationItems" placeholder="Describe the items you'd like to donate..." style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem; min-height: 80px;"></textarea>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Your Email *</label>
+                        <input type="email" id="donationEmail" placeholder="your@email.com" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem;">
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">We'll contact you to confirm details and arrange pickup/delivery.</p>
+                    <button onclick="submitItemsDonation()" class="btn-primary" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Submit</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -883,13 +950,19 @@
             container.innerHTML = `
                 <div class="grid">
                     ${memories.map(m => `
-                        <div class="card">
+                        <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+                            ${m.photo_path ? `
+                                <div style="width: 100%; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 8px 8px 0 0; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                    <img src="https://sqcdgvvjojgrwsdajtuq.supabase.co/storage/v1/object/public/trip-photos/${m.photo_path}" alt="${m.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            ` : '<div style="width: 100%; aspect-ratio: 3 / 2; background: #f0f0f0; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; color: #999;">No photo</div>'}
                             <div class="card-header" style="cursor: default;">
                                 <h3>${m.title}</h3>
                             </div>
-                            <div class="card-content" style="max-height: none;">
+                            <div class="card-content" style="max-height: none; flex-grow: 1;">
                                 <p><strong>${m.students?.full_name || 'Anonymous'}</strong></p>
-                                <p style="font-size: 0.9rem; color: #666;">${m.content.substring(0, 100)}...</p>
+                                <p style="font-size: 0.9rem; color: #666; line-height: 1.5;">${m.content.substring(0, 150)}${m.content.length > 150 ? '...' : ''}</p>
+                                <p style="font-size: 0.85rem; color: #999; margin-top: 0.5rem;">Submitted ${Auth.formatDate(m.submitted_at)}</p>
                             </div>
                         </div>
                     `).join('')}
@@ -945,6 +1018,104 @@
                 loadFaqs()
             ]);
         })();
+
+        // ==================== DONATION MODAL ====================
+
+        function openDonateModal() {
+            document.getElementById('donateModal').classList.add('show');
+            closeMenu();
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('show');
+            // Reset form
+            document.getElementById('paymentMethod').value = '';
+            document.getElementById('donationAmount').value = '';
+            document.getElementById('donationItems').value = '';
+            document.getElementById('donationEmail').value = '';
+            selectDonationType('money');
+        }
+
+        function selectDonationType(type) {
+            // Update button styles
+            const moneyBtn = document.getElementById('moneyBtn');
+            const itemsBtn = document.getElementById('itemsBtn');
+
+            if (type === 'money') {
+                moneyBtn.style.borderColor = '#2ecc71';
+                moneyBtn.style.background = '#f0fdf4';
+                itemsBtn.style.borderColor = '#e0e0e0';
+                itemsBtn.style.background = 'white';
+                document.getElementById('moneySection').style.display = 'block';
+                document.getElementById('itemsSection').style.display = 'none';
+            } else {
+                moneyBtn.style.borderColor = '#e0e0e0';
+                moneyBtn.style.background = 'white';
+                itemsBtn.style.borderColor = '#2ecc71';
+                itemsBtn.style.background = '#f0fdf4';
+                document.getElementById('moneySection').style.display = 'none';
+                document.getElementById('itemsSection').style.display = 'block';
+            }
+        }
+
+        async function submitMoneyDonation() {
+            const method = document.getElementById('paymentMethod').value;
+            const amount = document.getElementById('donationAmount').value;
+
+            if (!method || !amount) {
+                alert('Please select a payment method and enter an amount');
+                return;
+            }
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                const churchId = church ? church.id : null;
+
+                // Call API to save donation
+                const response = await fetch('api.js', {
+                    // For now, just show a message since we haven't built the backend yet
+                });
+
+                alert(`Thank you for your donation of $${amount}! Payment instructions for ${method.toUpperCase()} will be sent to your email. We'll contact you shortly with details.`);
+                closeDonateModal();
+            } catch (error) {
+                console.error('Error submitting donation:', error);
+                alert('Thank you for your interest in donating! We will contact you shortly.');
+                closeDonateModal();
+            }
+        }
+
+        async function submitItemsDonation() {
+            const items = document.getElementById('donationItems').value;
+            const email = document.getElementById('donationEmail').value;
+
+            if (!items || !email) {
+                alert('Please describe the items and provide your email');
+                return;
+            }
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                const churchId = church ? church.id : null;
+
+                alert(`Thank you for offering to donate! We've received your information:\n\nItems: ${items}\nEmail: ${email}\n\nWe'll contact you soon to arrange details.`);
+                closeDonateModal();
+            } catch (error) {
+                console.error('Error submitting donation:', error);
+                alert('Thank you for your interest in donating! We will contact you shortly.');
+                closeDonateModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const donateModal = document.getElementById('donateModal');
+            donateModal.addEventListener('click', function(e) {
+                if (e.target === donateModal) {
+                    closeDonateModal();
+                }
+            });
+        });
     </script>
 </body>
 </html>

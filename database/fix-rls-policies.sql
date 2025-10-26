@@ -1,21 +1,40 @@
--- Fix for infinite recursion in RLS policies
--- Run this in Supabase SQL Editor to remove problematic admin-checking policies
+-- Fix RLS Policies for student_invites table
+-- Run this if you get "permission denied for table student_invites"
 
--- Drop all RLS policies that reference the users table
-DROP POLICY IF EXISTS "Admins can view all users" ON users;
-DROP POLICY IF EXISTS "Admins can view all students" ON students;
-DROP POLICY IF EXISTS "Admins can manage all payments" ON payments;
-DROP POLICY IF EXISTS "Admins can manage payment config" ON payment_config;
-DROP POLICY IF EXISTS "Admins can manage all documents" ON documents;
-DROP POLICY IF EXISTS "Admins can manage all memories" ON trip_memories;
-DROP POLICY IF EXISTS "Admins can manage events" ON events;
-DROP POLICY IF EXISTS "Admins can manage resources" ON resources;
-DROP POLICY IF EXISTS "Admins can view all questions" ON user_questions;
-DROP POLICY IF EXISTS "Admins can update questions" ON user_questions;
-DROP POLICY IF EXISTS "Admins can manage responses" ON question_responses;
-DROP POLICY IF EXISTS "Admins can manage faqs" ON faqs;
-DROP POLICY IF EXISTS "Admins can manage content items" ON content_items;
+-- First, drop existing policies (in case they're incorrect)
+DROP POLICY IF EXISTS "Parents can view their own invites" ON student_invites;
+DROP POLICY IF EXISTS "Parents can create invites" ON student_invites;
+DROP POLICY IF EXISTS "Admins can view church invites" ON student_invites;
 
--- Now you can use your app with the basic RLS policies
--- Admin functionality will be handled at the application level instead of database level
--- This is acceptable for private/limited access applications like yours
+-- Make sure RLS is enabled
+ALTER TABLE student_invites ENABLE ROW LEVEL SECURITY;
+
+-- Policy 1: Parents can view invites they created
+CREATE POLICY "Parents can view their own invites"
+    ON student_invites FOR SELECT
+    USING (parent_id = auth.uid());
+
+-- Policy 2: Parents can create invites (INSERT)
+CREATE POLICY "Parents can create invites"
+    ON student_invites FOR INSERT
+    WITH CHECK (parent_id = auth.uid());
+
+-- Policy 3: Admins can view all invites in their church
+CREATE POLICY "Admins can view church invites"
+    ON student_invites FOR SELECT
+    USING (
+        church_id IN (
+            SELECT church_id FROM users WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- Verify RLS is enabled
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE tablename = 'student_invites';
+
+-- Verify policies exist
+SELECT schemaname, tablename, policyname, permissive, roles, qual, with_check
+FROM pg_policies
+WHERE tablename = 'student_invites'
+ORDER BY policyname;

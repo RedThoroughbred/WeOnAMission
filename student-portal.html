@@ -7,10 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="tenant.js"></script>
+    <script src="theme.js"></script>
+    <script src="utils.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         .portal-header {
-            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             padding: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -47,7 +49,7 @@
 
         .logout-btn:hover {
             background: white;
-            color: #1976d2;
+            color: var(--primary);
         }
 
         .container {
@@ -59,7 +61,7 @@
         .section-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #1976d2;
+            color: var(--primary);
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
             border-bottom: 2px solid #e0e0e0;
@@ -131,13 +133,13 @@
         }
 
         .status-rejected {
-            background: #ffebee;
-            color: #c62828;
+            background: var(--danger-light);
+            color: var(--danger);
         }
 
         .btn {
             padding: 0.75rem 1.5rem;
-            background: #1976d2;
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 6px;
@@ -147,7 +149,7 @@
         }
 
         .btn:hover {
-            background: #1565c0;
+            background: var(--primary-dark);
             transform: translateY(-2px);
         }
 
@@ -232,7 +234,7 @@
         }
 
         .upload-area {
-            border: 2px dashed #1976d2;
+            border: 2px dashed var(--primary);
             border-radius: 8px;
             padding: 2rem;
             text-align: center;
@@ -241,12 +243,12 @@
         }
 
         .upload-area:hover {
-            background: #f0f7ff;
+            background: rgba(79, 70, 229, 0.05);
         }
 
         .upload-area.dragover {
-            background: #e3f2fd;
-            border-color: #1565c0;
+            background: rgba(79, 70, 229, 0.1);
+            border-color: var(--primary-dark);
         }
 
         .file-input {
@@ -285,9 +287,9 @@
         }
 
         .alert-error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #c62828;
+            background: var(--danger-light);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
         }
 
         .alert-success {
@@ -353,12 +355,24 @@
 <body>
     <div class="portal-header">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h1>Student Portal</h1>
                 </div>
-                <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+                    <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
+                </div>
             </div>
+
+            <!-- Navigation Menu - Dropdown on Mobile, Inline on Desktop -->
+            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+                <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
+                <a href="student-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">👤 My Profile</a>
+                <a href="student-profile.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">⚙️ Settings</a>
+                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
+            </nav>
+
             <div class="user-info">
                 <div class="user-details">
                     <p><strong id="userName">Loading...</strong></p>
@@ -479,6 +493,7 @@
     <script src="auth.js"></script>
     <script>
         let currentUser = null;
+        let currentStudent = null;
         let selectedPhotoFile = null;
 
         // Initialize page
@@ -486,9 +501,61 @@
             currentUser = await Auth.initializePage('student');
             if (!currentUser) return;
 
+            // Load current student record
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (church) {
+                    const { data: student, error: studentError } = await supabaseClient
+                        .from('students')
+                        .select('*')
+                        .eq('user_id', currentUser.id)
+                        .eq('church_id', church.id)
+                        .single();
+
+                    if (!studentError && student) {
+                        currentStudent = student;
+                        console.log('Student record loaded:', currentStudent.id);
+                    } else {
+                        console.error('Could not load student record:', studentError);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading student record:', error);
+            }
+
             await loadMyMemories();
             await loadApprovedMemories();
+
+            // Setup responsive menu
+            setupResponsiveMenu();
         })();
+
+        function setupResponsiveMenu() {
+            const hamburger = document.getElementById('portalHamburger');
+            const nav = document.getElementById('portalNav');
+
+            function checkScreenSize() {
+                if (window.innerWidth < 768) {
+                    hamburger.style.display = 'block';
+                    nav.style.display = 'none';
+                } else {
+                    hamburger.style.display = 'none';
+                    nav.style.display = 'flex';
+                }
+            }
+
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        }
+
+        function togglePortalMenu() {
+            const nav = document.getElementById('portalNav');
+            nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function logout() {
+            Auth.logout();
+        }
 
         // ==================== MEMORY SUBMISSION ====================
 
@@ -499,8 +566,16 @@
                     console.error('No church context found');
                     return;
                 }
-                const memories = await API.getMemoriesForStudent(currentUser.id, church.id);
-                renderMyMemories(memories);
+
+                if (!currentStudent) {
+                    console.warn('Student record not loaded yet');
+                    return;
+                }
+
+                const memories = await API.getMemoriesForStudent(currentStudent.id, church.id);
+                // Filter to show only pending memories (approved ones are in the gallery below)
+                const pendingMemories = memories.filter(m => m.status === 'pending');
+                renderMyMemories(pendingMemories);
             } catch (error) {
                 console.error('Error loading memories:', error);
                 document.getElementById('memoriesContainer').innerHTML =
@@ -515,8 +590,8 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📝</div>
-                        <h3>No Memories Submitted Yet</h3>
-                        <p>Click "Submit New Memory" to share your photos and reflections from the trip.</p>
+                        <h3>No Pending Memories</h3>
+                        <p>All your submitted memories have been reviewed. Check the Memory Gallery below to see approved memories!</p>
                     </div>
                 `;
                 return;
@@ -597,8 +672,8 @@
             // Return a placeholder if no photo path
             if (!photoPath) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23f0f0f0" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" font-size="14" fill="%23999" text-anchor="middle" dy=".3em"%3ENo photo%3C/text%3E%3C/svg%3E';
 
-            // For now, return the path - in production you'd get the actual URL from Supabase
-            return `https://placeholder.com/400x300?text=Photo`;
+            // Return the Supabase public URL for the photo
+            return `https://sqcdgvvjojgrwsdajtuq.supabase.co/storage/v1/object/public/trip-photos/${photoPath}`;
         }
 
         function showSubmitMemoryModal() {
@@ -682,11 +757,17 @@
                     console.error('No church context found');
                     return;
                 }
+
+                if (!currentStudent) {
+                    alert('Error: Could not find your student record. Please refresh the page.');
+                    return;
+                }
+
                 const submitBtn = event.target.querySelector('button[type="submit"]');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Submitting...';
 
-                await API.submitTripMemory(currentUser.id, title, content, selectedPhotoFile, church.id);
+                await API.submitTripMemory(currentStudent.id, title, content, selectedPhotoFile, church.id);
 
                 closeModal('submitMemoryModal');
                 event.target.reset();

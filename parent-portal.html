@@ -7,10 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="tenant.js"></script>
+    <script src="theme.js"></script>
+    <script src="utils.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         .portal-header {
-            background: linear-gradient(135deg, #c62828 0%, #d84315 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             padding: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -47,7 +49,7 @@
 
         .logout-btn:hover {
             background: white;
-            color: #c62828;
+            color: var(--primary);
         }
 
         .container {
@@ -75,7 +77,7 @@
 
         .student-name {
             font-size: 1.5rem;
-            color: #c62828;
+            color: var(--primary);
             font-weight: 600;
         }
 
@@ -111,12 +113,18 @@
             margin-bottom: 1.5rem;
         }
 
+        .payment-summary h3,
+        .payment-summary span,
+        .payment-summary strong {
+            color: white;
+        }
+
         .payment-summary.partial {
             background: linear-gradient(135deg, #FF9800 0%, #FFA726 100%);
         }
 
         .payment-summary.pending {
-            background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+            background: linear-gradient(135deg, var(--warning) 0%, #FCA329 100%);
         }
 
         .payment-row {
@@ -144,7 +152,7 @@
         }
 
         .tab-btn.active {
-            color: #c62828;
+            color: var(--primary);
         }
 
         .tab-btn.active::after {
@@ -154,7 +162,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: #c62828;
+            background: var(--primary);
         }
 
         .tab-content {
@@ -166,7 +174,7 @@
         }
 
         .upload-area {
-            border: 2px dashed #c62828;
+            border: 2px dashed var(--primary);
             border-radius: 8px;
             padding: 2rem;
             text-align: center;
@@ -175,12 +183,12 @@
         }
 
         .upload-area:hover {
-            background: #fff9f9;
+            background: rgba(79, 70, 229, 0.05);
         }
 
         .upload-area.dragover {
-            background: #ffebee;
-            border-color: #d84315;
+            background: rgba(79, 70, 229, 0.1);
+            border-color: var(--primary-dark);
         }
 
         .file-input {
@@ -234,13 +242,13 @@
         }
 
         .status-rejected {
-            background: #ffebee;
-            color: #c62828;
+            background: var(--danger-light);
+            color: var(--danger);
         }
 
         .btn {
             padding: 0.75rem 1.5rem;
-            background: #c62828;
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 6px;
@@ -250,7 +258,7 @@
         }
 
         .btn:hover {
-            background: #d84315;
+            background: var(--primary-dark);
             transform: translateY(-2px);
         }
 
@@ -435,17 +443,198 @@
         .question-form-group button:hover {
             background: #b71c1c;
         }
+
+        /* Invite Student Modal Styles */
+        .invite-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .invite-modal.show {
+            display: flex;
+        }
+
+        .invite-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .invite-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .invite-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .invite-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .invite-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .invite-form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .invite-form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .invite-success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .invite-success h3 {
+            color: #2e7d32;
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .invite-link-box {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .invite-link-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .invite-link-text {
+            background: white;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            color: #333;
+        }
+
+        .copy-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .copy-button:hover {
+            background: var(--primary-dark);
+        }
+
+        .copy-button.copied {
+            background: #4caf50;
+        }
+
+        .student-action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .student-action-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .student-action-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .invite-status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .invite-status-badge.pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
     </style>
 </head>
 <body>
     <div class="portal-header">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h1>Parent Portal</h1>
                 </div>
-                <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+                    <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
+                </div>
             </div>
+
+            <!-- Navigation Menu - Dropdown on Mobile, Inline on Desktop -->
+            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+                <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
+                <a href="parent-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">👨‍👩‍👧‍👦 My Students</a>
+                <a href="parent-profile.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">⚙️ Settings</a>
+                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
+            </nav>
+
             <div class="user-info">
                 <div class="user-details">
                     <p><strong id="userName">Loading...</strong></p>
@@ -511,6 +700,52 @@
         </div>
     </div>
 
+    <!-- Edit Student Modal -->
+    <div id="editStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Student Details</h2>
+                <button class="modal-close" onclick="closeModal('editStudentModal')">&times;</button>
+            </div>
+            <form onsubmit="handleEditStudent(event)">
+                <input type="hidden" id="editStudentId">
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="editStudentName" required>
+                </div>
+                <div class="form-group">
+                    <label>Grade</label>
+                    <input type="number" id="editStudentGrade" min="7" max="12">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="editStudentDob">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Name</label>
+                    <input type="text" id="editEmergencyName">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Phone</label>
+                    <input type="tel" id="editEmergencyPhone">
+                </div>
+                <div class="form-group">
+                    <label>Medical Information</label>
+                    <textarea id="editMedicalInfo" placeholder="Any medical conditions, medications, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Allergies</label>
+                    <textarea id="editAllergies"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Dietary Restrictions</label>
+                    <textarea id="editDietary"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Question Modal -->
     <div id="questionModal" class="question-modal">
         <div class="question-modal-content">
@@ -543,6 +778,69 @@
         </div>
     </div>
 
+    <!-- Invite Student Modal -->
+    <div id="inviteModal" class="invite-modal">
+        <div class="invite-modal-content">
+            <div class="invite-modal-header">
+                <h2 id="inviteModalTitle">Invite Student to Create Account</h2>
+                <button class="invite-modal-close" onclick="closeInviteModal()">✕</button>
+            </div>
+
+            <!-- Form State (for entering email) -->
+            <div id="inviteFormState">
+                <form onsubmit="handleInviteSubmit(event)">
+                    <div class="invite-form-group">
+                        <label for="studentInviteEmail">Student Email Address *</label>
+                        <input type="email" id="studentInviteEmail" required
+                               placeholder="student@example.com"
+                               autocomplete="email">
+                        <small style="color: #666; display: block; margin-top: 0.25rem;">
+                            An invite link will be sent to this email address.
+                        </small>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn" style="flex: 1;">Send Invite</button>
+                        <button type="button" class="btn btn-secondary"
+                                style="flex: 1; background: #999;"
+                                onclick="closeInviteModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Success State (after invite sent) -->
+            <div id="inviteSuccessState" style="display: none;">
+                <div class="invite-success">
+                    <h3>✓ Invite Sent Successfully!</h3>
+                    <p>An invite link has been generated for the student.</p>
+                </div>
+
+                <div class="invite-link-box">
+                    <label>Share this link with the student:</label>
+                    <div class="invite-link-text" id="inviteLinkDisplay"></div>
+                    <button type="button" class="copy-button" onclick="copyInviteLink(this)">
+                        📋 Copy Link
+                    </button>
+                </div>
+
+                <p style="color: #666; font-size: 0.9rem; margin-top: 1rem; line-height: 1.5;">
+                    <strong>Note:</strong> The student should click this link to create their account.
+                    The link expires in 7 days. You can send a new invite anytime.
+                </p>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <button type="button" class="btn" style="flex: 1;" onclick="closeInviteModal()">
+                        Done
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                            style="flex: 1; background: #666;"
+                            onclick="resetInviteForm()">
+                        Send Another Invite
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="api.js"></script>
     <script src="auth.js"></script>
     <script>
@@ -554,7 +852,38 @@
             if (!user) return;
 
             await loadStudents();
+
+            // Setup responsive menu
+            setupResponsiveMenu();
         })();
+
+        function setupResponsiveMenu() {
+            const hamburger = document.getElementById('portalHamburger');
+            const nav = document.getElementById('portalNav');
+
+            // Show hamburger on small screens
+            function checkScreenSize() {
+                if (window.innerWidth < 768) {
+                    hamburger.style.display = 'block';
+                    nav.style.display = 'none';
+                } else {
+                    hamburger.style.display = 'none';
+                    nav.style.display = 'flex';
+                }
+            }
+
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        }
+
+        function togglePortalMenu() {
+            const nav = document.getElementById('portalNav');
+            nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function logout() {
+            Auth.logout();
+        }
 
         async function loadStudents() {
             try {
@@ -590,6 +919,9 @@
                 <div class="student-card" id="student-${student.id}">
                     <div class="student-header">
                         <div class="student-name">${student.full_name}</div>
+                        <button class="student-action-btn" onclick="openInviteModal('${student.id}', '${student.full_name}')">
+                            📬 Send Invite
+                        </button>
                     </div>
 
                     <div class="student-info">
@@ -645,6 +977,9 @@
                     </div>
 
                     <div id="info-tab-${student.id}" class="tab-content">
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn" onclick="openEditStudentModal('${student.id}', '${student.full_name}')">✏️ Edit Details</button>
+                        </div>
                         ${renderStudentDetails(student)}
                     </div>
                 </div>
@@ -707,7 +1042,7 @@
 
                 document.getElementById(`payment-${studentId}`).innerHTML = `
                     <div class="payment-summary ${statusClass}">
-                        <h3 style="margin-bottom: 1rem;">Payment Status</h3>
+                        <h3 style="margin-bottom: 1rem; color: white;">Payment Status</h3>
                         <div class="payment-row">
                             <span>Trip Cost:</span>
                             <strong>${Auth.formatCurrency(payment.trip_cost)}</strong>
@@ -881,6 +1216,59 @@
             }
         }
 
+        function openEditStudentModal(studentId, studentName) {
+            const student = currentStudents.find(s => s.id === studentId);
+            if (!student) {
+                alert('Student not found');
+                return;
+            }
+
+            // Populate the edit form with student data
+            document.getElementById('editStudentId').value = student.id;
+            document.getElementById('editStudentName').value = student.full_name || '';
+            document.getElementById('editStudentGrade').value = student.grade || '';
+            document.getElementById('editStudentDob').value = student.date_of_birth || '';
+            document.getElementById('editEmergencyName').value = student.emergency_contact_name || '';
+            document.getElementById('editEmergencyPhone').value = student.emergency_contact_phone || '';
+            document.getElementById('editMedicalInfo').value = student.medical_info || '';
+            document.getElementById('editAllergies').value = student.allergies || '';
+            document.getElementById('editDietary').value = student.dietary_restrictions || '';
+
+            // Open the modal
+            document.getElementById('editStudentModal').classList.add('show');
+        }
+
+        async function handleEditStudent(event) {
+            event.preventDefault();
+
+            const studentId = document.getElementById('editStudentId').value;
+            const updates = {
+                full_name: document.getElementById('editStudentName').value,
+                grade: document.getElementById('editStudentGrade').value || null,
+                date_of_birth: document.getElementById('editStudentDob').value || null,
+                emergency_contact_name: document.getElementById('editEmergencyName').value || null,
+                emergency_contact_phone: document.getElementById('editEmergencyPhone').value || null,
+                medical_info: document.getElementById('editMedicalInfo').value || null,
+                allergies: document.getElementById('editAllergies').value || null,
+                dietary_restrictions: document.getElementById('editDietary').value || null
+            };
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                await API.updateStudent(studentId, updates, church.id);
+                closeModal('editStudentModal');
+                await loadStudents();
+                alert('Student updated successfully!');
+            } catch (error) {
+                console.error('Error updating student:', error);
+                alert('Error updating student. Please try again.');
+            }
+        }
+
         // ==================== QUESTION MODAL ====================
 
         function openQuestionModal() {
@@ -912,6 +1300,136 @@
                 console.error('Error submitting question:', error);
                 alert('There was an error. Please try again.');
             }
+        }
+
+        // ==================== INVITE STUDENT MODAL ====================
+
+        let currentInviteStudentId = null;
+        let currentInviteStudentName = null;
+        let currentInviteUrl = null;
+
+        function openInviteModal(studentId, studentName) {
+            currentInviteStudentId = studentId;
+            currentInviteStudentName = studentName;
+            resetInviteForm();
+            document.getElementById('inviteModal').classList.add('show');
+            document.getElementById('inviteModalTitle').textContent = `Invite ${studentName} to Create Account`;
+        }
+
+        function closeInviteModal() {
+            document.getElementById('inviteModal').classList.remove('show');
+            resetInviteForm();
+        }
+
+        function resetInviteForm() {
+            document.getElementById('inviteFormState').style.display = 'block';
+            document.getElementById('inviteSuccessState').style.display = 'none';
+            document.getElementById('studentInviteEmail').value = '';
+            document.getElementById('studentInviteEmail').focus();
+            currentInviteUrl = null;
+        }
+
+        async function handleInviteSubmit(event) {
+            event.preventDefault();
+
+            const studentEmail = document.getElementById('studentInviteEmail').value;
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+
+            if (!currentInviteStudentId) {
+                Notify.error('Student not selected');
+                return;
+            }
+
+            // Validate email
+            if (!Form.isValidEmail(studentEmail)) {
+                Notify.error('Please enter a valid email address');
+                return;
+            }
+
+            try {
+                // Show loading state
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span style="opacity: 0.7;">Sending...</span>';
+                }
+
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    Notify.error('No church context found');
+                    return;
+                }
+
+                // Call API to send invite
+                const result = await API.sendStudentInvite(
+                    currentInviteStudentId,
+                    studentEmail,
+                    church.id
+                );
+
+                // Store the invite URL for display
+                currentInviteUrl = result.inviteUrl;
+
+                // Show success state
+                document.getElementById('inviteFormState').style.display = 'none';
+                document.getElementById('inviteSuccessState').style.display = 'block';
+                document.getElementById('inviteLinkDisplay').textContent = currentInviteUrl;
+
+                // Show toast notification
+                Notify.success(`Invite sent to ${studentEmail}!`);
+
+            } catch (error) {
+                console.error('Error sending invite:', error);
+
+                // Parse error message for user-friendly display
+                let errorMsg = 'Failed to send invite';
+
+                if (error.message) {
+                    if (error.message.includes('student_invites') || error.message.includes('relation')) {
+                        errorMsg = 'Database not set up yet. Please run the database migration from database/student-enrollment-setup.sql';
+                    } else if (error.message.includes('permission') || error.message.includes('permission denied')) {
+                        errorMsg = 'Permission denied. Make sure you are logged in as a parent.';
+                    } else if (error.code === 'PGRST116') {
+                        errorMsg = 'Database table not found. Please run the database migration.';
+                    } else {
+                        errorMsg = error.message;
+                    }
+                }
+
+                Notify.error(errorMsg);
+            } finally {
+                // Reset button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Send Invite';
+                }
+            }
+        }
+
+        function copyInviteLink(button) {
+            if (!currentInviteUrl) {
+                Notify.error('No invite link available');
+                return;
+            }
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(currentInviteUrl).then(() => {
+                // Show success feedback
+                const copyBtn = button || event.target;
+                if (copyBtn) {
+                    copyBtn.classList.add('copied');
+                    copyBtn.textContent = '✓ Copied!';
+
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyBtn.textContent = '📋 Copy Link';
+                    }, 2000);
+                }
+
+                Notify.success('Invite link copied to clipboard!');
+            }).catch((error) => {
+                console.error('Failed to copy:', error);
+                Notify.error('Failed to copy link');
+            });
         }
     </script>
 </body>

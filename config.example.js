@@ -57,12 +57,57 @@ const CONFIG = {
         currency: 'USD'
     },
 
-    // Branding/Theme
-    theme: {
-        primaryColor: '#c62828',
-        secondaryColor: '#d84315',
-        accentColor: '#ff6f00',
-        logo: '/assets/logo.png'
+    // Branding/Theme - Choose from pre-built themes or customize
+    // Available themes: 'ocean', 'forest', 'sunset', 'lavender', 'neutral'
+    theme: 'ocean',
+
+    // Pre-built theme packages (don't modify)
+    themes: {
+        ocean: {
+            name: 'Ocean',
+            primary: '#0369A1',
+            primaryDark: '#0284C7',
+            primaryLight: '#38BDF8',
+            secondary: '#06B6D4',
+            secondaryDark: '#0891B2',
+            secondaryLight: '#22D3EE'
+        },
+        forest: {
+            name: 'Forest',
+            primary: '#15803D',
+            primaryDark: '#166534',
+            primaryLight: '#22C55E',
+            secondary: '#10B981',
+            secondaryDark: '#059669',
+            secondaryLight: '#34D399'
+        },
+        sunset: {
+            name: 'Sunset',
+            primary: '#EA580C',
+            primaryDark: '#C2410C',
+            primaryLight: '#F97316',
+            secondary: '#F97316',
+            secondaryDark: '#EA580C',
+            secondaryLight: '#FED7AA'
+        },
+        lavender: {
+            name: 'Lavender',
+            primary: '#A855F7',
+            primaryDark: '#9333EA',
+            primaryLight: '#D8B4FE',
+            secondary: '#EC4899',
+            secondaryDark: '#DB2777',
+            secondaryLight: '#F472B6'
+        },
+        neutral: {
+            name: 'Neutral',
+            primary: '#4F46E5',
+            primaryDark: '#4338CA',
+            primaryLight: '#818CF8',
+            secondary: '#06B6D4',
+            secondaryDark: '#0891B2',
+            secondaryLight: '#22D3EE'
+        }
     },
 
     // Feature Flags (enable/disable features)

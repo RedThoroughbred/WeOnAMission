@@ -325,19 +325,8 @@
                 // Get user to determine portal
                 const user = await API.getCurrentUser();
 
-                // If on a church-specific page, redirect to that church's portal
-                if (currentChurch && user) {
-                    const portalMap = {
-                        'parent': 'parent-portal.html',
-                        'student': 'student-portal.html',
-                        'admin': 'admin-portal.html'
-                    };
-                    const portalPage = portalMap[user.role] || 'parent-portal.html';
-                    const churchBaseUrl = Tenant.getChurchBaseUrl(currentChurch.slug);
-                    window.location.href = `${churchBaseUrl}/${portalPage}`;
-                } else {
-                    Auth.redirectToPortal(user.role);
-                }
+                // Redirect to appropriate portal based on role
+                Auth.redirectToPortal(user.role);
             } catch (error) {
                 console.error('Sign in error:', error);
                 showError(error.message || 'Invalid email or password');

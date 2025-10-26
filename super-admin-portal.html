@@ -294,12 +294,24 @@
 <body>
     <div class="portal-header">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h1>Super Admin Dashboard</h1>
-                    <p>Manage churches and platform settings</p>
+                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Manage churches and platform settings</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
                 </div>
             </div>
+
+            <!-- Navigation Menu - Dropdown on Mobile, Inline on Desktop -->
+            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+                <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
+                <a href="admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">⚙️ Admin Dashboard</a>
+                <a href="super-admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">🔐 Super Admin</a>
+                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
+            </nav>
+
             <div class="user-info">
                 <div class="user-details">
                     <p><strong id="userName">Loading...</strong></p>
@@ -420,9 +432,44 @@
         </div>
     </div>
 
+    <!-- Admin Management Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="adminModalTitle">Manage Admins</h3>
+                <button type="button" class="modal-close" onclick="closeAdminModal()" style="background: none; border: none; color: #666; font-size: 24px; cursor: pointer;">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Success/Error messages -->
+                <div id="adminModalAlert" style="display: none; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;"></div>
+
+                <!-- Current Admins List -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: #333; margin-bottom: 1rem;">Current Admins</h4>
+                    <div id="currentAdminsList" style="background: #f5f5f5; padding: 1rem; border-radius: 6px; min-height: 80px;">
+                        <p style="color: #999; text-align: center;">Loading admins...</p>
+                    </div>
+                </div>
+
+                <!-- Add New Admin -->
+                <div style="border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+                    <h4 style="color: #333; margin-bottom: 1rem;">Add Admin</h4>
+                    <div class="form-group">
+                        <label for="adminSelect">Select User</label>
+                        <select id="adminSelect" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px;">
+                            <option value="">-- Loading users --</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn" onclick="addAdminToChurch()" style="width: 100%;">Add as Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const supabaseClient = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
         let allChurches = [];
+        let currentAdminChurchId = null;
+        let currentAdminChurchName = null;
 
         (async function() {
             // Check authentication
@@ -439,9 +486,37 @@
                 return;
             }
 
+            setupResponsiveMenu();
             await loadChurches();
             await loadStats();
         })();
+
+        function setupResponsiveMenu() {
+            const hamburger = document.getElementById('portalHamburger');
+            const nav = document.getElementById('portalNav');
+
+            function checkScreenSize() {
+                if (window.innerWidth < 768) {
+                    hamburger.style.display = 'block';
+                    nav.style.display = 'none';
+                } else {
+                    hamburger.style.display = 'none';
+                    nav.style.display = 'flex';
+                }
+            }
+
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        }
+
+        function togglePortalMenu() {
+            const nav = document.getElementById('portalNav');
+            nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function logout() {
+            Auth.logout();
+        }
 
         async function loadChurches() {
             try {
@@ -462,6 +537,7 @@
 
         function renderChurches() {
             const container = document.getElementById('churchesContainer');
+            container.classList.remove('loading');
 
             if (allChurches.length === 0) {
                 container.innerHTML = '<p style="color: #999;">No churches found. Create one using the form above.</p>';
@@ -491,6 +567,7 @@
                                     <td>
                                         <div class="church-actions">
                                             <button class="btn btn-secondary" onclick="openEditModal('${church.id}')">Edit</button>
+                                            <button class="btn btn-secondary" onclick="openAdminModal('${church.id}', '${church.name}')">👥 Admins</button>
                                             <button class="btn btn-danger" onclick="deleteChurch('${church.id}')">Delete</button>
                                         </div>
                                     </td>
@@ -666,6 +743,7 @@
 
         function renderChurchUsers(users, churchId) {
             const container = document.getElementById('usersContainer');
+            container.classList.remove('loading');
 
             if (users.length === 0) {
                 container.innerHTML = '<p style="color: #999;">No users found for this church.</p>';
@@ -779,6 +857,197 @@
                 closeEditModal();
             }
         });
+
+        // Close admin modal on outside click
+        document.getElementById('adminModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('adminModal')) {
+                closeAdminModal();
+            }
+        });
+
+        // ==================== ADMIN MANAGEMENT FUNCTIONS ====================
+
+        /**
+         * Open admin management modal for a specific church
+         */
+        async function openAdminModal(churchId, churchName) {
+            currentAdminChurchId = churchId;
+            currentAdminChurchName = churchName;
+
+            document.getElementById('adminModalTitle').textContent = `Manage Admins - ${churchName}`;
+            document.getElementById('adminModal').style.display = 'flex';
+            document.getElementById('adminModalAlert').style.display = 'none';
+
+            // Load current admins and available users
+            await loadChurchAdmins(churchId);
+            await loadAvailableAdmins(churchId);
+        }
+
+        /**
+         * Close admin modal
+         */
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            currentAdminChurchId = null;
+            currentAdminChurchName = null;
+        }
+
+        /**
+         * Load and display current admins for a church
+         */
+        async function loadChurchAdmins(churchId) {
+            try {
+                const admins = await API.getChurchAdmins(churchId);
+                const listContainer = document.getElementById('currentAdminsList');
+
+                if (admins.length === 0) {
+                    listContainer.innerHTML = '<p style="color: #999; text-align: center;">No admins assigned to this church yet.</p>';
+                    return;
+                }
+
+                const html = admins.map(admin => {
+                    const churchCount = admin.admin_churches ? admin.admin_churches.length : 0;
+                    const churchNames = churchCount === 1 ? '1 church' : `${churchCount} churches`;
+
+                    return `
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 0.75rem;
+                            background: white;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                            border-left: 3px solid #667eea;
+                        ">
+                            <div>
+                                <strong>${admin.email}</strong>
+                                <br>
+                                <small style="color: #666;">Manages ${churchNames}</small>
+                            </div>
+                            <button class="btn btn-danger" onclick="removeAdminFromChurch('${admin.id}', '${admin.email}', '${churchId}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Remove</button>
+                        </div>
+                    `;
+                }).join('');
+
+                listContainer.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading church admins:', error);
+                showAdminAlert('Error loading admins: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Load available users to make admins
+         */
+        async function loadAvailableAdmins(churchId) {
+            try {
+                const available = await API.getAvailableAdmins(churchId);
+                const select = document.getElementById('adminSelect');
+
+                if (available.length === 0) {
+                    select.innerHTML = '<option value="">All users are already admins for this church</option>';
+                    return;
+                }
+
+                const html = available.map(user => {
+                    const churches = user.admin_churches ? user.admin_churches.length : 0;
+                    const churchText = churches === 0 ? 'No churches' : churches === 1 ? '1 church' : `${churches} churches`;
+                    return `<option value="${user.id}">${user.email} (${churchText})</option>`;
+                }).join('');
+
+                select.innerHTML = '<option value="">-- Select a user --</option>' + html;
+            } catch (error) {
+                console.error('Error loading available admins:', error);
+                showAdminAlert('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Add selected user as admin to current church
+         */
+        async function addAdminToChurch() {
+            const select = document.getElementById('adminSelect');
+            const userId = select.value;
+
+            if (!userId) {
+                showAdminAlert('Please select a user', 'error');
+                return;
+            }
+
+            // Get selected user's email
+            const selectedOption = select.options[select.selectedIndex];
+            const userEmail = selectedOption.text.split(' (')[0];
+
+            try {
+                // Disable button during operation
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = 'Adding...';
+
+                const result = await API.addAdminToChurch(userEmail, currentAdminChurchId);
+
+                if (result.success) {
+                    showAdminAlert(`✓ ${userEmail} added as admin for ${currentAdminChurchName}!`, 'success');
+                    // Reload both lists
+                    await loadChurchAdmins(currentAdminChurchId);
+                    await loadAvailableAdmins(currentAdminChurchId);
+                } else {
+                    showAdminAlert(result.message, 'error');
+                }
+
+                btn.disabled = false;
+                btn.textContent = 'Add as Admin';
+            } catch (error) {
+                console.error('Error adding admin:', error);
+                showAdminAlert('Error adding admin: ' + error.message, 'error');
+                event.target.disabled = false;
+                event.target.textContent = 'Add as Admin';
+            }
+        }
+
+        /**
+         * Remove admin from church
+         */
+        async function removeAdminFromChurch(userId, userEmail, churchId) {
+            if (!confirm(`Remove ${userEmail} as admin from ${currentAdminChurchName}?`)) {
+                return;
+            }
+
+            try {
+                const result = await API.removeAdminFromChurch(userEmail, churchId);
+
+                if (result.success) {
+                    showAdminAlert(`✓ ${userEmail} removed from ${currentAdminChurchName}!`, 'success');
+                    // Reload both lists
+                    await loadChurchAdmins(currentAdminChurchId);
+                    await loadAvailableAdmins(currentAdminChurchId);
+                } else {
+                    showAdminAlert(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error removing admin:', error);
+                showAdminAlert('Error removing admin: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Show alert in admin modal
+         */
+        function showAdminAlert(message, type) {
+            const alertDiv = document.getElementById('adminModalAlert');
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            alertDiv.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+            alertDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+            alertDiv.style.border = type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
     </script>
 </body>
 </html>
