@@ -5,7 +5,7 @@ const CONFIG = {
     // Supabase Configuration (shared across all churches)
     supabase: {
         url: 'https://sqcdgvvjojgrwsdajtuq.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxY2RndnZqb2pncndzZGFqdHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyNTk0ODQsImV4cCI6MjA3NjgzNTQ4NH0.pox-fMugQZAd7JClZSbuKp9U56EkEWr6yyTGdvvjojgrwsdajtuq'
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxY2RndnZqb2pncndzZGFqdHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyNTk0ODQsImV4cCI6MjA3NjgzNTQ4NH0.pox-fMugQZAd7JClZSbuKp9U56EkEWr6yyTGdoOUCH4'
     },
 
     // Default Trip Information (overridden by church settings from database)
