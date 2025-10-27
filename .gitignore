@@ -1,6 +1,5 @@
 # Sensitive Configuration Files
-# NEVER commit your API keys!
-config.js
+# Note: config.js is committed since this is a public demo with demo API keys
 .env
 .env.local
 .env.*.local
