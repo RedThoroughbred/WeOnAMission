@@ -80,16 +80,14 @@ const Tenant = {
 
     /**
      * Get the current church context
-     * Returns { slug, id, name } or null if on landing page
+     * Returns { slug, id, name } or default Trinity church if on homepage
      */
     async getCurrentChurchContext() {
         const slug = this.getChurchSlugFromUrl();
 
-        if (!slug) {
-            return null;
-        }
-
-        const id = await this.getChurchIdFromSlug(slug);
+        // Use Trinity as default if no slug is provided (homepage)
+        const churchSlug = slug || 'trinity';
+        const id = await this.getChurchIdFromSlug(churchSlug);
 
         if (!id) {
             return null;
@@ -113,11 +111,11 @@ const Tenant = {
                 'trinity': 'Trinity Church',
                 'trinitychurch': 'Trinity Church',
             };
-            churchName = defaultNames[slug] || 'Mission Trip';
+            churchName = defaultNames[churchSlug] || 'Mission Trip';
         }
 
         return {
-            slug,
+            slug: churchSlug,
             id,
             name: churchName
         };
