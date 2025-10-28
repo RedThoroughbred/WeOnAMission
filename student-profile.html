@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Student Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="tenant.js"></script>
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="theme.js"></script>
+    <script src="utils.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .portal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .portal-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .user-details p {
+            margin: 0.25rem 0;
+            opacity: 0.95;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #888;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .readonly-field {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .medical-section {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-header">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h1>Settings</h1>
+                </div>
+                <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
+                <a href="student-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">👤 My Profile</a>
+                <a href="student-profile.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2);">⚙️ Settings</a>
+            </nav>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <p><strong id="userName">Loading...</strong></p>
+                    <p id="userEmail"></p>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="success-message" id="successMessage">✓ Changes saved successfully!</div>
+            <div class="error-message" id="errorMessage"></div>
+
+            <h2 class="section-title">👤 Your Profile</h2>
+
+            <div id="profileContent" class="loading">Loading your profile...</div>
+
+            <!-- Profile Form (hidden until loaded) -->
+            <form id="profileForm" style="display: none;" onsubmit="handleSaveProfile(event)">
+                <!-- Basic Info -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" required placeholder="Enter your first name">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" placeholder="Enter your last name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" disabled class="readonly-field">
+                    <small style="color: #666; margin-top: 0.25rem; display: block;">Email cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="Enter your phone number">
+                </div>
+
+                <div class="form-group">
+                    <label for="dateOfBirth">Date of Birth</label>
+                    <input type="date" id="dateOfBirth">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" placeholder="Enter your address">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" placeholder="Enter your city">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State/Province</label>
+                        <input type="text" id="state" placeholder="Enter your state">
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">ZIP/Postal Code</label>
+                        <input type="text" id="zip" placeholder="Enter your zip code">
+                    </div>
+                </div>
+
+                <!-- Medical/Emergency Info -->
+                <div class="medical-section">
+                    <h3 style="margin-top: 0; color: var(--primary);">🏥 Medical & Emergency Information</h3>
+
+                    <div class="form-group">
+                        <label for="emergencyContact">Emergency Contact Name</label>
+                        <input type="text" id="emergencyContact" placeholder="Enter emergency contact name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyPhone">Emergency Contact Phone</label>
+                        <input type="tel" id="emergencyPhone" placeholder="Enter emergency contact phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyRelationship">Relationship to Emergency Contact</label>
+                        <select id="emergencyRelationship">
+                            <option value="">Select relationship</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Relative">Relative</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medicalConditions">Medical Conditions</label>
+                        <textarea id="medicalConditions" placeholder="List any medical conditions, allergies, or medications (optional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="allergies">Allergies</label>
+                        <textarea id="allergies" placeholder="List any allergies (optional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dietary">Dietary Restrictions</label>
+                        <textarea id="dietary" placeholder="List any dietary restrictions (optional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="insuranceProvider">Insurance Provider</label>
+                        <input type="text" id="insuranceProvider" placeholder="Enter insurance provider name (optional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="insurancePolicyNumber">Insurance Policy Number</label>
+                        <input type="text" id="insurancePolicyNumber" placeholder="Enter policy number (optional)">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn">💾 Save Changes</button>
+                    <a href="student-portal.html" class="btn btn-secondary" style="text-decoration: none; text-align: center;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentStudent = null;
+        let churchSlug = 'trinity';
+
+        (async function() {
+            // Initialize auth
+            const user = await Auth.initializePage();
+            if (!user || user.role !== 'student') {
+                window.location.href = '/landing.html';
+                return;
+            }
+
+            // Get church slug
+            const params = new URLSearchParams(window.location.search);
+            churchSlug = params.get('church') || 'trinity';
+
+            // Load profile
+            await loadProfile();
+        })();
+
+        async function loadProfile() {
+            try {
+                const user = await API.getCurrentUser();
+
+                if (!user) {
+                    throw new Error('Could not load user profile');
+                }
+
+                // Update header
+                document.getElementById('userName').textContent = user.full_name || user.email;
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Get student record
+                const { data: student, error: studentError } = await supabaseClient
+                    .from('students')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (studentError) {
+                    console.warn('Could not find student record:', studentError);
+                    currentStudent = null;
+                } else {
+                    currentStudent = student;
+                }
+
+                // Hide loading and show form
+                document.getElementById('profileContent').style.display = 'none';
+                document.getElementById('profileForm').style.display = 'block';
+
+                // Populate form with user data
+                const fullName = user.full_name || '';
+                const [firstName, ...lastNameParts] = fullName.split(' ');
+                document.getElementById('firstName').value = firstName || '';
+                document.getElementById('lastName').value = lastNameParts.join(' ') || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phone').value = user.phone || '';
+                document.getElementById('address').value = user.address || '';
+                document.getElementById('city').value = user.city || '';
+                document.getElementById('state').value = user.state || '';
+                document.getElementById('zip').value = user.zip || '';
+                document.getElementById('dateOfBirth').value = user.date_of_birth || '';
+                document.getElementById('emergencyContact').value = user.emergency_contact_name || '';
+                document.getElementById('emergencyPhone').value = user.emergency_contact_phone || '';
+                document.getElementById('emergencyRelationship').value = user.emergency_contact_relationship || '';
+                document.getElementById('medicalConditions').value = user.medical_info || '';
+                document.getElementById('allergies').value = user.allergies || '';
+                document.getElementById('dietary').value = user.dietary_restrictions || '';
+                document.getElementById('insuranceProvider').value = user.insurance_provider || '';
+                document.getElementById('insurancePolicyNumber').value = user.insurance_policy_number || '';
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profileContent').innerHTML = '❌ Error loading profile. Please try refreshing the page.';
+            }
+        }
+
+        async function handleSaveProfile(event) {
+            event.preventDefault();
+
+            try {
+                const firstName = document.getElementById('firstName').value.trim();
+                const lastName = document.getElementById('lastName').value.trim();
+                const fullName = `${firstName} ${lastName}`.trim();
+
+                if (!firstName) {
+                    throw new Error('First name is required');
+                }
+
+                const user = await API.getCurrentUser();
+
+                // Build comprehensive update object for users table
+                const updates = {
+                    full_name: fullName,
+                    phone: document.getElementById('phone').value.trim() || null,
+                    address: document.getElementById('address').value.trim() || null,
+                    city: document.getElementById('city').value.trim() || null,
+                    state: document.getElementById('state').value.trim() || null,
+                    zip: document.getElementById('zip').value.trim() || null,
+                    date_of_birth: document.getElementById('dateOfBirth').value || null,
+                    emergency_contact_name: document.getElementById('emergencyContact').value.trim() || null,
+                    emergency_contact_phone: document.getElementById('emergencyPhone').value.trim() || null,
+                    emergency_contact_relationship: document.getElementById('emergencyRelationship').value || null,
+                    medical_info: document.getElementById('medicalConditions').value.trim() || null,
+                    allergies: document.getElementById('allergies').value.trim() || null,
+                    dietary_restrictions: document.getElementById('dietary').value.trim() || null,
+                    insurance_provider: document.getElementById('insuranceProvider').value.trim() || null,
+                    insurance_policy_number: document.getElementById('insurancePolicyNumber').value.trim() || null
+                };
+
+                // Update users table with all profile information
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .update(updates)
+                    .eq('id', user.id)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Show success message
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = error.message || 'Error saving profile. Please try again.';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await Auth.logout();
+            window.location.href = '/landing.html';
+        });
+
+        // Question modal
+        function openQuestionModal() {
+            const modal = document.getElementById('questionModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.getElementById('questionText').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
