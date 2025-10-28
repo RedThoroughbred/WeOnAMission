@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="tenant.js"></script>
+    <script src="theme.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         .portal-header {
@@ -353,36 +354,181 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Light Mode Styling */
+        .stat-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-label {
+            color: #666 !important;
+        }
+
+        .question-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .response-label {
+            color: #666;
+        }
+
+        .question-footer {
+            color: #999;
+            border-top-color: #e0e0e0;
+        }
+
+        /* Dark Mode */
+        html[data-theme="dark"] .stat-card {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        html[data-theme="dark"] .stat-number {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .stat-label {
+            color: #fff !important;
+        }
+
+        html[data-theme="dark"] .section-title {
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .filter-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        html[data-theme="dark"] .question-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .question-email {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .question-text {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .question-type {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .response-label {
+            color: var(--text-primary) !important;
+        }
+
+        html[data-theme="dark"] .response-text {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .question-footer {
+            color: var(--text-secondary) !important;
+            border-top-color: var(--border-light) !important;
+        }
+
+        html[data-theme="dark"] .question-status {
+            background: var(--bg-tertiary);
+        }
+
+        html[data-theme="dark"] .modal-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .modal-header {
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .modal-close {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .form-group label {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input,
+        html[data-theme="dark"] .form-group textarea {
+            background: var(--bg-secondary);
+            border-color: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input::placeholder,
+        html[data-theme="dark"] .form-group textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .btn {
+            background: var(--primary);
+        }
+
+        html[data-theme="dark"] .btn:hover {
+            background: var(--primary-dark);
+        }
     </style>
 </head>
 <body>
     <div class="portal-header">
         <div class="container">
-            <h1>Questions Dashboard</h1>
-            <div class="user-info">
-                <div class="user-details">
-                    <p><strong id="userName">Loading...</strong></p>
-                    <p id="userEmail"></p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1>Questions Dashboard</h1>
                 </div>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button id="themeToggleBtn" title="Toggle Dark Mode" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;">🌙</button>
+                    <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
+                </div>
             </div>
+
+            <!-- Navigation Menu - Dropdown on Mobile, Inline on Desktop -->
+            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: none; gap: 1rem; flex-wrap: wrap; width: 100%;">
+                <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
+                <a href="admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">⚙️ Dashboard</a>
+                <a href="questions-dashboard.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">📧 User Questions</a>
+                <a href="content-management.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📝 Content</a>
+                <a href="super-admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">🔐 Super Admin</a>
+                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap; margin-left: auto;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
+            </nav>
         </div>
     </div>
 
     <div class="container">
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalQuestions">0</div>
-                <div class="stat-label">Total Questions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="pendingQuestions">0</div>
-                <div class="stat-label">Pending Responses</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="completedQuestions">0</div>
-                <div class="stat-label">Completed</div>
+        <!-- Quick Stats - Collapsible -->
+        <div style="margin-bottom: 2rem;">
+            <button onclick="toggleStats()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 600; color: #333; padding: 0;">
+                <span id="statsToggleIcon">▶</span>
+                <span>Quick Stats</span>
+            </button>
+            <div id="statsContainer" class="stats-grid" style="margin-top: 1rem; display: none;">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalQuestions">0</div>
+                    <div class="stat-label">Total Questions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingQuestions">0</div>
+                    <div class="stat-label">Pending Responses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedQuestions">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
             </div>
         </div>
 
@@ -439,8 +585,44 @@
             const user = await Auth.initializePage('admin');
             if (!user) return;
 
+            setupResponsiveMenu();
             await loadQuestions();
         })();
+
+        function setupResponsiveMenu() {
+            const hamburger = document.getElementById('portalHamburger');
+            const nav = document.getElementById('portalNav');
+
+            function checkScreenSize() {
+                if (window.innerWidth < 768) {
+                    hamburger.style.display = 'block';
+                    nav.style.display = 'none';
+                } else {
+                    hamburger.style.display = 'none';
+                    nav.style.display = 'flex';
+                }
+            }
+
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        }
+
+        function togglePortalMenu() {
+            const nav = document.getElementById('portalNav');
+            nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function logout() {
+            Auth.logout();
+        }
+
+        function toggleStats() {
+            const container = document.getElementById('statsContainer');
+            const icon = document.getElementById('statsToggleIcon');
+            const isVisible = container.style.display !== 'none';
+            container.style.display = isVisible ? 'none' : 'grid';
+            icon.textContent = isVisible ? '▶' : '▼';
+        }
 
         async function loadQuestions() {
             try {
@@ -513,14 +695,14 @@
 
                     ${q.question_responses && q.question_responses.length > 0 ? `
                         <div class="response-section">
-                            <strong style="color: #666;">Response:</strong>
+                            <strong class="response-label">Response:</strong>
                             ${q.question_responses.map(r => `
                                 <div class="response-text">${r.response}</div>
                             `).join('')}
                         </div>
                     ` : ''}
 
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; font-size: 0.85rem; color: #999;">
+                    <div class="question-footer" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; font-size: 0.85rem;">
                         Submitted ${Auth.formatDateTime(q.created_at)}
                     </div>
 

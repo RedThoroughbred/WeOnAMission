@@ -32,19 +32,42 @@
     --gray-800: #1F2937;
     --gray-900: #111827;
 
-    /* Backgrounds */
+    /* Light Mode - Backgrounds */
     --bg-primary: #FFFFFF;
     --bg-secondary: #F9FAFB;
     --bg-tertiary: #F3F4F6;
 
-    /* Borders */
+    /* Light Mode - Borders */
     --border-light: #E5E7EB;
     --border-dark: #D1D5DB;
 
-    /* Text */
+    /* Light Mode - Text */
     --text-primary: #111827;
     --text-secondary: #6B7280;
     --text-tertiary: #9CA3AF;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode */
+html[data-theme="dark"] {
+    --bg-primary: #0F172A;
+    --bg-secondary: #1E293B;
+    --bg-tertiary: #334155;
+
+    --border-light: #334155;
+    --border-dark: #475569;
+
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #94A3B8;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -199,6 +222,42 @@ input[type="radio"] {
 .btn {
     min-height: 44px;
     padding: 0.75rem 1.5rem;
+}
+
+/* Theme Toggle Button */
+
+#themeToggleBtn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: inherit;
+}
+
+#themeToggleBtn:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+
+#themeToggleBtn:active {
+    transform: scale(0.95);
+}
+
+/* Theme button on light backgrounds (index.html) */
+header #themeToggleBtn {
+    color: white;
+}
+
+header #themeToggleBtn:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Messages */

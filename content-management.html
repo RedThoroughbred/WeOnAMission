@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="tenant.js"></script>
+    <script src="theme.js"></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
         * {
             margin: 0;
@@ -310,23 +312,186 @@
                 flex: 1;
             }
         }
+
+        /* Dark Mode */
+        html[data-theme="dark"] .portal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        html[data-theme="dark"] .section-title {
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .tabs {
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .tab-btn {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .tab-btn.active {
+            color: #818CF8;
+        }
+
+        html[data-theme="dark"] .tab-btn.active::after {
+            background: #818CF8;
+        }
+
+        html[data-theme="dark"] .btn {
+            background: #9c27b0;
+        }
+
+        html[data-theme="dark"] .btn:hover {
+            background: #7b1fa2;
+        }
+
+        html[data-theme="dark"] .item {
+            background: var(--bg-secondary);
+            border-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .item-title {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .item-text {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .item-meta {
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+        }
+
+        html[data-theme="dark"] .modal-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .modal-header {
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .modal-close {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .form-group label {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input,
+        html[data-theme="dark"] .form-group textarea {
+            background: var(--bg-secondary);
+            border-color: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input::placeholder,
+        html[data-theme="dark"] .form-group textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .form-group input:focus,
+        html[data-theme="dark"] .form-group textarea:focus {
+            border-color: #9c27b0;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.1);
+        }
+
+        html[data-theme="dark"] .empty-state {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .empty-state-icon {
+            opacity: 0.5;
+        }
+
+        /* Light Mode - Complete Theme */
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* Dark Mode - Complete Theme */
+        html[data-theme="dark"] body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .portal-header h1 {
+            color: white;
+        }
+
+        html[data-theme="dark"] .modal {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Dark Mode - Stats Cards with Inline Style Overrides */
+        html[data-theme="dark"] #statsContainer > div {
+            background: var(--bg-secondary) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        html[data-theme="dark"] #statsContainer > div > div:first-child {
+            color: #818CF8 !important;
+        }
+
+        html[data-theme="dark"] #statsContainer > div > div:last-child {
+            color: #fff !important;
+        }
     </style>
 </head>
 <body>
     <div class="portal-header">
         <div class="container">
-            <h1>Content Management</h1>
-            <div class="user-info">
-                <div class="user-details">
-                    <p><strong id="userName">Loading...</strong></p>
-                    <p id="userEmail"></p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1>Content Management</h1>
                 </div>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button id="themeToggleBtn" title="Toggle Dark Mode" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;">🌙</button>
+                    <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
+                </div>
             </div>
+
+            <!-- Navigation Menu - Dropdown on Mobile, Inline on Desktop -->
+            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: none; gap: 1rem; flex-wrap: wrap; width: 100%;">
+                <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
+                <a href="admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">⚙️ Dashboard</a>
+                <a href="questions-dashboard.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📧 User Questions</a>
+                <a href="content-management.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">📝 Content</a>
+                <a href="super-admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">🔐 Super Admin</a>
+                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap; margin-left: auto;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
+            </nav>
         </div>
     </div>
 
     <div class="container">
+        <!-- Quick Stats - Collapsible -->
+        <div style="margin-bottom: 2rem;">
+            <button onclick="toggleStats()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 600; color: #333; padding: 0;">
+                <span id="statsToggleIcon">▶</span>
+                <span>Quick Stats</span>
+            </button>
+            <div id="statsContainer" style="margin-top: 1rem; display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #9c27b0; margin-bottom: 0.5rem;" id="totalFaqs">0</div>
+                    <div style="font-size: 0.9rem; color: #666;">Total FAQs</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #9c27b0; margin-bottom: 0.5rem;" id="totalPacking">0</div>
+                    <div style="font-size: 0.9rem; color: #666;">Packing Items</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #9c27b0; margin-bottom: 0.5rem;" id="totalPhrases">0</div>
+                    <div style="font-size: 0.9rem; color: #666;">Spanish Phrases</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('faqs')">FAQs</button>
@@ -448,6 +613,44 @@
             // Show selected tab
             document.getElementById(tabName + '-tab').classList.add('active');
             event.target.classList.add('active');
+        }
+
+        function setupResponsiveMenu() {
+            const hamburger = document.getElementById('portalHamburger');
+            const nav = document.getElementById('portalNav');
+
+            function checkScreenSize() {
+                if (window.innerWidth < 768) {
+                    hamburger.style.display = 'block';
+                    nav.style.display = 'none';
+                } else {
+                    hamburger.style.display = 'none';
+                    nav.style.display = 'flex';
+                }
+            }
+
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        }
+
+        function togglePortalMenu() {
+            const nav = document.getElementById('portalNav');
+            nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function logout() {
+            Auth.logout();
+        }
+
+        // Initialize responsive menu on page load
+        document.addEventListener('DOMContentLoaded', setupResponsiveMenu);
+
+        function toggleStats() {
+            const container = document.getElementById('statsContainer');
+            const icon = document.getElementById('statsToggleIcon');
+            const isVisible = container.style.display !== 'none';
+            container.style.display = isVisible ? 'none' : 'grid';
+            icon.textContent = isVisible ? '▶' : '▼';
         }
 
         // ==================== FAQs ====================

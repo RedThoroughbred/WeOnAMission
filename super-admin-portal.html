@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="tenant.js"></script>
+    <script src="theme.js"></script>
     <script src="auth.js"></script>
     <script src="api.js"></script>
     <link rel="stylesheet" href="styles.css">
@@ -14,7 +15,7 @@
         .portal-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem;
+            padding: 1.5rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
@@ -50,7 +51,7 @@
 
         .logout-btn:hover {
             background: white;
-            color: #667eea;
+            color: #764ba2;
         }
 
         .container {
@@ -70,7 +71,7 @@
         .section h2 {
             color: #333;
             margin-bottom: 1.5rem;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid var(--primary);
             padding-bottom: 0.75rem;
         }
 
@@ -100,12 +101,12 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
         .btn {
-            background: #667eea;
+            background: var(--primary);
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -116,7 +117,7 @@
         }
 
         .btn:hover {
-            background: #5568d3;
+            background: var(--primary-dark);
         }
 
         .btn-secondary {
@@ -158,6 +159,97 @@
 
         .churches-table tr:hover {
             background: #f9f9f9;
+        }
+
+        /* Dark mode overrides for super-admin */
+        html[data-theme="dark"] .section {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .section h2 {
+            color: var(--text-primary);
+            border-bottom-color: var(--primary);
+        }
+
+        html[data-theme="dark"] .form-group label {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input,
+        html[data-theme="dark"] .form-group select,
+        html[data-theme="dark"] .form-group textarea {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .form-group input:focus,
+        html[data-theme="dark"] .form-group select:focus,
+        html[data-theme="dark"] .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        html[data-theme="dark"] .btn {
+            background: var(--primary);
+        }
+
+        html[data-theme="dark"] .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        html[data-theme="dark"] .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .btn-secondary:hover {
+            background: var(--border-dark);
+        }
+
+        html[data-theme="dark"] .churches-table {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .churches-table th {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .churches-table td {
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .churches-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Dark mode stats styling */
+        html[data-theme="dark"] .stats-grid {
+            /* Inherits from light mode */
+        }
+
+        html[data-theme="dark"] .stat-card {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        html[data-theme="dark"] .stat-number {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .stat-label {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Stats toggle button in dark mode */
+        html[data-theme="dark"] button[onclick="toggleStats()"] {
+            color: #fff !important;
         }
 
         .church-actions {
@@ -272,13 +364,17 @@
                 flex-direction: column;
             }
 
+            /* Make tables scrollable on mobile */
             .churches-table {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .churches-table th,
             .churches-table td {
-                padding: 0.75rem;
+                padding: 0.5rem 0.75rem;
             }
 
             .church-actions {
@@ -297,41 +393,39 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h1>Super Admin Dashboard</h1>
-                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Manage churches and platform settings</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button id="themeToggleBtn" title="Toggle Dark Mode" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;">🌙</button>
                     <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
                 </div>
             </div>
 
             <!-- Navigation Menu - Dropdown on Mobile, Inline on Desktop -->
-            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+            <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: none; gap: 1rem; flex-wrap: wrap; width: 100%;">
                 <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
                 <a href="admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">⚙️ Admin Dashboard</a>
                 <a href="super-admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">🔐 Super Admin</a>
-                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
+                <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap; margin-left: auto;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
             </nav>
-
-            <div class="user-info">
-                <div class="user-details">
-                    <p><strong id="userName">Loading...</strong></p>
-                    <p id="userEmail"></p>
-                </div>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
-            </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalChurches">0</div>
-                <div class="stat-label">Total Churches</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalUsers">0</div>
-                <div class="stat-label">Total Users</div>
+        <!-- Quick Stats - Collapsible -->
+        <div style="margin-bottom: 2rem;">
+            <button onclick="toggleStats()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 600; color: #333; padding: 0;">
+                <span id="statsToggleIcon">▼</span>
+                <span>Quick Stats</span>
+            </button>
+            <div id="statsContainer" class="stats-grid" style="margin-top: 1rem;">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalChurches">0</div>
+                    <div class="stat-label">Total Churches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
             </div>
         </div>
 
@@ -393,6 +487,7 @@
             </div>
             <div id="usersContainer" class="loading" style="display:none;">Loading users...</div>
         </div>
+
     </div>
 
     <!-- Edit Church Modal -->
@@ -516,6 +611,14 @@
 
         function logout() {
             Auth.logout();
+        }
+
+        function toggleStats() {
+            const container = document.getElementById('statsContainer');
+            const icon = document.getElementById('statsToggleIcon');
+            const isVisible = container.style.display !== 'none';
+            container.style.display = isVisible ? 'none' : 'grid';
+            icon.textContent = isVisible ? '▶' : '▼';
         }
 
         async function loadChurches() {
@@ -1048,6 +1151,7 @@
                 }, 3000);
             }
         }
+
     </script>
 </body>
 </html>

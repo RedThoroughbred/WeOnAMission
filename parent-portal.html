@@ -612,6 +612,124 @@
             background: #fff3e0;
             color: #f57c00;
         }
+
+        /* Dark mode overrides */
+        html[data-theme="dark"] .student-card {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        html[data-theme="dark"] .student-name {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .info-item {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .info-label {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .info-value {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .section-tabs {
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .tab-btn {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .tab-btn.active {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .tab-btn.active::after {
+            background: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .payment-summary {
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+        }
+
+        html[data-theme="dark"] .upload-area {
+            border-color: var(--primary);
+            background: transparent;
+        }
+
+        html[data-theme="dark"] .upload-area.dragover {
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        html[data-theme="dark"] .document-item {
+            background: var(--bg-secondary);
+        }
+
+        html[data-theme="dark"] .document-name {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .document-meta {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .modal-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group label {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input,
+        html[data-theme="dark"] .form-group select,
+        html[data-theme="dark"] .form-group textarea {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .btn {
+            background: var(--primary);
+        }
+
+        html[data-theme="dark"] .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        html[data-theme="dark"] .status-badge {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .empty-state {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .loading {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .section-title {
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .invite-status-badge {
+            background: var(--bg-secondary);
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .invite-status-badge.pending {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ffb74d;
+        }
     </style>
 </head>
 <body>
@@ -623,6 +741,7 @@
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                     <button onclick="openQuestionModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;" title="Ask a Question">❓</button>
+                    <button id="themeToggleBtn" title="Toggle Dark Mode" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;">🌙</button>
                     <button onclick="togglePortalMenu()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; display: none;" id="portalHamburger" title="Menu">☰</button>
                 </div>
             </div>
