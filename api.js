@@ -666,16 +666,19 @@ const API = {
 
     async submitQuestion(email, question, questionType = 'question', churchId, attachmentPath = null) {
         const user = await this.getCurrentUser();
+
+        // Build question data - only include fields that exist in the table
+        const questionData = {
+            user_id: user ? user.id : null,
+            email: email,
+            question: attachmentPath ? `${question}\n\n[Attachment: ${attachmentPath}]` : question,
+            question_type: questionType,
+            church_id: churchId
+        };
+
         const { data, error } = await supabaseClient
             .from('user_questions')
-            .insert([{
-                user_id: user ? user.id : null,
-                email: email,
-                question: question,
-                question_type: questionType,
-                church_id: churchId,
-                attachment_path: attachmentPath
-            }])
+            .insert([questionData])
             .select()
             .single();
 
