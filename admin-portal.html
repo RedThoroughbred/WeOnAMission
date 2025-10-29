@@ -663,7 +663,9 @@
             <button class="nav-tab" onclick="switchTab('parents', this)">Parents</button>
             <button class="nav-tab" onclick="switchTab('memories', this)">Memories</button>
             <button class="nav-tab" onclick="switchTab('payments', this)">Payments</button>
+            <button class="nav-tab" onclick="switchTab('questions', this)">User Questions</button>
             <button class="nav-tab" onclick="switchTab('faqs', this)">FAQs</button>
+            <button class="nav-tab" onclick="switchTab('content', this)">Content</button>
         </div>
 
         <!-- Students Tab -->
@@ -716,6 +718,18 @@
                 <a href="questions-dashboard.html" class="btn" style="background: #666; text-decoration: none; display: inline-block;">📧 View User Questions</a>
             </div>
             <div id="faqsContainer" class="loading">Loading FAQs...</div>
+        </div>
+
+        <!-- User Questions Tab -->
+        <div id="questions-tab" class="tab-content">
+            <h2 class="section-title">User Questions & Feedback</h2>
+            <iframe src="questions-dashboard.html" style="width: 100%; height: 800px; border: none; border-radius: 8px;"></iframe>
+        </div>
+
+        <!-- Content Management Tab -->
+        <div id="content-tab" class="tab-content">
+            <h2 class="section-title">Content Management</h2>
+            <iframe src="content-management.html" style="width: 100%; height: 800px; border: none; border-radius: 8px;"></iframe>
         </div>
     </div>
 
@@ -2057,7 +2071,17 @@
                     return;
                 }
                 console.log('Loading FAQs for church:', church.id);
-                const faqs = await API.getAllFaqs(church.id);
+
+                // Use Promise.race with a 10 second timeout
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('FAQ loading timeout - took more than 10 seconds')), 10000)
+                );
+
+                const faqs = await Promise.race([
+                    API.getAllFaqs(church.id),
+                    timeoutPromise
+                ]);
+
                 console.log('FAQs loaded:', faqs);
                 renderFaqs(faqs);
             } catch (error) {
