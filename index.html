@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peru 2026 - Student Mission Trip</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="theme.js"></script>
@@ -121,8 +122,8 @@
         }
 
         html[data-theme="dark"] .side-menu {
-            background: #1a1f2e;
-            color: #f1f5f9;
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         .side-menu.open {
@@ -259,12 +260,14 @@
         .hero h1 {
             font-size: 2rem;
             margin-bottom: 0.5rem;
+            color: white;
         }
 
         .hero-subtitle {
             font-size: 1rem;
             opacity: 0.95;
             margin-bottom: 1.5rem;
+            color: white;
         }
 
         .countdown-timer {
@@ -368,7 +371,7 @@
             justify-content: center;
             font-size: 1.2rem;
             transition: transform 0.3s;
-            color: #1976d2;
+            color: var(--primary);
         }
 
         .card.collapsed .card-toggle {
@@ -611,19 +614,22 @@
         }
 
         html[data-theme="dark"] section {
-            background: transparent;
-        }
-
-        html[data-theme="dark"] section:nth-child(odd) {
             background: var(--bg-primary);
         }
 
-        html[data-theme="dark"] section:nth-child(even) {
-            background: var(--bg-secondary);
+        html[data-theme="dark"] .info-box {
+            background: rgba(79, 70, 229, 0.1);
+            border-left-color: var(--primary-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .info-box.alert-warning {
+            background: rgba(249, 115, 22, 0.1);
+            border-left-color: #f97316;
         }
 
         html[data-theme="dark"] .section-title {
-            color: var(--text-primary);
+            color: white;
             border-bottom-color: var(--border-light);
         }
 
@@ -636,6 +642,10 @@
         html[data-theme="dark"] .card-header {
             background: var(--bg-secondary);
             color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .card-header h3 {
+            color: white;
         }
 
         html[data-theme="dark"] .card-content {
@@ -732,6 +742,20 @@
             border: 1px solid var(--border-light);
         }
 
+        html[data-theme="dark"] .grid-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .grid-card h3 {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .grid-card p {
+            color: var(--text-secondary);
+        }
+
         .memory-card {
             background: white;
         }
@@ -780,6 +804,7 @@
         <div class="logo" onclick="window.location.href='#'">🌍 Peru 2026</div>
         <div class="header-right">
             <div class="question-icon" title="Ask a Question" onclick="openQuestionModal()">❓</div>
+            <button id="themeToggleBtn" title="Toggle Dark Mode" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;">🌙</button>
             <button class="hamburger" onclick="openMenu()">☰</button>
         </div>
     </header>
@@ -1433,10 +1458,10 @@
 
                     html += `
                             <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column;">
-                                <h3 style="margin: 0 0 0.5rem 0; color: #000; font-size: 1.1rem; font-weight: 600;">${title}</h3>
+                                <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">${title}</h3>
                                 <p style="margin: 0 0 1rem 0; color: var(--text-secondary); font-size: 0.9rem; flex: 1; line-height: 1.5;">${content}</p>
                                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary);">
-                                    <span><strong style="color: #333;">${studentName}</strong></span>
+                                    <span><strong style="color: var(--text-primary);">${studentName}</strong></span>
                                     <span>${date}</span>
                                 </div>
                             </div>
