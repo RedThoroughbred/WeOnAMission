@@ -2078,24 +2078,17 @@
                 // Upload attachment if provided
                 if (file) {
                     try {
-                        if (file.size > 5 * 1024 * 1024) {
-                            alert('File too large. Maximum size is 5MB.');
-                            submitBtn.disabled = false;
-                            submitBtn.textContent = 'Submit Question';
-                            return;
-                        }
-
                         const timestamp = Date.now();
                         const fileName = `${timestamp}_${file.name}`;
-                        const { data, error } = await supabaseClient.storage
-                            .from('trip-photos')
-                            .upload(`questions/${fileName}`, file);
+                        const uploadPath = `questions/${fileName}`;
 
-                        if (!error) {
-                            attachmentPath = `questions/${fileName}`;
-                        } else {
-                            console.warn('Attachment upload failed, continuing without it:', error);
-                            attachmentPath = `[File: ${file.name}]`;
+                        // Use API helper to upload file
+                        const uploadResult = await API.uploadFile(file, 'trip-photos', uploadPath);
+                        attachmentPath = uploadResult.path;
+
+                        // Warn user if upload failed but question will still be saved
+                        if (!uploadResult.success) {
+                            console.warn('Attachment upload warning:', uploadResult.error);
                         }
                     } catch (error) {
                         console.error('Error uploading attachment:', error);

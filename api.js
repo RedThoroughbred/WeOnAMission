@@ -1523,6 +1523,55 @@ const API = {
             console.error('Error getting parent student count:', error);
             return 0;
         }
+    },
+
+    // ==================== FILE UPLOADS ====================
+
+    /**
+     * Upload a file to Supabase storage
+     * @param {File} file - File to upload
+     * @param {string} bucket - Bucket name (e.g., 'trip-photos')
+     * @param {string} path - Path within bucket (e.g., 'questions/filename')
+     * @returns {object} - {success: boolean, path: string, error?: string}
+     */
+    async uploadFile(file, bucket = 'trip-photos', path) {
+        try {
+            if (!file) return { success: true, path: null };
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                return {
+                    success: false,
+                    path: `[File: ${file.name}]`,
+                    error: 'File too large. Maximum size is 5MB.'
+                };
+            }
+
+            const { error } = await supabaseClient.storage
+                .from(bucket)
+                .upload(path, file);
+
+            if (error) {
+                console.warn(`File upload to ${bucket}/${path} failed:`, error);
+                return {
+                    success: false,
+                    path: `[File: ${file.name}]`,
+                    error: error.message || 'File upload failed. Your question will be saved without the attachment.'
+                };
+            }
+
+            return {
+                success: true,
+                path: path
+            };
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            return {
+                success: false,
+                path: `[File: ${file.name}]`,
+                error: error.message || 'File upload failed. Your question will be saved without the attachment.'
+            };
+        }
     }
 };
 
