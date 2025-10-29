@@ -2052,14 +2052,20 @@
                 const church = await Tenant.getCurrentChurchContext();
                 if (!church) {
                     console.error('No church context found');
+                    document.getElementById('faqsContainer').innerHTML =
+                        '<div class="empty-state">Error: Church context not found</div>';
                     return;
                 }
+                console.log('Loading FAQs for church:', church.id);
                 const faqs = await API.getAllFaqs(church.id);
+                console.log('FAQs loaded:', faqs);
                 renderFaqs(faqs);
             } catch (error) {
                 console.error('Error loading FAQs:', error);
+                console.error('Error message:', error.message);
+                console.error('Error details:', error);
                 document.getElementById('faqsContainer').innerHTML =
-                    '<div class="empty-state">Error loading FAQs</div>';
+                    `<div class="empty-state">Error loading FAQs: ${error.message || 'Unknown error'}</div>`;
             }
         }
 
@@ -2087,6 +2093,7 @@
                                 ${faq.category ? `<span style="font-size: 0.85rem; color: #999; background: #f5f5f5; padding: 0.25rem 0.75rem; border-radius: 12px; display: inline-block;">${faq.category}</span>` : ''}
                             </div>
                             <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                                <button onclick="toggleFaqDisplay('${faq.id}', ${faq.display})" class="btn btn-small" style="padding: 0.5rem 1rem; background: ${faq.display ? '#10B981' : '#9CA3AF'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">${faq.display ? '👁️ Showing' : '🚫 Hidden'}</button>
                                 <button onclick="editFaq('${faq.id}')" class="btn btn-small" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Edit</button>
                                 <button onclick="deleteFaq('${faq.id}')" class="btn btn-small" style="padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Delete</button>
                             </div>
@@ -2136,6 +2143,33 @@
             } catch (error) {
                 console.error('Error loading FAQ:', error);
                 alert('Error loading FAQ data');
+            }
+        }
+
+        async function toggleFaqDisplay(faqId, currentDisplay) {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+
+                const newDisplay = !currentDisplay;
+                const { data, error } = await supabaseClient
+                    .from('faqs')
+                    .update({ display: newDisplay })
+                    .eq('id', faqId)
+                    .eq('church_id', church.id)
+                    .select();
+
+                if (error) throw error;
+
+                // Reload FAQs to show updated state
+                loadFaqs();
+                alert(`FAQ ${newDisplay ? 'shown' : 'hidden'} on homepage`);
+            } catch (error) {
+                console.error('Error toggling FAQ display:', error);
+                alert('Error updating FAQ visibility. Please try again.');
             }
         }
 

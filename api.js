@@ -664,7 +664,7 @@ const API = {
 
     // ==================== USER QUESTIONS ====================
 
-    async submitQuestion(email, question, questionType = 'question', churchId) {
+    async submitQuestion(email, question, questionType = 'question', churchId, attachmentPath = null) {
         const user = await this.getCurrentUser();
         const { data, error } = await supabaseClient
             .from('user_questions')
@@ -673,7 +673,8 @@ const API = {
                 email: email,
                 question: question,
                 question_type: questionType,
-                church_id: churchId
+                church_id: churchId,
+                attachment_path: attachmentPath
             }])
             .select()
             .single();

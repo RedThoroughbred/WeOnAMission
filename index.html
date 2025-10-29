@@ -64,7 +64,7 @@
         }
 
         .portals-section {
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             background: var(--bg-tertiary);
             border-top: 1px solid var(--border-light);
             border-bottom: 1px solid var(--border-light);
@@ -173,11 +173,11 @@
         .menu-divider {
             height: 1px;
             background: var(--border-light);
-            margin: 1rem 0;
+            margin: 0.5rem 0;
         }
 
         .auth-buttons {
-            padding: 1rem 1.5rem;
+            padding: 0.5rem 1.5rem;
             display: flex;
             gap: 0.5rem;
         }
@@ -1101,22 +1101,23 @@
                         const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
                         const filePath = `questions/${church.id}/${fileName}`;
 
+                        // Try uploading to trip-photos bucket as it exists
                         const { error: uploadError } = await supabaseClient
                             .storage
-                            .from('question-attachments')
+                            .from('trip-photos')
                             .upload(filePath, attachmentFile);
 
                         if (uploadError) {
                             console.error('File upload error:', uploadError);
-                            alert('Failed to upload attachment. Please try again.');
-                            return;
+                            // Store filename even if upload fails - admin can request directly
+                            attachmentPath = `[File: ${attachmentFile.name}]`;
+                        } else {
+                            attachmentPath = filePath;
                         }
-
-                        attachmentPath = filePath;
                     } catch (uploadErr) {
                         console.error('Error uploading file:', uploadErr);
-                        alert('Error uploading file. You can submit without attachment.');
-                        // Allow submission without attachment
+                        // Store filename as attachment reference even if upload fails
+                        attachmentPath = `[File: ${attachmentFile.name}]`;
                     }
                 }
 

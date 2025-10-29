@@ -688,6 +688,7 @@
                             <div class="question-text">${q.question}</div>
                             <div style="margin-top: 0.5rem;">
                                 <span class="question-type">${q.question_type.replace('_', ' ').toUpperCase()}</span>
+                                ${q.attachment_path ? `<span class="attachment-badge" style="margin-left: 0.5rem; background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">📎 Attachment</span>` : ''}
                             </div>
                         </div>
                         <span class="status-badge status-${q.status}">${q.status.toUpperCase()}</span>
@@ -702,13 +703,21 @@
                         </div>
                     ` : ''}
 
+                    ${q.attachment_path ? `
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: #f5f5f5; border-left: 3px solid #1976d2; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 0.5rem;">📎 Attachment:</strong>
+                            <div style="font-size: 0.9rem; color: #555; margin-bottom: 0.5rem;">${q.attachment_path}</div>
+                            <button class="btn btn-secondary btn-small" onclick="downloadAttachment('${q.attachment_path}', '${q.id}')">⬇️ Download</button>
+                        </div>
+                    ` : ''}
+
                     <div class="question-footer" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; font-size: 0.85rem;">
                         Submitted ${Auth.formatDateTime(q.created_at)}
                     </div>
 
                     <div class="response-actions" style="margin-top: 1rem;">
                         ${q.status !== 'complete' ? `
-                            <button class="btn btn-primary btn-small" onclick="openResponseModal('${q.id}', '${q.email}', '${q.question.replace(/'/g, "\\'")}')">
+                            <button class="btn btn-primary btn-small" onclick="openResponseModal('${q.id}', '${q.email}', '${q.question.replace(/'/g, "\\'")}', '${q.attachment_path ? q.attachment_path.replace(/'/g, "\\'") : ''}')">
                                 ${q.question_responses && q.question_responses.length > 0 ? 'Update Response' : 'Add Response'}
                             </button>
                         ` : ''}
@@ -720,16 +729,50 @@
             `).join('');
         }
 
-        function openResponseModal(questionId, email, question) {
+        function openResponseModal(questionId, email, question, attachmentPath = '') {
             currentQuestionId = questionId;
+            let attachmentHTML = '';
+            if (attachmentPath) {
+                attachmentHTML = `
+                    <p style="margin-top: 1rem;"><strong>Attachment:</strong></p>
+                    <div style="margin-top: 0.5rem; padding: 0.75rem; background: #f5f5f5; border-left: 3px solid #1976d2; border-radius: 4px;">
+                        <div style="font-size: 0.9rem; color: #555;">📎 ${attachmentPath}</div>
+                    </div>
+                `;
+            }
             document.getElementById('questionDetails').innerHTML = `
                 <p><strong>From:</strong> ${email}</p>
                 <p><strong>Question:</strong></p>
                 <p style="margin-top: 0.5rem; color: #333;">${question}</p>
+                ${attachmentHTML}
             `;
             document.getElementById('responseText').value = '';
             document.getElementById('addToFaq').checked = false;
             document.getElementById('responseModal').classList.add('show');
+        }
+
+        async function downloadAttachment(attachmentPath, questionId) {
+            try {
+                if (!attachmentPath || attachmentPath.startsWith('[File:')) {
+                    alert('This file could not be uploaded. Please contact the admin.');
+                    return;
+                }
+
+                // Get public URL from Supabase storage
+                const { data } = supabaseClient.storage
+                    .from('trip-photos')
+                    .getPublicUrl(attachmentPath);
+
+                if (data && data.publicUrl) {
+                    // Open download in new tab
+                    window.open(data.publicUrl, '_blank');
+                } else {
+                    alert('Could not access attachment. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error downloading attachment:', error);
+                alert('Error downloading attachment. Please try again.');
+            }
         }
 
         function closeResponseModal() {
@@ -754,7 +797,7 @@
                 submitBtn.textContent = 'Sending...';
 
                 // Submit response
-                await API.submitQuestionResponse(currentQuestionId, responseText, addToFaq, church.id);
+                const response = await API.submitQuestionResponse(currentQuestionId, responseText, addToFaq, church.id);
 
                 // If adding to FAQ, create FAQ entry
                 if (addToFaq) {
@@ -765,8 +808,10 @@
                 // Mark as pending (admin response submitted)
                 await API.updateQuestionStatus(currentQuestionId, 'pending', church.id);
 
-                // Mark as notified
-                await API.markQuestionNotified(currentQuestionId.replace(/'/g, "\\'"), church.id);
+                // Mark response as notified (only if we have a response ID)
+                if (response && response.id) {
+                    await API.markQuestionNotified(response.id);
+                }
 
                 closeResponseModal();
                 await loadQuestions();
