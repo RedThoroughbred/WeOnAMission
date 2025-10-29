@@ -1382,10 +1382,13 @@
                     return;
                 }
                 const memories = await API.getAllMemories(church.id);
+                console.log('All memories loaded:', memories);
+                console.log('Memory statuses:', memories.map(m => ({ id: m.id, status: m.status })));
                 renderMemories(memories);
 
                 // Update pending count
                 const pendingCount = memories.filter(m => m.status === 'pending').length;
+                console.log('Pending count:', pendingCount, 'memories with pending:', memories.filter(m => m.status === 'pending'));
                 document.getElementById('pendingMemoriesCount').textContent = pendingCount;
             } catch (error) {
                 console.error('Error loading memories:', error);
