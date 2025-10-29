@@ -69,6 +69,8 @@
             background: var(--bg-tertiary);
             border-top: 1px solid var(--border-light);
             border-bottom: 1px solid var(--border-light);
+            flex: 0 1 auto;
+            margin-top: auto;
         }
 
         .portal-link {
@@ -117,8 +119,11 @@
             transition: left 0.3s;
             z-index: 999;
             overflow-y: auto;
+            overflow-x: hidden;
             padding-top: 1rem;
             border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
         }
 
         html[data-theme="dark"] .side-menu {
@@ -149,7 +154,8 @@
         }
 
         .side-menu nav {
-            padding: 1rem 0;
+            padding: 0.5rem 0;
+            flex: 0 0 auto;
         }
 
         .side-menu nav a {
