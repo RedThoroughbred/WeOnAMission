@@ -620,6 +620,8 @@
             <nav id="portalNav" style="position: relative; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); display: none; gap: 1rem; flex-wrap: wrap; width: 100%;">
                 <a href="index.html?church=trinity" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📋 Trip Info</a>
                 <a href="admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255,255,255,0.2); white-space: nowrap;">⚙️ Dashboard</a>
+                <a href="questions-dashboard.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📧 Questions</a>
+                <a href="content-management.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">📝 Content</a>
                 <a href="super-admin-portal.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">🔐 Super Admin</a>
                 <button onclick="logout()" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: all 0.3s; background: rgba(255,0,0,0.2); border: none; cursor: pointer; white-space: nowrap; margin-left: auto;" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.2)'">🚪 Logout</button>
             </nav>
@@ -663,9 +665,7 @@
             <button class="nav-tab" onclick="switchTab('parents', this)">Parents</button>
             <button class="nav-tab" onclick="switchTab('memories', this)">Memories</button>
             <button class="nav-tab" onclick="switchTab('payments', this)">Payments</button>
-            <button class="nav-tab" onclick="switchTab('questions', this)">User Questions</button>
             <button class="nav-tab" onclick="switchTab('faqs', this)">FAQs</button>
-            <button class="nav-tab" onclick="switchTab('content', this)">Content</button>
         </div>
 
         <!-- Students Tab -->
@@ -718,18 +718,6 @@
                 <a href="questions-dashboard.html" class="btn" style="background: #666; text-decoration: none; display: inline-block;">📧 View User Questions</a>
             </div>
             <div id="faqsContainer" class="loading">Loading FAQs...</div>
-        </div>
-
-        <!-- User Questions Tab -->
-        <div id="questions-tab" class="tab-content">
-            <h2 class="section-title">User Questions & Feedback</h2>
-            <iframe src="questions-dashboard.html" style="width: 100%; height: 800px; border: none; border-radius: 8px;"></iframe>
-        </div>
-
-        <!-- Content Management Tab -->
-        <div id="content-tab" class="tab-content">
-            <h2 class="section-title">Content Management</h2>
-            <iframe src="content-management.html" style="width: 100%; height: 800px; border: none; border-radius: 8px;"></iframe>
         </div>
     </div>
 
