@@ -110,17 +110,6 @@ const Theme = {
     }
 };
 
-// Initialize theme when CONFIG is ready
-// Note: CONFIG must be loaded first in HTML (before theme.js)
-function initThemeWhenReady() {
-    if (typeof CONFIG !== 'undefined' && CONFIG.themes) {
-        Theme.init();
-        setupThemeButton();
-    } else {
-        // Retry in 50ms
-        setTimeout(initThemeWhenReady, 50);
-    }
-}
 
 // Setup theme button click handler
 function setupThemeButton() {
@@ -138,8 +127,27 @@ function setupThemeButton() {
     setupBtn();
 
     // Also try on DOMContentLoaded in case it hasn't fired yet
-    document.addEventListener('DOMContentLoaded', setupBtn);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupBtn);
+    }
 }
 
-// Start checking for CONFIG
-initThemeWhenReady();
+// Initialize theme when DOM and CONFIG are ready
+function initializeTheme() {
+    if (typeof CONFIG !== 'undefined' && CONFIG.themes) {
+        Theme.init();
+        setupThemeButton();
+        console.log('Theme initialized. Current mode:', Theme.getMode());
+    } else {
+        // Retry if CONFIG not ready
+        setTimeout(initializeTheme, 50);
+    }
+}
+
+// Wait for DOM to be ready, then initialize
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeTheme);
+} else {
+    // DOM is already ready
+    initializeTheme();
+}

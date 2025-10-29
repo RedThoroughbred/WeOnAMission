@@ -733,6 +733,17 @@ const API = {
         return data;
     },
 
+    async deleteQuestion(questionId, churchId) {
+        const { error } = await supabaseClient
+            .from('user_questions')
+            .delete()
+            .eq('id', questionId)
+            .eq('church_id', churchId);
+
+        if (error) throw error;
+        return true;
+    },
+
     async submitQuestionResponse(questionId, response, isFaq = false, churchId) {
         // Admin role check
         const isAdmin = await this.isUserAdmin();
