@@ -48,20 +48,34 @@ This is a **multi-tenant SaaS platform** for coordinating student volunteer/miss
 - **Nice to Know** (`nice-to-know.html`) - Public FAQ and content viewer
 - **Super Admin Portal** (`super-admin-portal.html`) - Create churches and manage users
 
-**Recent Additions:**
+**Recent Additions (Latest Session):**
+- ✨ **Question Submission System** - Red question mark (❓) button on all portals (admin-portal, content-management, questions-dashboard, super-admin-portal)
+- 📎 **File Attachment Support** - Users can upload files (PDF, DOC, DOCX, JPG, PNG, GIF, TXT) with questions, max 5MB
+- 🖼️ **Image Preview Modal** - Images display in fullscreen modal with download/open in new tab options
+- 📱 **Mobile-Optimized** - Three ways to close preview modal (top button, outside click, bottom close button)
+- 🔧 **Centralized Upload Logic** - File uploads handled via `API.uploadFile()` with better error handling
+- ⚡ **Graceful Degradation** - Questions saved even if file upload fails, with fallback `[File: filename]` reference
+- 🎨 **Header Standardization** - All portals now have consistent 70px min-height on mobile with 44px touch target buttons
+- 📱 **Mobile Menu Fixes** - Fixed side menu scrolling with `max-height: 100vh` and text wrapping on attachment filenames
+- 🌓 **Dark Mode Support** - Complete dark theme support across all dashboard pages
+
+**Previous Additions:**
 - Admin promotion system - One-click UI buttons to promote/demote users (replaces manual SQL)
-- Question submission system with admin approval
-- Content management interface
+- Question management dashboard with responses and FAQ conversion
+- Content management interface for FAQs and site content
 - Multi-church user management in super admin portal
+- Theme toggle (light/dark mode) on all admin pages
+- Trip memories with photo uploads and admin approval
 
 ### 🎯 Next Steps (Optional Enhancements)
-- Deploy to Vercel with custom domain
-- Add email notifications
-- Add SMS reminders
-- Payment processing integration (Stripe)
-- Bulk operations for admins
-- Search/filter functionality
-- Data export to Excel/PDF
+- Email notifications for question responses and approvals
+- SMS reminders for upcoming events and payment deadlines
+- Payment processing integration (Stripe for direct payments)
+- Bulk operations (bulk approve documents, bulk upload resources)
+- Advanced search/filter functionality for admins
+- Data export to Excel/PDF for reports
+- Calendar integration (Google Calendar, iCal export)
+- Message/communication system between admins and parents
 
 ## Architecture
 
@@ -115,8 +129,9 @@ mission-trip-platform/
 │   └── tenant.js                   # Church context detection
 │
 ├── Backend/API Layer
-│   ├── api.js                      # All Supabase operations (70+ functions)
-│   └── auth.js                     # Authentication and helpers
+│   ├── api.js                      # All Supabase operations (80+ functions)
+│   ├── auth.js                     # Authentication and helpers
+│   └── theme.js                    # Dark/light theme toggle and persistence
 │
 ├── Portal Pages (All Multi-Tenant)
 │   ├── landing.html                # Church selection page
