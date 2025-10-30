@@ -2148,6 +2148,7 @@
 
         function renderFaqs(faqs) {
             const container = document.getElementById('faqsContainer');
+            container.classList.remove('loading');
 
             if (!faqs || faqs.length === 0) {
                 container.innerHTML = `

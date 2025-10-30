@@ -699,6 +699,7 @@
 
         function renderQuestions(questions) {
             const container = document.getElementById('questionsContainer');
+            container.classList.remove('loading');
 
             if (questions.length === 0) {
                 container.innerHTML = `

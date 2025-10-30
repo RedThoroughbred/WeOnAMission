@@ -1234,6 +1234,7 @@
 
         function renderEvents(events) {
             const container = document.getElementById('eventsContainer');
+            container.classList.remove('loading');
 
             if (events.length === 0) {
                 container.innerHTML = '<p class="empty-state">No upcoming events yet.</p>';
@@ -1280,6 +1281,7 @@
 
         function renderResources(resources) {
             const container = document.getElementById('resourcesContainer');
+            container.classList.remove('loading');
 
             if (resources.length === 0) {
                 container.innerHTML = '<p class="empty-state">No resources available yet.</p>';
@@ -1366,6 +1368,7 @@
 
         function renderFaqs(faqs) {
             const container = document.getElementById('faqContainer');
+            container.classList.remove('loading');
 
             if (faqs.length === 0) {
                 container.innerHTML = '<p class="empty-state">No FAQs yet. Submit a question to help us build this section!</p>';
