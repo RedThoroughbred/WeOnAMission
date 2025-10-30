@@ -49,6 +49,9 @@ out/
 coverage/
 .coverage
 
+# Vite
+.vite/
+
 # Logs
 logs/
 *.log

@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html[data-theme='dark'] {
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-900 text-white rounded-lg font-medium transition-all duration-150 hover:bg-primary-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-secondary-950 text-white rounded-lg font-medium transition-all duration-150 hover:bg-secondary-700 active:scale-95;
+  }
+
+  .btn-outline {
+    @apply px-4 py-2 border border-primary-900 text-primary-900 rounded-lg font-medium transition-all duration-150 hover:bg-primary-900 hover:text-white;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 text-primary-900 rounded-lg font-medium transition-all duration-150 hover:bg-primary-900 hover:bg-opacity-10;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 p-4;
+  }
+
+  .portal-header {
+    @apply bg-gradient-to-r from-primary-900 to-primary-700 text-white sticky top-0 z-50;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-900;
+  }
+
+  .form-textarea {
+    @apply w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-900 min-h-[120px] resize-vertical;
+  }
+
+  .status-badge {
+    @apply inline-block px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .status-badge-success {
+    @apply status-badge bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100;
+  }
+
+  .status-badge-warning {
+    @apply status-badge bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-100;
+  }
+
+  .status-badge-error {
+    @apply status-badge bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100;
+  }
+
+  .status-badge-info {
+    @apply status-badge bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50;
+  }
+
+  .modal-content {
+    @apply bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 250ms ease-in-out;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 350ms ease-in-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 300ms ease-in-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 300ms ease-in-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 200ms ease-in-out;
+}
