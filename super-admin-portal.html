@@ -1259,8 +1259,9 @@
                     }
                 }
 
-                // Submit question without church context (super admin questions)
-                await API.submitQuestion(email, questionText, questionType, null, attachmentPath);
+                // Submit question with Trinity Church as default (platform questions default to Trinity)
+                const TRINITY_CHURCH_ID = '00000000-0000-0000-0000-000000000001';
+                await API.submitQuestion(email, questionText, questionType, TRINITY_CHURCH_ID, attachmentPath);
 
                 closeQuestionModal();
                 alert('Thank you for your question! Our team will review it and respond soon.');
