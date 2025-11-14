@@ -17,8 +17,16 @@ import Students from './pages/parent/Students'
 import Payments from './pages/parent/Payments'
 import Documents from './pages/parent/Documents'
 
+// Student Portal
+import StudentDashboard from './pages/student/StudentDashboard'
+import TripMemories from './pages/student/TripMemories'
+
 // Admin Portal
 import AdminPortal from './pages/AdminPortal'
+import AdminDashboard from './pages/admin/AdminDashboard'
+
+// Super Admin Portal
+import SuperAdmin from './pages/SuperAdmin'
 
 // Redirect old URLs to new routes
 function LocationRedirect() {
@@ -37,9 +45,15 @@ function LocationRedirect() {
     } else if (pathname === '/parent-portal.html') {
       window.history.replaceState({}, '', '/parent' + location.search)
       window.location.href = '/parent' + location.search
+    } else if (pathname === '/student-portal.html') {
+      window.history.replaceState({}, '', '/student' + location.search)
+      window.location.href = '/student' + location.search
     } else if (pathname === '/admin-portal.html') {
       window.history.replaceState({}, '', '/admin' + location.search)
       window.location.href = '/admin' + location.search
+    } else if (pathname === '/super-admin-portal.html') {
+      window.history.replaceState({}, '', '/super-admin' + location.search)
+      window.location.href = '/super-admin' + location.search
     }
   }, [location])
 
@@ -66,8 +80,16 @@ function App() {
                 <Route path="/payments" element={<Payments />} />
                 <Route path="/documents" element={<Documents />} />
 
+                {/* Student Portal Routes */}
+                <Route path="/student" element={<StudentDashboard />} />
+                <Route path="/student/memories" element={<TripMemories />} />
+
                 {/* Admin Portal Routes */}
                 <Route path="/admin" element={<AdminPortal />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+                {/* Super Admin Routes */}
+                <Route path="/super-admin" element={<SuperAdmin />} />
 
                 {/* Catch all - show landing page */}
                 <Route path="*" element={<Landing />} />
