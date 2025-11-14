@@ -15,10 +15,10 @@ const buttonVariants = cva(
         success: "bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md",
       },
       size: {
-        sm: "h-9 px-3 text-sm",
-        md: "h-10 px-4 py-2",
-        lg: "h-11 px-6 text-lg",
-        icon: "h-10 w-10",
+        sm: "h-10 px-3 text-sm min-h-[40px]",
+        md: "h-11 px-4 py-2 min-h-[44px]",
+        lg: "h-12 px-6 text-lg min-h-[48px]",
+        icon: "h-11 w-11 min-h-[44px] min-w-[44px]",
       },
     },
     defaultVariants: {

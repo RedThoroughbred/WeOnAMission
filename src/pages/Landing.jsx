@@ -40,7 +40,7 @@ export default function Landing() {
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight px-4 sm:px-0">
                 Empowering Churches
                 <br />
                 <span className="bg-gradient-to-r from-primary-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -49,7 +49,7 @@ export default function Landing() {
               </h1>
 
               {/* Subheading */}
-              <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
                 A beautiful platform to coordinate mission trips, manage registrations, track payments, and build lasting memories together.
               </p>
 

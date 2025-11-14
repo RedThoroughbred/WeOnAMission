@@ -67,7 +67,7 @@ export default function Login() {
             </div>
 
             {/* Form */}
-            <form onsubmit={handleSubmit} className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
               {error && (
                 <Alert variant="error">
                   <AlertDescription>{error}</AlertDescription>

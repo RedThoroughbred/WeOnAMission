@@ -18,15 +18,15 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', s
   if (!isOpen) return null
 
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-6xl'
+    sm: 'sm:max-w-md',
+    md: 'sm:max-w-lg',
+    lg: 'sm:max-w-2xl',
+    xl: 'sm:max-w-4xl',
+    full: 'sm:max-w-6xl'
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 animate-fadeIn">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -36,7 +36,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', s
       {/* Modal */}
       <div
         className={cn(
-          "relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-hidden flex flex-col animate-scaleIn",
+          "relative w-full bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-scaleIn",
           sizeClasses[size]
         )}
       >
@@ -51,10 +51,10 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', s
             {showClose && (
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 sm:p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6 sm:w-5 sm:h-5" />
               </button>
             )}
           </div>

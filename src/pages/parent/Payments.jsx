@@ -288,43 +288,83 @@ export default function Payments() {
                 </Button>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Notes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paymentHistory
+                        .filter(p => !selectedStudent || p.student_id === selectedStudent.id)
+                        .map((payment) => (
+                          <TableRow key={payment.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-gray-400" />
+                                <span>{formatDate(payment.payment_date)}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-medium">{payment.student_name}</TableCell>
+                            <TableCell>
+                              <span className="text-green-600 dark:text-green-400 font-semibold">
+                                {formatCurrency(payment.amount)}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{payment.payment_type}</Badge>
+                            </TableCell>
+                            <TableCell className="text-gray-600 dark:text-gray-400">
+                              {payment.notes || '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
                   {paymentHistory
                     .filter(p => !selectedStudent || p.student_id === selectedStudent.id)
                     .map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span>{formatDate(payment.payment_date)}</span>
+                      <div
+                        key={payment.id}
+                        className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 space-y-3"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {payment.student_name}
+                            </p>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <Calendar className="w-4 h-4" />
+                              <span>{formatDate(payment.payment_date)}</span>
+                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{payment.student_name}</TableCell>
-                        <TableCell>
-                          <span className="text-green-600 dark:text-green-400 font-semibold">
+                          <span className="text-lg font-bold text-green-600 dark:text-green-400">
                             {formatCurrency(payment.amount)}
                           </span>
-                        </TableCell>
-                        <TableCell>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                           <Badge variant="secondary">{payment.payment_type}</Badge>
-                        </TableCell>
-                        <TableCell className="text-gray-600 dark:text-gray-400">
-                          {payment.notes || '—'}
-                        </TableCell>
-                      </TableRow>
+                          {payment.notes && (
+                            <span className="text-sm text-gray-600 dark:text-gray-400 truncate ml-2">
+                              {payment.notes}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     ))}
-                </TableBody>
-              </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -387,7 +427,7 @@ export default function Payments() {
                     id="payment_type"
                     value={formData.payment_type}
                     onChange={(e) => setFormData({ ...formData, payment_type: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full h-11 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                     required
                   >
                     <option value="check">Check</option>
