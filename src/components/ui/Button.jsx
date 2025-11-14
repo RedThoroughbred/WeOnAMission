@@ -3,22 +3,22 @@ import { cva } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 hover:scale-[1.02]",
+  "inline-flex items-center justify-center font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 hover:scale-105 relative overflow-hidden group",
   {
     variants: {
       variant: {
-        primary: "bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl",
-        secondary: "bg-gradient-to-r from-secondary-600 to-secondary-700 text-white hover:from-secondary-700 hover:to-secondary-800 shadow-lg hover:shadow-xl",
-        outline: "border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600",
-        ghost: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
-        danger: "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl",
-        success: "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl",
+        primary: "bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 text-white hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 shadow-2xl shadow-primary-500/40 hover:shadow-primary-600/50 before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity",
+        secondary: "bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 text-white hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 shadow-2xl shadow-purple-500/40 hover:shadow-purple-600/50",
+        outline: "border-3 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 shadow-lg hover:shadow-xl",
+        ghost: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 shadow-none",
+        danger: "bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white hover:from-red-600 hover:via-red-700 hover:to-red-800 shadow-2xl shadow-red-500/40",
+        success: "bg-gradient-to-br from-green-500 via-green-600 to-green-700 text-white hover:from-green-600 hover:via-green-700 hover:to-green-800 shadow-2xl shadow-green-500/40",
       },
       size: {
-        sm: "h-10 px-4 text-sm min-h-[40px] rounded-xl",
-        md: "h-11 px-5 py-2 min-h-[44px] rounded-xl",
-        lg: "h-12 px-6 text-lg min-h-[48px] rounded-xl",
-        icon: "h-11 w-11 min-h-[44px] min-w-[44px] rounded-full",
+        sm: "h-11 px-5 text-sm min-h-[44px] rounded-2xl",
+        md: "h-12 px-6 py-3 min-h-[48px] text-base rounded-2xl",
+        lg: "h-14 px-8 text-lg min-h-[56px] rounded-2xl",
+        icon: "h-12 w-12 min-h-[48px] min-w-[48px] rounded-full",
       },
     },
     defaultVariants: {

@@ -56,7 +56,7 @@ export default function PortalSidebar({ role = 'parent', isOpen, onClose }) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden animate-fadeIn"
           onClick={onClose}
         />
       )}
@@ -64,30 +64,50 @@ export default function PortalSidebar({ role = 'parent', isOpen, onClose }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-200 ease-in-out lg:translate-x-0",
+          "fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] w-72 bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-900/50 border-r border-gray-200/60 dark:border-gray-700/60 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-out lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <nav className="h-full overflow-y-auto p-4 space-y-2">
-          {navItems.map((item) => (
+        <nav className="h-full overflow-y-auto p-6 space-y-3">
+          {navItems.map((item, index) => (
             <NavLink
               key={item.name}
               to={item.href}
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  "group flex items-center gap-4 px-5 py-4 rounded-2xl text-base font-semibold transition-all duration-200 relative overflow-hidden",
                   isActive
-                    ? "bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    ? "bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-[1.02]"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:scale-[1.02] active:scale-95"
                 )
               }
+              style={{
+                animationDelay: `${index * 50}ms`
+              }}
             >
-              <item.icon className="w-5 h-5" />
-              {item.name}
+              {({ isActive }) => (
+                <>
+                  <div className={cn(
+                    "p-2.5 rounded-xl transition-all duration-200",
+                    isActive
+                      ? "bg-white/20"
+                      : "bg-gray-100 dark:bg-gray-800 group-hover:bg-primary-50 dark:group-hover:bg-primary-950/20"
+                  )}>
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <span className="flex-1">{item.name}</span>
+                  {isActive && (
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  )}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
+
+        {/* Decorative gradient at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
       </aside>
     </>
   )

@@ -135,15 +135,17 @@ export default function Payments() {
 
   return (
     <PortalLayout title="Payments" role="parent">
-      <div className="space-y-6 animate-fadeInUp">
+      <div className="space-y-10 animate-fadeInUp">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-6 pb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Payments</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Track payments and manage trip expenses</p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-3 tracking-tight">
+              Payments
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400">Track payments and manage trip expenses</p>
           </div>
-          <Button onClick={handleAddPayment} disabled={!selectedStudent} size="md" className="shadow-lg">
-            <Plus className="w-5 h-5 mr-2" />
+          <Button onClick={handleAddPayment} disabled={!selectedStudent} size="lg">
+            <Plus className="w-6 h-6 mr-2" />
             Add Payment
           </Button>
         </div>
