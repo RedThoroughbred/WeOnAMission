@@ -6,10 +6,18 @@ import { AuthProvider } from './contexts/AuthContext'
 import { TenantProvider } from './contexts/TenantContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 
-// Pages (will be created)
+// Public Pages
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Home from './pages/Home'
+
+// Parent Portal
+import ParentDashboard from './pages/parent/ParentDashboard'
+import Students from './pages/parent/Students'
+import Payments from './pages/parent/Payments'
+import Documents from './pages/parent/Documents'
+
+// Admin Portal
 import AdminPortal from './pages/AdminPortal'
 
 // Redirect old URLs to new routes
@@ -26,6 +34,9 @@ function LocationRedirect() {
     } else if (pathname === '/login.html') {
       window.history.replaceState({}, '', '/login' + location.search)
       window.location.href = '/login' + location.search
+    } else if (pathname === '/parent-portal.html') {
+      window.history.replaceState({}, '', '/parent' + location.search)
+      window.location.href = '/parent' + location.search
     } else if (pathname === '/admin-portal.html') {
       window.history.replaceState({}, '', '/admin' + location.search)
       window.location.href = '/admin' + location.search
@@ -44,10 +55,20 @@ function App() {
             <Router>
               <LocationRedirect />
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/home" element={<Home />} />
+
+                {/* Parent Portal Routes */}
+                <Route path="/parent" element={<ParentDashboard />} />
+                <Route path="/students" element={<Students />} />
+                <Route path="/payments" element={<Payments />} />
+                <Route path="/documents" element={<Documents />} />
+
+                {/* Admin Portal Routes */}
                 <Route path="/admin" element={<AdminPortal />} />
+
                 {/* Catch all - show landing page */}
                 <Route path="*" element={<Landing />} />
               </Routes>
