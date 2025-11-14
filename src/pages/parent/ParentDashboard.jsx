@@ -86,32 +86,35 @@ export default function ParentDashboard() {
   return (
     <PortalLayout title="Parent Dashboard" role="parent">
       <div className="space-y-6 animate-fadeInUp">
-        {/* Welcome Section */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700 rounded-3xl p-6 sm:p-8 text-white shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24" />
+        {/* Welcome Section - SUPER VIBRANT & OBVIOUS */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-600 rounded-3xl p-8 sm:p-12 text-white shadow-2xl border-4 border-white/20">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400/20 rounded-full -mr-48 -mt-48 animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-400/20 rounded-full -ml-32 -mb-32 animate-pulse" />
           <div className="relative">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+            <div className="inline-block px-6 py-2 bg-yellow-400 text-gray-900 font-extrabold text-sm rounded-full mb-4 shadow-lg animate-pulse">
+              🎉 NEW MODERN UI - COMPLETELY REDESIGNED!
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-black mb-4 drop-shadow-lg">
               Welcome back, {user?.user_metadata?.full_name || 'Parent'}! 👋
             </h2>
-            <p className="text-white/90 mb-6">
+            <p className="text-xl text-white/95 mb-8 font-medium">
               Track your students' mission trip progress and manage everything in one place
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-4">
               <Button
-                size="md"
+                size="lg"
                 onClick={() => navigate('/students')}
-                className="bg-white text-primary-900 hover:bg-white/90 shadow-xl hover:shadow-2xl border-0"
+                className="bg-white text-cyan-600 hover:bg-yellow-400 hover:text-gray-900 shadow-2xl hover:shadow-yellow-400/50 border-0 transform hover:scale-110"
               >
-                <Users className="w-4 h-4 mr-2" />
+                <Users className="w-6 h-6 mr-2" />
                 Manage Students
               </Button>
               <Button
-                size="md"
+                size="lg"
                 onClick={() => navigate('/payments')}
-                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border-2 border-white/30 shadow-lg"
+                className="bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 shadow-2xl shadow-pink-500/50"
               >
-                <DollarSign className="w-4 h-4 mr-2" />
+                <DollarSign className="w-6 h-6 mr-2" />
                 View Payments
               </Button>
             </div>
