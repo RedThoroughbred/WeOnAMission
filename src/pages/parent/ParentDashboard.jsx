@@ -87,30 +87,34 @@ export default function ParentDashboard() {
     <PortalLayout title="Parent Dashboard" role="parent">
       <div className="space-y-6 animate-fadeInUp">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-            Welcome back, {user?.user_metadata?.full_name || 'Parent'}! 👋
-          </h2>
-          <p className="text-primary-100 mb-6">
-            Track your students' mission trip progress and manage everything in one place
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/students')}
-              className="bg-white text-primary-900 hover:bg-gray-100"
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Manage Students
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/payments')}
-              className="border-white text-white hover:bg-white/10"
-            >
-              <DollarSign className="w-4 h-4 mr-2" />
-              View Payments
-            </Button>
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700 rounded-3xl p-6 sm:p-8 text-white shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24" />
+          <div className="relative">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+              Welcome back, {user?.user_metadata?.full_name || 'Parent'}! 👋
+            </h2>
+            <p className="text-white/90 mb-6">
+              Track your students' mission trip progress and manage everything in one place
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                size="md"
+                onClick={() => navigate('/students')}
+                className="bg-white text-primary-900 hover:bg-white/90 shadow-xl hover:shadow-2xl border-0"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Manage Students
+              </Button>
+              <Button
+                size="md"
+                onClick={() => navigate('/payments')}
+                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border-2 border-white/30 shadow-lg"
+              >
+                <DollarSign className="w-4 h-4 mr-2" />
+                View Payments
+              </Button>
+            </div>
           </div>
         </div>
 

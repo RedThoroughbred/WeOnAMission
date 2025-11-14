@@ -137,13 +137,13 @@ export default function Payments() {
     <PortalLayout title="Payments" role="parent">
       <div className="space-y-6 animate-fadeInUp">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-2">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Tracking</h2>
-            <p className="text-gray-600 dark:text-gray-400">Manage trip payments and view payment history</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Payments</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Track payments and manage trip expenses</p>
           </div>
-          <Button onClick={handleAddPayment} disabled={!selectedStudent}>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={handleAddPayment} disabled={!selectedStudent} size="md" className="shadow-lg">
+            <Plus className="w-5 h-5 mr-2" />
             Add Payment
           </Button>
         </div>
@@ -427,7 +427,7 @@ export default function Payments() {
                     id="payment_type"
                     value={formData.payment_type}
                     onChange={(e) => setFormData({ ...formData, payment_type: e.target.value })}
-                    className="w-full h-11 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full h-11 px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200"
                     required
                   >
                     <option value="check">Check</option>

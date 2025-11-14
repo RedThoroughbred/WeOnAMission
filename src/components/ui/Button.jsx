@@ -3,22 +3,22 @@ import { cva } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 hover:scale-[1.02]",
   {
     variants: {
       variant: {
-        primary: "bg-gradient-to-br from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-sm hover:shadow-md",
-        secondary: "bg-gradient-to-br from-secondary-600 to-secondary-700 text-white hover:from-secondary-700 hover:to-secondary-800 shadow-sm hover:shadow-md",
-        outline: "border-2 border-primary-600 text-primary-700 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950",
-        ghost: "text-primary-700 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/50",
-        danger: "bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md",
-        success: "bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md",
+        primary: "bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl",
+        secondary: "bg-gradient-to-r from-secondary-600 to-secondary-700 text-white hover:from-secondary-700 hover:to-secondary-800 shadow-lg hover:shadow-xl",
+        outline: "border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600",
+        ghost: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
+        danger: "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl",
+        success: "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl",
       },
       size: {
-        sm: "h-10 px-3 text-sm min-h-[40px]",
-        md: "h-11 px-4 py-2 min-h-[44px]",
-        lg: "h-12 px-6 text-lg min-h-[48px]",
-        icon: "h-11 w-11 min-h-[44px] min-w-[44px]",
+        sm: "h-10 px-4 text-sm min-h-[40px] rounded-xl",
+        md: "h-11 px-5 py-2 min-h-[44px] rounded-xl",
+        lg: "h-12 px-6 text-lg min-h-[48px] rounded-xl",
+        icon: "h-11 w-11 min-h-[44px] min-w-[44px] rounded-full",
       },
     },
     defaultVariants: {

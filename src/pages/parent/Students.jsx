@@ -134,13 +134,13 @@ export default function Students() {
     <PortalLayout title="My Students" role="parent">
       <div className="space-y-6 animate-fadeInUp">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-2">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Students</h2>
-            <p className="text-gray-600 dark:text-gray-400">Add and manage students registered for the mission trip</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Students</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Manage students registered for the mission trip</p>
           </div>
-          <Button onClick={handleAddStudent} className="sm:self-start">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={handleAddStudent} size="md" className="shadow-lg">
+            <Plus className="w-5 h-5 mr-2" />
             Add Student
           </Button>
         </div>
