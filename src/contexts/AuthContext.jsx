@@ -22,11 +22,25 @@ export const AuthProvider = ({ children }) => {
         // Fetch user profile if logged in
         if (session?.user) {
           console.log('🔐 Fetching initial user profile...')
-          const { data, error } = await sb
+
+          // Add timeout to prevent hanging
+          const profilePromise = sb
             .from('users')
             .select('*')
             .eq('id', session.user.id)
             .single()
+
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Initial user profile query timeout after 5s')), 5000)
+          )
+
+          const result = await Promise.race([profilePromise, timeoutPromise])
+            .catch(err => {
+              console.error('⚠️ Initial user profile query failed or timed out:', err.message)
+              return { data: null, error: err }
+            })
+
+          const { data, error } = result
 
           if (error) {
             console.error('❌ Failed to fetch initial user profile:', error)
@@ -61,11 +75,25 @@ export const AuthProvider = ({ children }) => {
           if (session?.user) {
             console.log('👤 User logged in:', session.user.email)
             console.log('👤 Fetching user profile from database...')
-            const { data, error } = await sb
+
+            // Add timeout to prevent hanging
+            const profilePromise = sb
               .from('users')
               .select('*')
               .eq('id', session.user.id)
               .single()
+
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('User profile query timeout after 5s')), 5000)
+            )
+
+            const result = await Promise.race([profilePromise, timeoutPromise])
+              .catch(err => {
+                console.error('⚠️ User profile query failed or timed out:', err.message)
+                return { data: null, error: err }
+              })
+
+            const { data, error } = result
 
             if (error) {
               console.error('❌ Failed to fetch user profile:', error)

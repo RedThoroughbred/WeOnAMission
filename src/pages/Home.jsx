@@ -16,32 +16,41 @@ export default function Home() {
       return
     }
 
-    // Wait for user profile to load from database
-    if (!userProfile) {
-      console.log('⏳ Waiting for user profile to load...')
-      return
-    }
-
-    console.log('🏠 Home: Redirecting based on role:', userProfile.role)
-
-    // Redirect based on role from database (not user_metadata)
-    const role = userProfile.role || 'parent'
-
-    switch (role) {
-      case 'superadmin':
-        navigate('/super-admin')
-        break
-      case 'admin':
-        navigate('/admin')
-        break
-      case 'student':
-        navigate('/student')
-        break
-      case 'parent':
-      default:
+    // Give userProfile 10 seconds to load, then proceed with fallback
+    const timeout = setTimeout(() => {
+      if (!userProfile) {
+        console.warn('⚠️ User profile failed to load after 10s, using fallback to parent portal')
         navigate('/parent')
-        break
+      }
+    }, 10000)
+
+    // If userProfile loads, clear timeout and redirect based on role
+    if (userProfile) {
+      clearTimeout(timeout)
+      console.log('🏠 Home: Redirecting based on role:', userProfile.role)
+
+      const role = userProfile.role || 'parent'
+
+      switch (role) {
+        case 'superadmin':
+          navigate('/super-admin')
+          break
+        case 'admin':
+          navigate('/admin')
+          break
+        case 'student':
+          navigate('/student')
+          break
+        case 'parent':
+        default:
+          navigate('/parent')
+          break
+      }
+    } else {
+      console.log('⏳ Waiting for user profile to load...')
     }
+
+    return () => clearTimeout(timeout)
   }, [user, userProfile, loading, navigate])
 
   return (
