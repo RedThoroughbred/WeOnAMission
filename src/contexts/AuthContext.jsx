@@ -115,12 +115,19 @@ export const AuthProvider = ({ children }) => {
       return subscription
     }
 
-    let subscription = null
+    let subscriptionRef = null
+
     setupAuthListener().then(sub => {
-      subscription = sub
+      subscriptionRef = sub
+    }).catch(err => {
+      console.error('❌ Failed to setup auth listener:', err)
     })
 
-    return () => subscription?.unsubscribe()
+    return () => {
+      if (subscriptionRef) {
+        subscriptionRef.unsubscribe()
+      }
+    }
   }, [])
 
   const signUp = useCallback(async (email, password, fullName) => {

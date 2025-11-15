@@ -2,9 +2,22 @@ import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './supabaseConfig'
 
 // Create Supabase client with hardcoded config
+// Add explicit options to ensure proper initialization
 const supabaseInstance = createClient(
   SUPABASE_CONFIG.url,
-  SUPABASE_CONFIG.anonKey
+  SUPABASE_CONFIG.anonKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'supabase-js-web'
+      }
+    }
+  }
 )
 
 console.log('✓ Supabase client initialized')
