@@ -6,11 +6,12 @@ import PortalLayout from '../../components/layout/PortalLayout'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, Progress, StatCard, Skeleton } from '../../components/ui'
 import { Users, DollarSign, FileCheck, Calendar, Plus, TrendingUp, AlertCircle } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
+import { api } from '../../services/api'
 
 export default function ParentDashboard() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { currentChurch } = useTenant()
+  const { currentChurch, churchId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState([])
   const [paymentSummary, setPaymentSummary] = useState(null)
@@ -18,39 +19,50 @@ export default function ParentDashboard() {
   const [recentDocuments, setRecentDocuments] = useState([])
 
   useEffect(() => {
-    loadDashboardData()
-  }, [])
+    if (churchId && user) {
+      loadDashboardData()
+    }
+  }, [churchId, user])
 
   const loadDashboardData = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API calls
-      // Simulated data for now
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      console.log('📊 Loading parent dashboard for user:', user.id)
 
-      setStudents([
-        { id: 1, full_name: 'John Doe', grade: 10 },
-        { id: 2, full_name: 'Jane Doe', grade: 12 }
+      // Load real data from database
+      const [studentsData, paymentsData, eventsData, documentsData] = await Promise.all([
+        api.getMyStudents(churchId, user.id),
+        api.getMyPayments(churchId, user.id),
+        api.getEvents(churchId),
+        api.getMyDocuments(churchId, user.id)
       ])
 
+      setStudents(studentsData)
+
+      // Calculate payment summary
+      const totalPaid = paymentsData.reduce((sum, p) => sum + (p.amount || 0), 0)
+      const totalCost = (currentChurch?.trip_cost || 2500) * studentsData.length
       setPaymentSummary({
-        totalStudents: 2,
-        totalPaid: 2500,
-        totalCost: 5000,
-        balanceDue: 2500
+        totalStudents: studentsData.length,
+        totalPaid,
+        totalCost,
+        balanceDue: totalCost - totalPaid
       })
 
-      setUpcomingEvents([
-        { id: 1, name: 'Fundraiser Dinner', event_date: '2025-12-01', event_type: 'fundraiser' },
-        { id: 2, name: 'Parent Meeting', event_date: '2025-12-15', event_type: 'meeting' }
-      ])
+      // Filter upcoming events
+      const now = new Date()
+      setUpcomingEvents(eventsData.filter(e => new Date(e.event_date) >= now).slice(0, 3))
 
-      setRecentDocuments([
-        { id: 1, file_name: 'Medical Form - John', status: 'approved' },
-        { id: 2, file_name: 'Permission Slip - Jane', status: 'pending' }
-      ])
+      setRecentDocuments(documentsData.slice(0, 5))
+
+      console.log('✅ Dashboard loaded:', { students: studentsData.length, payments: paymentsData.length })
     } catch (error) {
-      console.error('Error loading dashboard:', error)
+      console.error('❌ Error loading dashboard:', error)
+      // Set empty arrays on error
+      setStudents([])
+      setPaymentSummary({ totalStudents: 0, totalPaid: 0, totalCost: 0, balanceDue: 0 })
+      setUpcomingEvents([])
+      setRecentDocuments([])
     } finally {
       setLoading(false)
     }
