@@ -126,17 +126,29 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const signOut = useCallback(async () => {
+    console.log('🚪 Starting sign out...')
     setLoading(true)
     setError(null)
     try {
       const sb = getSupabase()
+      console.log('🚪 Calling Supabase signOut...')
       const { error: signOutError } = await sb.auth.signOut()
-      if (signOutError) throw signOutError
+
+      if (signOutError) {
+        console.error('🚪 Sign out error:', signOutError)
+        throw signOutError
+      }
+
+      console.log('🚪 Sign out successful, clearing user state...')
       setUser(null)
       setUserProfile(null)
+      console.log('✅ Sign out complete!')
     } catch (err) {
+      console.error('❌ Sign out failed:', err)
       setError(err.message)
-      throw err
+      // Don't throw - still clear local state even if API fails
+      setUser(null)
+      setUserProfile(null)
     } finally {
       setLoading(false)
     }

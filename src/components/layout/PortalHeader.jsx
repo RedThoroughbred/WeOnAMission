@@ -15,8 +15,16 @@ export default function PortalHeader({ title, onMenuToggle, menuOpen }) {
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   const handleSignOut = async () => {
-    await signOut()
-    navigate('/login')
+    console.log('🚪 PortalHeader: Sign out button clicked')
+    try {
+      await signOut()
+      console.log('🚪 PortalHeader: Sign out successful, navigating to /login')
+      navigate('/login')
+    } catch (err) {
+      console.error('🚪 PortalHeader: Sign out error:', err)
+      // Navigate to login anyway
+      navigate('/login')
+    }
   }
 
   const getInitials = (name) => {
