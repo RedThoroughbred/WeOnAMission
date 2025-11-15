@@ -85,11 +85,12 @@ export const api = {
 
   async getMyPayments(churchId, userId) {
     const sb = getSupabase()
+    // Get payments for students where parent_id matches userId
     const { data, error } = await sb
       .from('payments')
-      .select('*, students(full_name)')
+      .select('*, students!inner(full_name, parent_id)')
       .eq('church_id', churchId)
-      .eq('user_id', userId)
+      .eq('students.parent_id', userId)
       .order('payment_date', { ascending: false })
 
     if (error) throw error
@@ -100,7 +101,7 @@ export const api = {
     const sb = getSupabase()
     const { data, error} = await sb
       .from('payments')
-      .select('*, students(full_name), users(full_name)')
+      .select('*, students(full_name, parent_id)')
       .eq('church_id', churchId)
       .order('payment_date', { ascending: false })
 
@@ -108,11 +109,11 @@ export const api = {
     return data || []
   },
 
-  async createPayment(paymentData, churchId, userId) {
+  async createPayment(paymentData, churchId) {
     const sb = getSupabase()
     const { data, error } = await sb
       .from('payments')
-      .insert([{ ...paymentData, church_id: churchId, user_id: userId }])
+      .insert([{ ...paymentData, church_id: churchId }])
       .select()
       .single()
 
@@ -139,7 +140,7 @@ export const api = {
     const sb = getSupabase()
     const { data, error } = await sb
       .from('documents')
-      .select('*, students(full_name), users(full_name)')
+      .select('*, students(full_name)')
       .eq('church_id', churchId)
       .order('uploaded_at', { ascending: false })
 
