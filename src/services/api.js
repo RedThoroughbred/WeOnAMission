@@ -3,6 +3,15 @@
 
 import { getSupabase } from '../lib/config'
 
+// Helper to add timeout to Supabase queries
+const withTimeout = async (promise, timeoutMs = 10000, operationName = 'Query') => {
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`${operationName} timeout after ${timeoutMs}ms`)), timeoutMs)
+  )
+
+  return Promise.race([promise, timeoutPromise])
+}
+
 export const api = {
   // ==================== STUDENTS ====================
 
@@ -274,14 +283,18 @@ export const api = {
     console.log('📊 API: getAdminStats called with churchId:', churchId)
     const sb = getSupabase()
 
-    // Get all stats in parallel
-    const [studentsRes, paymentsRes, documentsRes, memoriesRes, eventsRes] = await Promise.all([
-      sb.from('students').select('id', { count: 'exact' }).eq('church_id', churchId),
-      sb.from('payments').select('amount').eq('church_id', churchId),
-      sb.from('documents').select('id', { count: 'exact' }).eq('church_id', churchId).eq('status', 'pending'),
-      sb.from('trip_memories').select('id', { count: 'exact' }).eq('church_id', churchId).eq('status', 'pending'),
-      sb.from('events').select('id', { count: 'exact' }).eq('church_id', churchId).gte('event_date', new Date().toISOString()),
-    ])
+    // Get all stats in parallel with 10 second timeout
+    const [studentsRes, paymentsRes, documentsRes, memoriesRes, eventsRes] = await withTimeout(
+      Promise.all([
+        sb.from('students').select('id', { count: 'exact' }).eq('church_id', churchId),
+        sb.from('payments').select('amount').eq('church_id', churchId),
+        sb.from('documents').select('id', { count: 'exact' }).eq('church_id', churchId).eq('status', 'pending'),
+        sb.from('trip_memories').select('id', { count: 'exact' }).eq('church_id', churchId).eq('status', 'pending'),
+        sb.from('events').select('id', { count: 'exact' }).eq('church_id', churchId).gte('event_date', new Date().toISOString()),
+      ]),
+      10000,
+      'getAdminStats'
+    )
 
     console.log('📊 API: Query results:')
     console.log('  - Students:', studentsRes.count, 'Error:', studentsRes.error)
