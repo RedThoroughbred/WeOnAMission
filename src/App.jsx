@@ -31,6 +31,7 @@ import AdminEvents from './pages/admin/AdminEvents'
 import AdminMemories from './pages/admin/AdminMemories'
 import AdminQuestions from './pages/admin/AdminQuestions'
 import AdminSettings from './pages/admin/AdminSettings'
+import AdminUsers from './pages/admin/AdminUsers'
 import ContentManagement from './pages/admin/ContentManagement'
 
 // Super Admin Portal
@@ -104,6 +105,7 @@ function App() {
                 <Route path="/admin/events" element={<AdminEvents />} />
                 <Route path="/admin/memories" element={<AdminMemories />} />
                 <Route path="/admin/questions" element={<AdminQuestions />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/content" element={<ContentManagement />} />
 

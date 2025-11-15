@@ -414,4 +414,27 @@ export const api = {
     if (error) throw error
     return data || []
   },
+
+  async updateUser(userId, updates) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteUser(userId) {
+    const sb = getSupabase()
+    const { error } = await sb
+      .from('users')
+      .delete()
+      .eq('id', userId)
+
+    if (error) throw error
+  },
 }

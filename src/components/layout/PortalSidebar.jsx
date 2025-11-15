@@ -11,7 +11,8 @@ import {
   HelpCircle,
   Image,
   LayoutDashboard,
-  Shield
+  Shield,
+  UserCog
 } from 'lucide-react'
 
 const navigation = {
@@ -33,6 +34,7 @@ const navigation = {
   admin: [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Students', href: '/admin/students', icon: Users },
+    { name: 'Users', href: '/admin/users', icon: UserCog },
     { name: 'Payments', href: '/admin/payments', icon: DollarSign },
     { name: 'Documents', href: '/admin/documents', icon: FileText },
     { name: 'Events', href: '/admin/events', icon: Calendar },
