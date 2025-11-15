@@ -3,19 +3,34 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function Home() {
-  const { user } = useAuth()
+  const { user, userProfile, loading } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Redirect to appropriate portal based on user role
+    // Wait for auth to finish loading
+    if (loading) return
+
+    // Redirect to login if not authenticated
     if (!user) {
       navigate('/login')
       return
     }
 
-    const role = user.user_metadata?.role || 'parent'
+    // Wait for user profile to load from database
+    if (!userProfile) {
+      console.log('⏳ Waiting for user profile to load...')
+      return
+    }
+
+    console.log('🏠 Home: Redirecting based on role:', userProfile.role)
+
+    // Redirect based on role from database (not user_metadata)
+    const role = userProfile.role || 'parent'
 
     switch (role) {
+      case 'superadmin':
+        navigate('/super-admin')
+        break
       case 'admin':
         navigate('/admin')
         break
@@ -27,7 +42,7 @@ export default function Home() {
         navigate('/parent')
         break
     }
-  }, [user, navigate])
+  }, [user, userProfile, loading, navigate])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
