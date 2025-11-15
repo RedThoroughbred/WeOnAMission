@@ -30,10 +30,13 @@ export default function AdminDashboard() {
   const loadDashboardData = async () => {
     setLoading(true)
     try {
-      console.log('📊 Loading admin dashboard data for church:', churchId)
+      console.log('📊 ============ ADMIN DASHBOARD LOADING ============')
+      console.log('📊 Church ID being used:', churchId)
 
       // Get real stats from database
       const statsData = await api.getAdminStats(churchId)
+
+      console.log('📊 Stats returned from API:', JSON.stringify(statsData, null, 2))
 
       setStats({
         ...statsData,
@@ -43,9 +46,14 @@ export default function AdminDashboard() {
       // For now, recent activity is empty until we build an activity log
       setRecentActivity([])
 
-      console.log('✅ Dashboard data loaded:', statsData)
+      console.log('✅ Dashboard data loaded successfully')
+      console.log('📊 ============================================')
     } catch (error) {
-      console.error('❌ Error loading dashboard:', error)
+      console.error('❌ ============ ERROR LOADING DASHBOARD ============')
+      console.error('❌ Error:', error)
+      console.error('❌ Error message:', error.message)
+      console.error('❌ Full error details:', JSON.stringify(error, null, 2))
+      console.error('❌ ================================================')
     } finally {
       setLoading(false)
     }

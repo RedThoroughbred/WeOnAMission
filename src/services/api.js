@@ -270,6 +270,7 @@ export const api = {
   // ==================== ADMIN STATS ====================
 
   async getAdminStats(churchId) {
+    console.log('📊 API: getAdminStats called with churchId:', churchId)
     const sb = getSupabase()
 
     // Get all stats in parallel
@@ -281,16 +282,34 @@ export const api = {
       sb.from('events').select('id', { count: 'exact' }).eq('church_id', churchId).gte('event_date', new Date().toISOString()),
     ])
 
+    console.log('📊 API: Query results:')
+    console.log('  - Students:', studentsRes.count, 'Error:', studentsRes.error)
+    console.log('  - Payments:', paymentsRes.data?.length, 'payments, Error:', paymentsRes.error)
+    console.log('  - Pending Documents:', documentsRes.count, 'Error:', documentsRes.error)
+    console.log('  - Pending Memories:', memoriesRes.count, 'Error:', memoriesRes.error)
+    console.log('  - Upcoming Events:', eventsRes.count, 'Error:', eventsRes.error)
+
+    // Check for errors
+    if (studentsRes.error) console.error('❌ Students query error:', studentsRes.error)
+    if (paymentsRes.error) console.error('❌ Payments query error:', paymentsRes.error)
+    if (documentsRes.error) console.error('❌ Documents query error:', documentsRes.error)
+    if (memoriesRes.error) console.error('❌ Memories query error:', memoriesRes.error)
+    if (eventsRes.error) console.error('❌ Events query error:', eventsRes.error)
+
     // Calculate total payments
     const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+    console.log('📊 API: Total paid calculated:', totalPaid)
 
-    return {
+    const stats = {
       totalStudents: studentsRes.count || 0,
       totalPaid,
       pendingDocuments: documentsRes.count || 0,
       pendingMemories: memoriesRes.count || 0,
       upcomingEvents: eventsRes.count || 0,
     }
+
+    console.log('📊 API: Returning stats:', stats)
+    return stats
   },
 
   // ==================== SUPER ADMIN - CHURCHES ====================

@@ -22,18 +22,28 @@ export const TenantProvider = ({ children }) => {
         const { data: { user } } = await sb.auth.getUser()
 
         let detectedChurchId = DEFAULT_CHURCH_ID
+        console.log('🏛️ TenantContext: Starting church detection...')
+        console.log('🏛️ Default church ID:', DEFAULT_CHURCH_ID)
 
         if (user) {
+          console.log('🏛️ User detected:', user.email, 'User ID:', user.id)
           // Get user's church_id from users table
-          const { data: userData } = await sb
+          const { data: userData, error: userError } = await sb
             .from('users')
             .select('church_id')
             .eq('id', user.id)
             .single()
 
+          console.log('🏛️ User data from database:', userData, 'Error:', userError)
+
           if (userData?.church_id) {
             detectedChurchId = userData.church_id
+            console.log('✅ Using church_id from user profile:', detectedChurchId)
+          } else {
+            console.log('⚠️ No church_id in user profile, using default:', DEFAULT_CHURCH_ID)
           }
+        } else {
+          console.log('⚠️ No user logged in, using default church ID')
         }
 
         // Also check URL/localStorage (for multi-church support)
@@ -65,16 +75,26 @@ export const TenantProvider = ({ children }) => {
           }
         }
 
+        console.log('🏛️ Final detected church ID:', detectedChurchId)
         setChurchId(detectedChurchId)
 
         // Fetch church details
-        const { data: churchData } = await sb
+        console.log('🏛️ Fetching church details for ID:', detectedChurchId)
+        const { data: churchData, error: churchError } = await sb
           .from('churches')
           .select('*')
           .eq('id', detectedChurchId)
           .single()
 
-        setChurch(churchData || { id: detectedChurchId, name: 'Trinity Church', slug: 'trinity' })
+        console.log('🏛️ Church data from database:', churchData, 'Error:', churchError)
+
+        if (churchData) {
+          setChurch(churchData)
+          console.log('✅ Church loaded:', churchData.name)
+        } else {
+          console.log('⚠️ Church not found in database, using fallback')
+          setChurch({ id: detectedChurchId, name: 'Trinity Church', slug: 'trinity' })
+        }
       } catch (err) {
         console.error('Error detecting church:', err)
         setError(err.message)
