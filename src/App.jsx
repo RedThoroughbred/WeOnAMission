@@ -27,10 +27,17 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminStudents from './pages/admin/AdminStudents'
 import AdminPayments from './pages/admin/AdminPayments'
 import AdminDocuments from './pages/admin/AdminDocuments'
+import AdminEvents from './pages/admin/AdminEvents'
+import AdminMemories from './pages/admin/AdminMemories'
+import AdminQuestions from './pages/admin/AdminQuestions'
+import AdminSettings from './pages/admin/AdminSettings'
 import ContentManagement from './pages/admin/ContentManagement'
 
 // Super Admin Portal
 import SuperAdmin from './pages/SuperAdmin'
+import SuperAdminChurches from './pages/superadmin/Churches'
+import SuperAdminUsers from './pages/superadmin/Users'
+import SuperAdminSettings from './pages/superadmin/Settings'
 
 // Redirect old URLs to new routes
 function LocationRedirect() {
@@ -94,10 +101,17 @@ function App() {
                 <Route path="/admin/students" element={<AdminStudents />} />
                 <Route path="/admin/payments" element={<AdminPayments />} />
                 <Route path="/admin/documents" element={<AdminDocuments />} />
+                <Route path="/admin/events" element={<AdminEvents />} />
+                <Route path="/admin/memories" element={<AdminMemories />} />
+                <Route path="/admin/questions" element={<AdminQuestions />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/content" element={<ContentManagement />} />
 
                 {/* Super Admin Routes */}
                 <Route path="/super-admin" element={<SuperAdmin />} />
+                <Route path="/super-admin/churches" element={<SuperAdminChurches />} />
+                <Route path="/super-admin/users" element={<SuperAdminUsers />} />
+                <Route path="/super-admin/settings" element={<SuperAdminSettings />} />
 
                 {/* Catch all - show landing page */}
                 <Route path="*" element={<Landing />} />
