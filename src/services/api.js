@@ -455,4 +455,38 @@ export const api = {
 
     if (error) throw error
   },
+
+  async createUser({ email, password, full_name, phone, role, church_id }) {
+    const sb = getSupabase()
+
+    // Create auth user
+    const { data: authData, error: authError } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name
+        }
+      }
+    })
+
+    if (authError) throw authError
+
+    // Create user record in database
+    const { data, error } = await sb
+      .from('users')
+      .insert([{
+        id: authData.user.id,
+        email,
+        full_name,
+        phone: phone || null,
+        role,
+        church_id
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
 }
