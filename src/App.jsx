@@ -24,6 +24,7 @@ import TripMemories from './pages/student/TripMemories'
 // Admin Portal
 import AdminPortal from './pages/AdminPortal'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminStudents from './pages/admin/AdminStudents'
 
 // Super Admin Portal
 import SuperAdmin from './pages/SuperAdmin'
@@ -87,6 +88,7 @@ function App() {
                 {/* Admin Portal Routes */}
                 <Route path="/admin" element={<AdminPortal />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/students" element={<AdminStudents />} />
 
                 {/* Super Admin Routes */}
                 <Route path="/super-admin" element={<SuperAdmin />} />
