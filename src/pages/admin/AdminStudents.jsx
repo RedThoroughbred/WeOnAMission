@@ -23,8 +23,7 @@ export default function AdminStudents() {
     email: '',
     phone: '',
     grade: '',
-    medical_info: '',
-    emergency_contact: ''
+    medical_info: ''
   })
 
   useEffect(() => {
@@ -70,8 +69,7 @@ export default function AdminStudents() {
       email: student.email || '',
       phone: student.phone || '',
       grade: student.grade || '',
-      medical_info: student.medical_info || '',
-      emergency_contact: student.emergency_contact || ''
+      medical_info: student.medical_info || ''
     })
     setShowEditModal(true)
   }
@@ -319,15 +317,6 @@ export default function AdminStudents() {
                     value={editForm.medical_info}
                     onChange={(e) => setEditForm({ ...editForm, medical_info: e.target.value })}
                     placeholder="Allergies, medications, etc."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit_emergency">Emergency Contact</Label>
-                  <Input
-                    id="edit_emergency"
-                    value={editForm.emergency_contact}
-                    onChange={(e) => setEditForm({ ...editForm, emergency_contact: e.target.value })}
-                    placeholder="Name: John Doe, Phone: (555) 123-4567"
                   />
                 </div>
               </div>

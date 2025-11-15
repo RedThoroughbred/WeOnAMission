@@ -396,7 +396,7 @@ export const api = {
     const sb = getSupabase()
     const { data, error } = await sb
       .from('users')
-      .select('*, churches(name)')
+      .select('*, churches!church_id(name)')
       .order('created_at', { ascending: false })
 
     if (error) throw error
