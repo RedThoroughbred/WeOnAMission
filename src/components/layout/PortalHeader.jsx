@@ -5,7 +5,7 @@ import { useTheme } from '../../hooks/useTheme'
 import { useTenant } from '../../hooks/useTenant'
 import { Button } from '../ui'
 import { Avatar, AvatarFallback } from '../ui'
-import { Globe, Moon, Sun, LogOut, Menu, X, Bell, Settings } from 'lucide-react'
+import { Globe, Moon, Sun, LogOut, Menu, X, Bell, Settings, Users, GraduationCap, Shield, LayoutDashboard } from 'lucide-react'
 
 export default function PortalHeader({ title, onMenuToggle, menuOpen }) {
   const navigate = useNavigate()
@@ -121,6 +121,61 @@ export default function PortalHeader({ title, onMenuToggle, menuOpen }) {
                     </p>
                   </div>
                   <div className="p-2">
+                    {/* Portal Switcher */}
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Switch Portal View
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        navigate('/parent')
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center">
+                        <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      Parent Portal
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        navigate('/student')
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-950/50 flex items-center justify-center">
+                        <GraduationCap className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      Student Portal
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        navigate('/admin')
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center">
+                        <LayoutDashboard className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      Admin Portal
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        navigate('/super-admin')
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/50 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      </div>
+                      Super Admin Portal
+                    </button>
+
+                    <div className="my-2 h-px bg-gray-200 dark:bg-gray-700"></div>
+
                     <button
                       onClick={() => {
                         setShowUserMenu(false)
