@@ -6,11 +6,9 @@ export default function PortalLayout({ title, role = 'parent', children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-pink-200 dark:bg-pink-900">
-      {/* BRIGHT PINK BACKGROUND - IF YOU SEE THIS, THE NEW UI IS WORKING! */}
-      <div className="fixed top-0 left-0 right-0 bg-yellow-300 text-black text-center py-4 z-50 font-black text-2xl">
-        ⚠️ NEW UI LOADED! If you see this yellow banner, the changes are working! ⚠️
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+      {/* Subtle background pattern */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.03),transparent_50%)] pointer-events-none" />
 
       <PortalHeader
         title={title}
@@ -24,7 +22,7 @@ export default function PortalLayout({ title, role = 'parent', children }) {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <main className="lg:pl-72 pt-24 relative">
+      <main className="lg:pl-72 pt-8 relative">
         <div className="px-6 sm:px-8 lg:px-12 pb-12 max-w-[1600px]">
           {children}
         </div>
