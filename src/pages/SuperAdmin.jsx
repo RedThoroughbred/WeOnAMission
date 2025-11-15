@@ -4,11 +4,13 @@ import PortalLayout from '../components/layout/PortalLayout'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, StatCard, Input, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui'
 import Modal, { ModalContent, ModalFooter } from '../components/ui/Modal'
 import { Church, Users, Settings, Plus, Edit, Shield, Globe } from 'lucide-react'
+import { api } from '../services/api'
 
 export default function SuperAdmin() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [churches, setChurches] = useState([])
+  const [churchStats, setChurchStats] = useState({})
   const [showAddChurchModal, setShowAddChurchModal] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -16,7 +18,7 @@ export default function SuperAdmin() {
     trip_name: '',
     trip_destination: '',
     departure_date: '',
-    total_cost: ''
+    trip_cost: ''
   })
 
   useEffect(() => {
@@ -26,40 +28,24 @@ export default function SuperAdmin() {
   const loadChurches = async () => {
     setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      console.log('🏛️ Loading ALL churches (Super Admin)')
+      const data = await api.getAllChurches()
+      setChurches(data)
 
-      setChurches([
-        {
-          id: 1,
-          name: 'Trinity Church',
-          slug: 'trinity',
-          settings: {
-            trip_name: 'Peru 2026',
-            trip_destination: 'Ahuac, Peru',
-            departure_date: '2026-06-26',
-            total_cost: 2500
-          },
-          student_count: 24,
-          user_count: 32,
-          active: true
-        },
-        {
-          id: 2,
-          name: 'Crossroads Church',
-          slug: 'crossroads',
-          settings: {
-            trip_name: 'Mexico 2026',
-            trip_destination: 'Tijuana, Mexico',
-            departure_date: '2026-07-15',
-            total_cost: 1800
-          },
-          student_count: 18,
-          user_count: 24,
-          active: true
-        }
-      ])
+      // Load stats for each church
+      const stats = {}
+      await Promise.all(
+        data.map(async (church) => {
+          const churchStat = await api.getChurchStats(church.id)
+          stats[church.id] = churchStat
+        })
+      )
+      setChurchStats(stats)
+
+      console.log('✅ Loaded', data.length, 'churches')
     } catch (error) {
-      console.error('Error loading churches:', error)
+      console.error('❌ Error loading churches:', error)
+      setChurches([])
     } finally {
       setLoading(false)
     }
@@ -68,21 +54,17 @@ export default function SuperAdmin() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const newChurch = {
-        id: Date.now(),
-        ...formData,
-        settings: {
-          trip_name: formData.trip_name,
-          trip_destination: formData.trip_destination,
-          departure_date: formData.departure_date,
-          total_cost: parseFloat(formData.total_cost)
-        },
-        student_count: 0,
-        user_count: 0,
+      const churchData = {
+        name: formData.name,
+        slug: formData.slug,
+        trip_name: formData.trip_name,
+        trip_destination: formData.trip_destination,
+        departure_date: formData.departure_date,
+        trip_cost: parseFloat(formData.trip_cost),
         active: true
       }
 
-      setChurches([...churches, newChurch])
+      await api.createChurch(churchData)
       setShowAddChurchModal(false)
       setFormData({
         name: '',
@@ -90,10 +72,12 @@ export default function SuperAdmin() {
         trip_name: '',
         trip_destination: '',
         departure_date: '',
-        total_cost: ''
+        trip_cost: ''
       })
+      await loadChurches()
     } catch (error) {
       console.error('Error creating church:', error)
+      alert('Failed to create church: ' + error.message)
     }
   }
 
@@ -132,12 +116,12 @@ export default function SuperAdmin() {
           />
           <StatCard
             title="Total Users"
-            value={churches.reduce((sum, c) => sum + c.user_count, 0)}
+            value={Object.values(churchStats).reduce((sum, s) => sum + (s.userCount || 0), 0)}
             icon={Users}
           />
           <StatCard
             title="Total Students"
-            value={churches.reduce((sum, c) => sum + c.student_count, 0)}
+            value={Object.values(churchStats).reduce((sum, s) => sum + (s.studentCount || 0), 0)}
             icon={Globe}
           />
         </div>
@@ -175,12 +159,12 @@ export default function SuperAdmin() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="text-sm font-medium">{church.settings.trip_name}</p>
-                        <p className="text-xs text-gray-500">{church.settings.trip_destination}</p>
+                        <p className="text-sm font-medium">{church.trip_name || 'Not set'}</p>
+                        <p className="text-xs text-gray-500">{church.trip_destination || 'Not set'}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{church.student_count}</TableCell>
-                    <TableCell>{church.user_count}</TableCell>
+                    <TableCell>{churchStats[church.id]?.studentCount || 0}</TableCell>
+                    <TableCell>{churchStats[church.id]?.userCount || 0}</TableCell>
                     <TableCell>
                       <Badge variant={church.active ? 'success' : 'secondary'}>
                         {church.active ? 'Active' : 'Inactive'}
@@ -261,14 +245,14 @@ export default function SuperAdmin() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="total_cost" required>Trip Cost (per student)</Label>
+                    <Label htmlFor="trip_cost" required>Trip Cost (per student)</Label>
                     <Input
-                      id="total_cost"
+                      id="trip_cost"
                       type="number"
                       min="0"
                       step="0.01"
-                      value={formData.total_cost}
-                      onChange={(e) => setFormData({ ...formData, total_cost: e.target.value })}
+                      value={formData.trip_cost}
+                      onChange={(e) => setFormData({ ...formData, trip_cost: e.target.value })}
                       required
                       placeholder="2500.00"
                     />

@@ -292,4 +292,93 @@ export const api = {
       upcomingEvents: eventsRes.count || 0,
     }
   },
+
+  // ==================== SUPER ADMIN - CHURCHES ====================
+
+  async getAllChurches() {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('churches')
+      .select('*')
+      .order('name')
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getChurch(churchId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('churches')
+      .select('*')
+      .eq('id', churchId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async createChurch(churchData) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('churches')
+      .insert([churchData])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateChurch(churchId, updates) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('churches')
+      .update(updates)
+      .eq('id', churchId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async getChurchStats(churchId) {
+    const sb = getSupabase()
+
+    const [studentsRes, usersRes] = await Promise.all([
+      sb.from('students').select('id', { count: 'exact' }).eq('church_id', churchId),
+      sb.from('users').select('id', { count: 'exact' }).eq('church_id', churchId),
+    ])
+
+    return {
+      studentCount: studentsRes.count || 0,
+      userCount: usersRes.count || 0,
+    }
+  },
+
+  // ==================== SUPER ADMIN - USERS ====================
+
+  async getAllUsers() {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('users')
+      .select('*, churches(name)')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getUsersByChurch(churchId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('users')
+      .select('*')
+      .eq('church_id', churchId)
+      .order('full_name')
+
+    if (error) throw error
+    return data || []
+  },
 }

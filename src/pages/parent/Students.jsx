@@ -73,27 +73,29 @@ export default function Students() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      // TODO: Replace with actual API call
       if (editingStudent) {
         // Update existing student
-        setStudents(students.map(s => s.id === editingStudent.id ? { ...formData, id: s.id } : s))
+        await api.updateStudent(editingStudent.id, formData, churchId)
       } else {
         // Add new student
-        setStudents([...students, { ...formData, id: Date.now() }])
+        await api.createStudent(formData, churchId, user.id)
       }
       setShowAddModal(false)
+      await loadStudents()
     } catch (error) {
       console.error('Error saving student:', error)
+      alert('Failed to save student: ' + error.message)
     }
   }
 
   const handleDeleteStudent = async (studentId) => {
     if (!confirm('Are you sure you want to remove this student?')) return
     try {
-      // TODO: Replace with actual API call
-      setStudents(students.filter(s => s.id !== studentId))
+      await api.deleteStudent(studentId, churchId)
+      await loadStudents()
     } catch (error) {
       console.error('Error deleting student:', error)
+      alert('Failed to delete student')
     }
   }
 
