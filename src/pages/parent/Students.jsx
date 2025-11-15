@@ -4,9 +4,14 @@ import PortalLayout from '../../components/layout/PortalLayout'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, Input, Label, Skeleton } from '../../components/ui'
 import Modal, { ModalContent, ModalFooter } from '../../components/ui/Modal'
 import { Users, Plus, Edit, Trash2, Search, Phone, Mail, AlertCircle } from 'lucide-react'
+import { useTenant } from '../../hooks/useTenant'
+import { useAuth } from '../../hooks/useAuth'
+import { api } from '../../services/api'
 
 export default function Students() {
   const navigate = useNavigate()
+  const { churchId } = useTenant()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -24,40 +29,21 @@ export default function Students() {
   })
 
   useEffect(() => {
-    loadStudents()
-  }, [])
+    if (churchId && user) {
+      loadStudents()
+    }
+  }, [churchId, user])
 
   const loadStudents = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setStudents([
-        {
-          id: 1,
-          full_name: 'John Doe',
-          grade: 10,
-          date_of_birth: '2009-05-15',
-          emergency_contact_name: 'Jane Doe',
-          emergency_contact_phone: '555-0123',
-          medical_info: 'None',
-          allergies: 'Peanuts',
-          dietary_restrictions: 'None'
-        },
-        {
-          id: 2,
-          full_name: 'Jane Doe',
-          grade: 12,
-          date_of_birth: '2007-08-20',
-          emergency_contact_name: 'John Doe Sr.',
-          emergency_contact_phone: '555-0124',
-          medical_info: 'Asthma - carries inhaler',
-          allergies: 'None',
-          dietary_restrictions: 'Vegetarian'
-        }
-      ])
+      console.log('👨‍👩‍👧‍👦 Loading MY students for parent:', user.id)
+      const data = await api.getMyStudents(churchId, user.id)
+      setStudents(data)
+      console.log('✅ Loaded', data.length, 'students')
     } catch (error) {
-      console.error('Error loading students:', error)
+      console.error('❌ Error loading students:', error)
+      setStudents([])
     } finally {
       setLoading(false)
     }
