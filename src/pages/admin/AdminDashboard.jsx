@@ -4,14 +4,17 @@ import PortalLayout from '../../components/layout/PortalLayout'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, StatCard, Progress } from '../../components/ui'
 import { Users, DollarSign, FileText, Image, Calendar, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
+import { useTenant } from '../../hooks/useTenant'
+import { api } from '../../services/api'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const { churchId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalPaid: 0,
-    totalCost: 0,
+    totalCost: 60000, // Default trip cost - should come from church settings
     pendingDocuments: 0,
     pendingMemories: 0,
     upcomingEvents: 0
@@ -19,31 +22,30 @@ export default function AdminDashboard() {
   const [recentActivity, setRecentActivity] = useState([])
 
   useEffect(() => {
-    loadDashboardData()
-  }, [])
+    if (churchId) {
+      loadDashboardData()
+    }
+  }, [churchId])
 
   const loadDashboardData = async () => {
     setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      console.log('📊 Loading admin dashboard data for church:', churchId)
+
+      // Get real stats from database
+      const statsData = await api.getAdminStats(churchId)
 
       setStats({
-        totalStudents: 24,
-        totalPaid: 35000,
-        totalCost: 60000,
-        pendingDocuments: 8,
-        pendingMemories: 5,
-        upcomingEvents: 3
+        ...statsData,
+        totalCost: 60000, // TODO: Get from church settings
       })
 
-      setRecentActivity([
-        { type: 'document', message: 'New medical form uploaded by John Doe', time: '5 minutes ago' },
-        { type: 'payment', message: 'Payment received: $500 from Jane Smith', time: '1 hour ago' },
-        { type: 'memory', message: 'New trip memory submitted by Mike Johnson', time: '2 hours ago' },
-        { type: 'student', message: 'New student registered: Sarah Williams', time: '3 hours ago' }
-      ])
+      // For now, recent activity is empty until we build an activity log
+      setRecentActivity([])
+
+      console.log('✅ Dashboard data loaded:', statsData)
     } catch (error) {
-      console.error('Error loading dashboard:', error)
+      console.error('❌ Error loading dashboard:', error)
     } finally {
       setLoading(false)
     }
@@ -206,29 +208,35 @@ export default function AdminDashboard() {
               <CardDescription>Latest actions and updates</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {recentActivity.map((activity, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0">
-                      {activity.type === 'document' && <FileText className="w-4 h-4 text-primary-600" />}
-                      {activity.type === 'payment' && <DollarSign className="w-4 h-4 text-green-600" />}
-                      {activity.type === 'memory' && <Image className="w-4 h-4 text-purple-600" />}
-                      {activity.type === 'student' && <Users className="w-4 h-4 text-blue-600" />}
+              {recentActivity.length > 0 ? (
+                <div className="space-y-3">
+                  {recentActivity.map((activity, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0">
+                        {activity.type === 'document' && <FileText className="w-4 h-4 text-primary-600" />}
+                        {activity.type === 'payment' && <DollarSign className="w-4 h-4 text-green-600" />}
+                        {activity.type === 'memory' && <Image className="w-4 h-4 text-purple-600" />}
+                        {activity.type === 'student' && <Users className="w-4 h-4 text-blue-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {activity.message}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {activity.time}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900 dark:text-white">
-                        {activity.message}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+                  No recent activity yet. Activity will appear here as you manage your mission trip.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
