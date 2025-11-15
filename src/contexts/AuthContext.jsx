@@ -157,14 +157,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const sb = getSupabase()
       console.log('🚪 Calling Supabase signOut...')
-      const { error: signOutError } = await sb.auth.signOut()
+
+      // Add timeout in case Supabase API hangs
+      const signOutPromise = sb.auth.signOut()
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Sign out timeout after 5s')), 5000)
+      )
+
+      const { error: signOutError } = await Promise.race([signOutPromise, timeoutPromise])
+        .catch(err => {
+          console.warn('⚠️ Sign out API call failed or timed out:', err.message)
+          return { error: err }
+        })
 
       if (signOutError) {
         console.error('🚪 Sign out error:', signOutError)
-        throw signOutError
+      } else {
+        console.log('🚪 Sign out API call successful')
       }
 
-      console.log('🚪 Sign out successful, clearing user state...')
+      console.log('🚪 Clearing user state regardless of API result...')
       setUser(null)
       setUserProfile(null)
       console.log('✅ Sign out complete!')
