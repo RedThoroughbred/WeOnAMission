@@ -333,14 +333,14 @@ export default function ParentDashboard() {
                 <CardTitle className="text-amber-900 dark:text-amber-100">
                   Getting Started Tips
                 </CardTitle>
-                <CardDescription className="text-amber-700 dark:text-amber-300 mt-2">
+                <div className="text-amber-700 dark:text-amber-300 mt-2">
                   <ul className="list-disc list-inside space-y-1">
                     <li>Add all students who will be attending the trip</li>
                     <li>Upload required documents (medical forms, permission slips)</li>
                     <li>Track payments and set up a payment schedule</li>
                     <li>Check upcoming events and mark your calendar</li>
                   </ul>
-                </CardDescription>
+                </div>
               </div>
             </div>
           </CardHeader>
