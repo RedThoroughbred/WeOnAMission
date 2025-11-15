@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peru 2026 - Student Mission Trip</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="theme.js"></script>
+    <script src="tenant.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            background: var(--bg-secondary);
+        }
+
+        /* ==================== HEADER & NAVIGATION ==================== */
+
+        header {
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            color: white;
+            padding: 1.25rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            cursor: pointer;
+            flex: 1;
+            letter-spacing: 0.5px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .question-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .question-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .portals-section {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
+            flex: 0 1 auto;
+            margin-top: auto;
+        }
+
+        .portal-link {
+            display: block;
+            padding: 0.75rem 0;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+            padding-left: 0.75rem;
+        }
+
+        .portal-link:hover {
+            background: var(--bg-primary);
+            border-left-color: var(--primary);
+            padding-left: 1rem;
+            border-radius: 4px;
+        }
+
+        .hamburger {
+            width: 30px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* ==================== SIDE MENU ==================== */
+
+        .side-menu {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            width: 80%;
+            max-width: 300px;
+            max-height: 100vh;
+            background: #f8f9fa;
+            color: var(--text-primary);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s;
+            z-index: 999;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-top: 1rem;
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+        }
+
+        html[data-theme="dark"] .side-menu {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .side-menu-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            padding: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .side-menu-close:hover {
+            color: var(--text-primary);
+            transform: scale(1.2);
+        }
+
+        .side-menu nav {
+            padding: 0.5rem 0;
+            flex: 0 0 auto;
+        }
+
+        .side-menu nav a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.3s;
+        }
+
+        .side-menu nav a:hover {
+            background: var(--bg-tertiary);
+            color: var(--primary);
+        }
+
+        .side-menu nav a.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: var(--border-light);
+            margin: 0.5rem 0;
+        }
+
+        .auth-buttons {
+            padding: 0.5rem 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .auth-buttons a {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-login {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        html[data-theme="dark"] .btn-login {
+            background: #2d3748;
+            color: #60a5fa;
+            border: 2px solid #60a5fa;
+        }
+
+        .btn-register {
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--primary);
+        }
+
+        html[data-theme="dark"] .btn-register {
+            background: #4f46e5;
+            color: white;
+            border: 2px solid #4f46e5;
+        }
+
+        .btn-register:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* ==================== OVERLAY ==================== */
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 998;
+        }
+
+        .menu-overlay.show {
+            display: block;
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* ==================== HERO SECTION ==================== */
+
+        .hero {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .countdown-timer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .countdown-item {
+            background: rgba(0,0,0,0.2);
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .countdown-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .hero-cta {
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #1976d2;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* ==================== CONTENT SECTIONS ==================== */
+
+        section {
+            padding: 1.5rem 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==================== COLLAPSIBLE CARDS ==================== */
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            user-select: none;
+        }
+
+        .card-header:hover {
+            background: #f0f7ff;
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+            color: #333;
+            margin: 0;
+            flex: 1;
+        }
+
+        .card-toggle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            color: var(--primary);
+        }
+
+        .card.collapsed .card-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .card-content {
+            padding: 1rem;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .card.collapsed .card-content {
+            max-height: 0;
+            padding: 0 1rem;
+        }
+
+        .card-content p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .card-content ul {
+            margin: 0.75rem 0 0.75rem 1.5rem;
+        }
+
+        .card-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==================== GRID LAYOUT ==================== */
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .grid-card h3 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .grid-card p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* ==================== INFO BOX ==================== */
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-left: 4px solid #f57c00;
+        }
+
+        /* ==================== STATUS BADGE ==================== */
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+
+        /* ==================== LOADING & EMPTY STATE ==================== */
+
+        .loading {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-tertiary);
+        }
+
+        /* ==================== FOOTER ==================== */
+
+        footer {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* ==================== MODALS ==================== */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group button {
+            background: #1976d2;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .form-group button:hover {
+            background: #1565c0;
+        }
+
+        /* ==================== DARK MODE ==================== */
+
+        html[data-theme="dark"] body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        html[data-theme="dark"] .side-menu {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-right-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .side-menu nav a {
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .side-menu nav a:hover {
+            background: var(--bg-secondary);
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .hero {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        }
+
+        html[data-theme="dark"] .hero h1 {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .hero p {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] section {
+            background: var(--bg-primary);
+        }
+
+        html[data-theme="dark"] .info-box {
+            background: rgba(79, 70, 229, 0.1);
+            border-left-color: var(--primary-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .info-box.alert-warning {
+            background: rgba(249, 115, 22, 0.1);
+            border-left-color: #f97316;
+        }
+
+        html[data-theme="dark"] .section-title {
+            color: white;
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .card {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        html[data-theme="dark"] .card-header {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .card-header h3 {
+            color: white;
+        }
+
+        html[data-theme="dark"] .card-content {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .event-info {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .countdown-timer {
+            gap: 1rem;
+        }
+
+        html[data-theme="dark"] .timer-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .timer-number {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .modal-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .modal-header {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .form-group label {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .form-group input,
+        html[data-theme="dark"] .form-group select,
+        html[data-theme="dark"] .form-group textarea {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-light);
+        }
+
+        html[data-theme="dark"] .form-group input::placeholder,
+        html[data-theme="dark"] .form-group textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        html[data-theme="dark"] .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        html[data-theme="dark"] .donation-type-btn {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-light) !important;
+        }
+
+        html[data-theme="dark"] .donation-type-btn.selected {
+            border-color: var(--primary) !important;
+            background: rgba(79, 70, 229, 0.1) !important;
+            color: var(--primary-light) !important;
+        }
+
+        html[data-theme="dark"] .loading {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .empty-state {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] footer {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-top: 1px solid var(--border-light);
+        }
+
+        html[data-theme="dark"] .grid {
+            gap: 1.5rem;
+        }
+
+        html[data-theme="dark"] .grid > * {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        html[data-theme="dark"] .grid-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .grid-card h3 {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .grid-card p {
+            color: var(--text-secondary);
+        }
+
+        .memory-card {
+            background: white;
+        }
+
+        .memory-card h3 {
+            color: #000 !important;
+        }
+
+        html[data-theme="dark"] .memory-card {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .memory-card h3 {
+            color: white !important;
+        }
+
+        html[data-theme="dark"] .status-badge {
+            color: var(--text-primary);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .countdown-timer {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            section {
+                padding: 1rem 0;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="logo" onclick="window.location.href='#'">🌍 Peru 2026</div>
+        <div class="header-right">
+            <div class="question-icon" title="Ask a Question" onclick="openQuestionModal()">❓</div>
+            <button id="themeToggleBtn" title="Toggle Dark Mode" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-size: 1.5rem; transition: all 0.3s;">🌙</button>
+            <button class="hamburger" onclick="openMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- SIDE MENU -->
+    <div class="side-menu" id="sideMenu">
+        <button class="side-menu-close" onclick="closeMenu()">✕</button>
+        <nav>
+            <a href="#home" onclick="closeMenu()" class="active">Home</a>
+            <a href="#about" onclick="closeMenu()">About</a>
+            <a href="#events" onclick="closeMenu()">Events & Calendar</a>
+            <a href="#resources" onclick="closeMenu()">Resources</a>
+            <a href="#memories" onclick="closeMenu()">Trip Memories</a>
+            <a href="#faq" onclick="closeMenu()">FAQ</a>
+            <a href="nice-to-know.html" onclick="closeMenu()">Nice to Know</a>
+        </nav>
+        <div class="menu-divider"></div>
+        <div class="auth-buttons">
+            <a href="login.html" class="btn-login">Login</a>
+            <a href="login.html" class="btn-register">Register</a>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="portals-section">
+            <p style="margin-bottom: 0.75rem; font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">🔗 Quick Access:</p>
+            <a href="parent-portal.html" onclick="closeMenu()" class="portal-link">👨‍👩‍👧‍👦 Parent Portal</a>
+            <a href="student-portal.html" onclick="closeMenu()" class="portal-link">🎓 Student Portal</a>
+            <a href="admin-portal.html" onclick="closeMenu()" class="portal-link">⚙️ Admin Portal</a>
+            <a href="super-admin-portal.html" onclick="closeMenu()" class="portal-link">🔐 Super Admin Portal</a>
+        </div>
+    </div>
+
+    <!-- MENU OVERLAY -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Peru Mission Trip 2026</h1>
+            <p class="hero-subtitle">Serve at Luz de Esperanza in Ahuac, Peru</p>
+
+            <div class="countdown-timer">
+                <div class="countdown-item">
+                    <div class="countdown-number" id="days">0</div>
+                    <div class="countdown-label">DAYS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="hours">0</div>
+                    <div class="countdown-label">HOURS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="minutes">0</div>
+                    <div class="countdown-label">MINS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="seconds">0</div>
+                    <div class="countdown-label">SECS</div>
+                </div>
+            </div>
+
+            <div class="hero-cta" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="login.html" class="btn-primary">Register Now</a>
+                <button onclick="openDonateModal()" class="btn-primary" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: none; cursor: pointer; text-decoration: none; display: inline-block; padding: 0.75rem 2rem; border-radius: 4px; font-weight: 600; color: white;">💚 Donate Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title">About the Trip</h2>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <h3>Luz de Esperanza Mission</h3>
+                    <div class="card-toggle">▶</div>
+                </div>
+                <div class="card-content">
+                    <p>Luz de Esperanza ("Light of Hope") is a school in the Andes mountains serving low-income families. We're building relationships and supporting their educational mission.</p>
+                    <p>Over 200 students benefit from programs we've supported. Our trips help with school improvements, educational resources, and cross-cultural understanding.</p>
+                </div>
+            </div>
+
+            <div class="info-box alert-warning">
+                <strong>⚠️ High Altitude:</strong> Ahuac is at 10,692 ft (3,260m). Most students will experience some altitude adjustment. See the Nice to Know section for preparation tips.
+            </div>
+        </div>
+    </section>
+
+    <!-- EVENTS SECTION -->
+    <section id="events">
+        <div class="container">
+            <h2 class="section-title">Upcoming Events</h2>
+            <div id="eventsContainer" class="loading">Loading events...</div>
+        </div>
+    </section>
+
+    <!-- RESOURCES SECTION -->
+    <section id="resources">
+        <div class="container">
+            <h2 class="section-title">Resources</h2>
+            <div id="resourcesContainer" class="loading">Loading resources...</div>
+        </div>
+    </section>
+
+    <!-- MEMORIES SECTION (BUTTON TO OPEN MODAL) -->
+    <section id="memories" style="background: var(--bg-secondary); padding: 3rem 0;">
+        <div class="container">
+            <div style="text-align: center;">
+                <h2 class="section-title">Trip Memories</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 1.1rem;">Relive the journey through our shared memories and photos</p>
+                <button onclick="openMemoryBookModal()" class="btn-primary" style="padding: 1rem 2.5rem; background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); transition: all 0.3s; letter-spacing: 0.5px;">📖 View Memory Book</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div id="faqContainer" class="loading">Loading FAQs...</div>
+        </div>
+    </section>
+
+    <!-- QUESTION MODAL -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ask a Question</h2>
+                <button class="modal-close" onclick="closeQuestionModal()">✕</button>
+            </div>
+            <form onsubmit="handleQuestionSubmit(event)">
+                <div class="form-group">
+                    <label>Your Email *</label>
+                    <input type="email" id="questionEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Question Type *</label>
+                    <select id="questionType" required>
+                        <option value="">Select a type...</option>
+                        <option value="question">Question</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="bug_report">Bug Report</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Question *</label>
+                    <textarea id="questionText" required placeholder="Type your question here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Attachment (Optional)</label>
+                    <input type="file" id="questionAttachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt" style="padding: 0.75rem; border: 2px solid var(--border-light); border-radius: 6px; width: 100%; cursor: pointer; background: var(--bg-primary); color: var(--text-primary);">
+                    <small style="color: var(--text-tertiary); display: block; margin-top: 0.5rem;">Accepted formats: PDF, DOC, DOCX, JPG, PNG, GIF, TXT (Max 5MB)</small>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Submit Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DONATION MODAL -->
+    <div id="donateModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Make a Donation</h2>
+                <button class="modal-close" onclick="closeDonateModal()">✕</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary); text-align: center;">How would you like to support our mission?</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <button onclick="selectDonationType('money')" id="moneyBtn" class="donation-type-btn selected" style="padding: 1.5rem; border: 2px solid #2ecc71; background: #f0fdf4; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                        <div style="font-weight: 600; color: #27ae60;">Donate Money</div>
+                    </button>
+                    <button onclick="selectDonationType('items')" id="itemsBtn" class="donation-type-btn" style="padding: 1.5rem; border: 2px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                        <div style="font-weight: 600; color: #666;">Donate Items</div>
+                    </button>
+                </div>
+
+                <!-- Money Donation Section -->
+                <div id="moneySection">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Select Payment Method *</label>
+                        <select id="paymentMethod" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem;">
+                            <option value="">-- Select Method --</option>
+                            <option value="zelle">Zelle</option>
+                            <option value="venmo">Venmo</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="check">Check</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Amount *</label>
+                        <input type="number" id="donationAmount" placeholder="Enter amount" min="1" step="0.01" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem;">
+                    </div>
+                    <button onclick="submitMoneyDonation()" class="btn-primary" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Submit Donation</button>
+                </div>
+
+                <!-- Items Donation Section -->
+                <div id="itemsSection" style="display: none;">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">What would you like to donate? *</label>
+                        <textarea id="donationItems" placeholder="Describe the items you'd like to donate..." style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem; min-height: 80px;"></textarea>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Your Email *</label>
+                        <input type="email" id="donationEmail" placeholder="your@email.com" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem;">
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">We'll contact you to confirm details and arrange pickup/delivery.</p>
+                    <button onclick="submitItemsDonation()" class="btn-primary" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEMORY BOOK MODAL -->
+    <div id="memoryBookModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Trip Memory Book</h2>
+                <button class="modal-close" onclick="closeMemoryBookModal()">✕</button>
+            </div>
+            <div id="memoryBookContainer" style="padding: 1.5rem;">
+                <div class="loading">Loading memories...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 Peru Mission Trip 2026. Have questions? Click the question mark icon at the top!</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // ==================== MENU FUNCTIONS ====================
+
+        function openMenu() {
+            document.getElementById('sideMenu').classList.add('open');
+            document.getElementById('menuOverlay').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            document.getElementById('sideMenu').classList.remove('open');
+            document.getElementById('menuOverlay').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ==================== CARD TOGGLE ====================
+
+        function toggleCard(header) {
+            const card = header.closest('.card');
+            card.classList.toggle('collapsed');
+        }
+
+        // Collapse all cards by default
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.add('collapsed');
+            });
+        });
+
+        // ==================== COUNTDOWN TIMER ====================
+
+        function updateCountdown() {
+            const departureDate = new Date('2026-06-26T00:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = departureDate - now;
+
+            if (distance < 0) {
+                document.querySelector('.countdown-timer').innerHTML = '<p style="grid-column: 1/-1; font-size: 1.2rem;">The trip is happening now! 🎉</p>';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // ==================== QUESTION MODAL ====================
+
+        function openQuestionModal() {
+            document.getElementById('questionModal').classList.add('show');
+            closeMenu(); // Close menu if open
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.remove('show');
+        }
+
+        async function handleQuestionSubmit(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('questionEmail').value;
+            const questionType = document.getElementById('questionType').value;
+            const question = document.getElementById('questionText').value;
+            const attachmentFile = document.getElementById('questionAttachment').files[0];
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+
+                let attachmentPath = null;
+
+                // Handle file upload if present
+                if (attachmentFile) {
+                    // Validate file size (5MB max)
+                    if (attachmentFile.size > 5 * 1024 * 1024) {
+                        alert('File size exceeds 5MB limit. Please choose a smaller file.');
+                        return;
+                    }
+
+                    try {
+                        const fileExt = attachmentFile.name.split('.').pop().toLowerCase();
+                        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+                        const filePath = `questions/${church.id}/${fileName}`;
+
+                        // Try uploading to trip-photos bucket as it exists
+                        const { error: uploadError } = await supabaseClient
+                            .storage
+                            .from('trip-photos')
+                            .upload(filePath, attachmentFile);
+
+                        if (uploadError) {
+                            console.error('File upload error:', uploadError);
+                            // Store filename even if upload fails - admin can request directly
+                            attachmentPath = `[File: ${attachmentFile.name}]`;
+                        } else {
+                            attachmentPath = filePath;
+                        }
+                    } catch (uploadErr) {
+                        console.error('Error uploading file:', uploadErr);
+                        // Store filename as attachment reference even if upload fails
+                        attachmentPath = `[File: ${attachmentFile.name}]`;
+                    }
+                }
+
+                // Submit question with or without attachment
+                await API.submitQuestion(email, question, questionType, church.id, attachmentPath);
+                alert('Question submitted! Admins will review and respond shortly.');
+                closeQuestionModal();
+                event.target.reset();
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('There was an error. Please try again.');
+            }
+        }
+
+        // ==================== LOAD DATA ====================
+
+        async function loadEvents() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const events = await API.getEvents(church.id);
+                renderEvents(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                document.getElementById('eventsContainer').innerHTML =
+                    '<p class="empty-state">Unable to load events. Please refresh.</p>';
+            }
+        }
+
+        // Generate calendar link for an event
+        function generateCalendarLink(event) {
+            // Parse date and time
+            const eventDate = new Date(event.event_date);
+            const year = eventDate.getFullYear();
+            const month = String(eventDate.getMonth() + 1).padStart(2, '0');
+            const day = String(eventDate.getDate()).padStart(2, '0');
+
+            // Parse time if available
+            let startTime = '090000'; // Default 9 AM
+            if (event.event_time) {
+                const timeParts = event.event_time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+                if (timeParts) {
+                    let hours = parseInt(timeParts[1]);
+                    const minutes = timeParts[2];
+                    const meridiem = timeParts[3] || 'AM';
+
+                    if (meridiem.toUpperCase() === 'PM' && hours !== 12) {
+                        hours += 12;
+                    } else if (meridiem.toUpperCase() === 'AM' && hours === 12) {
+                        hours = 0;
+                    }
+                    startTime = String(hours).padStart(2, '0') + minutes + '00';
+                }
+            }
+
+            // Create Google Calendar link
+            const eventTitle = encodeURIComponent(event.name);
+            const eventDesc = encodeURIComponent(event.description || '');
+            const eventLocation = encodeURIComponent(event.location || '');
+            const startDateTime = `${year}${month}${day}T${startTime}`;
+            const endDateTime = `${year}${month}${day}T${String(parseInt(startTime.substring(0, 2)) + 1).padStart(2, '0')}0000`;
+
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startDateTime}/${endDateTime}&location=${eventLocation}&details=${eventDesc}`;
+
+            return googleCalendarUrl;
+        }
+
+        function renderEvents(events) {
+            const container = document.getElementById('eventsContainer');
+            container.classList.remove('loading');
+
+            if (events.length === 0) {
+                container.innerHTML = '<p class="empty-state">No upcoming events yet.</p>';
+                return;
+            }
+
+            container.innerHTML = events.map(e => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <h3>${e.name}</h3>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>${Auth.formatDate(e.event_date)}</strong></p>
+                        ${e.event_time ? `<p>Time: ${e.event_time}</p>` : ''}
+                        ${e.location ? `<p>Location: ${e.location}</p>` : ''}
+                        <span class="status-badge">${e.event_type}</span>
+                        ${e.description ? `<p style="margin-top: 0.5rem;">${e.description}</p>` : ''}
+                        <div class="event-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <a href="${generateCalendarLink(e)}" target="_blank" class="calendar-btn" title="Add to Google Calendar">
+                                📅 Add to Calendar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadResources() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const resources = await API.getResources(church.id);
+                renderResources(resources);
+            } catch (error) {
+                console.error('Error loading resources:', error);
+                document.getElementById('resourcesContainer').innerHTML =
+                    '<p class="empty-state">Unable to load resources. Please refresh.</p>';
+            }
+        }
+
+        function renderResources(resources) {
+            const container = document.getElementById('resourcesContainer');
+            container.classList.remove('loading');
+
+            if (resources.length === 0) {
+                container.innerHTML = '<p class="empty-state">No resources available yet.</p>';
+                return;
+            }
+
+            container.innerHTML = resources.map(r => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <h3>${r.name}</h3>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p>${r.description || ''}</p>
+                        <p><strong>Type:</strong> ${r.resource_type}</p>
+                        <a href="${r.url}" target="_blank" style="color: #1976d2; font-weight: 600;">Access Resource →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMemories() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const memories = await API.getApprovedMemories(church.id);
+                renderMemories(memories);
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                document.getElementById('memoriesContainer').innerHTML =
+                    '<p class="empty-state">Unable to load memories. Please refresh.</p>';
+            }
+        }
+
+        function renderMemories(memories) {
+            const container = document.getElementById('memoriesContainer');
+
+            if (memories.length === 0) {
+                container.innerHTML = '<p class="empty-state">No approved memories yet. Check back soon!</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid">
+                    ${memories.map(m => `
+                        <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+                            ${m.photo_path ? `
+                                <div style="width: 100%; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 8px 8px 0 0; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                    <img src="https://sqcdgvvjojgrwsdajtuq.supabase.co/storage/v1/object/public/trip-photos/${m.photo_path}" alt="${m.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            ` : '<div style="width: 100%; aspect-ratio: 3 / 2; background: #f0f0f0; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; color: #999;">No photo</div>'}
+                            <div class="card-header" style="cursor: default;">
+                                <h3>${m.title}</h3>
+                            </div>
+                            <div class="card-content" style="max-height: none; flex-grow: 1;">
+                                <p><strong>${m.students?.full_name || 'Anonymous'}</strong></p>
+                                <p style="font-size: 0.9rem; color: #666; line-height: 1.5;">${m.content.substring(0, 150)}${m.content.length > 150 ? '...' : ''}</p>
+                                <p style="font-size: 0.85rem; color: #999; margin-top: 0.5rem;">Submitted ${Auth.formatDate(m.submitted_at)}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function loadFaqs() {
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    console.error('No church context found');
+                    return;
+                }
+                const faqs = await API.getFaqs(church.id);
+                renderFaqs(faqs);
+            } catch (error) {
+                console.error('Error loading FAQs:', error);
+                document.getElementById('faqContainer').innerHTML =
+                    '<p class="empty-state">Unable to load FAQs. Please refresh.</p>';
+            }
+        }
+
+        function renderFaqs(faqs) {
+            const container = document.getElementById('faqContainer');
+            container.classList.remove('loading');
+
+            if (faqs.length === 0) {
+                container.innerHTML = '<p class="empty-state">No FAQs yet. Submit a question to help us build this section!</p>';
+                return;
+            }
+
+            container.innerHTML = faqs.map(faq => `
+                <div class="card collapsed">
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <h3>${faq.question}</h3>
+                        <div class="card-toggle">▶</div>
+                    </div>
+                    <div class="card-content">
+                        <p>${faq.answer}</p>
+                        ${faq.category ? `<p style="font-size: 0.85rem; color: #999; margin-top: 1rem;">Category: ${faq.category}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== INITIALIZE ====================
+
+        (async function() {
+            await Promise.all([
+                loadEvents(),
+                loadResources(),
+                loadFaqs()
+            ]);
+        })();
+
+        // ==================== DONATION MODAL ====================
+
+        function openDonateModal() {
+            document.getElementById('donateModal').classList.add('show');
+            closeMenu();
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('show');
+            // Reset form
+            document.getElementById('paymentMethod').value = '';
+            document.getElementById('donationAmount').value = '';
+            document.getElementById('donationItems').value = '';
+            document.getElementById('donationEmail').value = '';
+            selectDonationType('money');
+        }
+
+        // ==================== MEMORY BOOK MODAL ====================
+
+        function openMemoryBookModal() {
+            const modal = document.getElementById('memoryBookModal');
+            modal.classList.add('show');
+            loadMemoriesForModal();
+        }
+
+        function closeMemoryBookModal() {
+            document.getElementById('memoryBookModal').classList.remove('show');
+        }
+
+        async function loadMemoriesForModal() {
+            const container = document.getElementById('memoryBookContainer');
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                if (!church) {
+                    container.innerHTML = '<p style="color: #d32f2f; text-align: center;">Unable to load memories. Please refresh.</p>';
+                    return;
+                }
+
+                const memories = await API.getApprovedMemories(church.id);
+
+                if (!memories || memories.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No memories shared yet. Be the first to add one!</p>';
+                    return;
+                }
+
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">';
+
+                for (const memory of memories) {
+                    const date = Auth.formatDate(memory.submitted_at);
+                    const photoPath = memory.photo_path ? `https://sqcdgvvjojgrwsdajtuq.supabase.co/storage/v1/object/public/trip-photos/${memory.photo_path}` : null;
+                    const studentName = memory.students?.full_name || 'Anonymous';
+                    const title = memory.title || 'Untitled Memory';
+                    const content = memory.content ? memory.content.substring(0, 150) + (memory.content.length > 150 ? '...' : '') : '';
+
+                    html += `
+                        <div class="memory-card" style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
+                    `;
+
+                    if (photoPath) {
+                        html += `<div style="width: 100%; height: 200px; overflow: hidden;">
+                            <img src="${photoPath}" alt="Memory photo" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>`;
+                    } else {
+                        html += `<div style="width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">No photo</div>`;
+                    }
+
+                    html += `
+                            <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column;">
+                                <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">${title}</h3>
+                                <p style="margin: 0 0 1rem 0; color: var(--text-secondary); font-size: 0.9rem; flex: 1; line-height: 1.5;">${content}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <span><strong style="color: var(--text-primary);">${studentName}</strong></span>
+                                    <span>${date}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                container.innerHTML = '<p style="color: #d32f2f; text-align: center;">Error loading memories. Please try again.</p>';
+            }
+        }
+
+        function selectDonationType(type) {
+            // Update button styles
+            const moneyBtn = document.getElementById('moneyBtn');
+            const itemsBtn = document.getElementById('itemsBtn');
+
+            if (type === 'money') {
+                moneyBtn.style.borderColor = '#2ecc71';
+                moneyBtn.style.background = '#f0fdf4';
+                itemsBtn.style.borderColor = '#e0e0e0';
+                itemsBtn.style.background = 'white';
+                document.getElementById('moneySection').style.display = 'block';
+                document.getElementById('itemsSection').style.display = 'none';
+            } else {
+                moneyBtn.style.borderColor = '#e0e0e0';
+                moneyBtn.style.background = 'white';
+                itemsBtn.style.borderColor = '#2ecc71';
+                itemsBtn.style.background = '#f0fdf4';
+                document.getElementById('moneySection').style.display = 'none';
+                document.getElementById('itemsSection').style.display = 'block';
+            }
+        }
+
+        async function submitMoneyDonation() {
+            const method = document.getElementById('paymentMethod').value;
+            const amount = document.getElementById('donationAmount').value;
+
+            if (!method || !amount) {
+                alert('Please select a payment method and enter an amount');
+                return;
+            }
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                const churchId = church ? church.id : null;
+
+                // Call API to save donation
+                const response = await fetch('api.js', {
+                    // For now, just show a message since we haven't built the backend yet
+                });
+
+                alert(`Thank you for your donation of $${amount}! Payment instructions for ${method.toUpperCase()} will be sent to your email. We'll contact you shortly with details.`);
+                closeDonateModal();
+            } catch (error) {
+                console.error('Error submitting donation:', error);
+                alert('Thank you for your interest in donating! We will contact you shortly.');
+                closeDonateModal();
+            }
+        }
+
+        async function submitItemsDonation() {
+            const items = document.getElementById('donationItems').value;
+            const email = document.getElementById('donationEmail').value;
+
+            if (!items || !email) {
+                alert('Please describe the items and provide your email');
+                return;
+            }
+
+            try {
+                const church = await Tenant.getCurrentChurchContext();
+                const churchId = church ? church.id : null;
+
+                alert(`Thank you for offering to donate! We've received your information:\n\nItems: ${items}\nEmail: ${email}\n\nWe'll contact you soon to arrange details.`);
+                closeDonateModal();
+            } catch (error) {
+                console.error('Error submitting donation:', error);
+                alert('Thank you for your interest in donating! We will contact you shortly.');
+                closeDonateModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const donateModal = document.getElementById('donateModal');
+            donateModal.addEventListener('click', function(e) {
+                if (e.target === donateModal) {
+                    closeDonateModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
