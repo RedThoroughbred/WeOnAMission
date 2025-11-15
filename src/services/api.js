@@ -459,18 +459,31 @@ export const api = {
   async createUser({ email, password, full_name, phone, role, church_id }) {
     const sb = getSupabase()
 
-    // Create auth user
+    // Create auth user with autoConfirm for admin-created users
     const { data: authData, error: authError } = await sb.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name
-        }
+        },
+        emailRedirectTo: window.location.origin
       }
     })
 
-    if (authError) throw authError
+    if (authError) {
+      console.error('Auth signup error:', authError)
+      throw authError
+    }
+
+    if (!authData?.user?.id) {
+      throw new Error('Failed to create auth user - no user ID returned')
+    }
+
+    console.log('✅ Auth user created:', authData.user.id)
+
+    // Small delay to ensure auth record is committed
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     // Create user record in database
     const { data, error } = await sb
@@ -486,7 +499,12 @@ export const api = {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Database insert error:', error)
+      throw error
+    }
+
+    console.log('✅ Database user created:', data)
     return data
   },
 
