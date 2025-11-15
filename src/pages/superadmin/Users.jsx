@@ -157,6 +157,19 @@ export default function SuperAdminUsers() {
     }
   }
 
+  const handleDelete = async (user) => {
+    if (!confirm(`Are you sure you want to DELETE ${user.full_name} (${user.email})?\n\nThis action CANNOT be undone!`)) return
+
+    try {
+      await api.deleteUser(user.id)
+      alert(`User ${user.full_name} has been deleted.`)
+      await loadUsers()
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      alert('Failed to delete user: ' + error.message)
+    }
+  }
+
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'superadmin':
@@ -244,6 +257,14 @@ export default function SuperAdminUsers() {
                           <Edit className="w-4 h-4 mr-1" />
                           Edit
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(user)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -283,9 +304,19 @@ export default function SuperAdminUsers() {
                           </td>
                           <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{user.phone || '-'}</td>
                           <td className="py-3 px-4 text-right">
-                            <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
+                            <div className="flex gap-2 justify-end">
+                              <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(user)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}

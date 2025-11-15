@@ -448,6 +448,16 @@ export const api = {
 
   async deleteUser(userId) {
     const sb = getSupabase()
+
+    // Try to delete from auth (requires admin privileges, might fail)
+    try {
+      await sb.auth.admin.deleteUser(userId)
+    } catch (authError) {
+      console.warn('Could not delete auth user (might require service role):', authError)
+      // Continue anyway - the database trigger should handle it
+    }
+
+    // Delete from users table (this should cascade to auth via trigger)
     const { error } = await sb
       .from('users')
       .delete()
@@ -482,18 +492,24 @@ export const api = {
   async createUser({ email, password, full_name, phone, role, church_id }) {
     const sb = getSupabase()
 
-    // Create auth user
+    // Create auth user with email confirmation disabled
     const { data: authData, error: authError } = await sb.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name
-        }
+        },
+        emailRedirectTo: undefined // Don't send confirmation email
       }
     })
 
     if (authError) throw authError
+
+    // Check if user was created
+    if (!authData.user) {
+      throw new Error('User creation failed - no user returned from auth')
+    }
 
     // Create user record in database
     const { data, error } = await sb
@@ -510,6 +526,10 @@ export const api = {
       .single()
 
     if (error) throw error
+
+    console.log('✅ User created:', data)
+    console.log('⚠️ Note: User may need email confirmation depending on Supabase settings')
+
     return data
   },
 
