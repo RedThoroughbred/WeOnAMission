@@ -139,7 +139,7 @@ export const api = {
       .select('*, students(full_name)')
       .eq('church_id', churchId)
       .eq('uploaded_by', userId)
-      .order('uploaded_at', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return data || []
@@ -151,7 +151,7 @@ export const api = {
       .from('documents')
       .select('*, students(full_name)')
       .eq('church_id', churchId)
-      .order('uploaded_at', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return data || []
@@ -164,7 +164,7 @@ export const api = {
       .select('*, students(full_name), users(full_name)')
       .eq('church_id', churchId)
       .eq('status', 'pending')
-      .order('uploaded_at', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return data || []

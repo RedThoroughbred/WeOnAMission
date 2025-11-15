@@ -16,6 +16,16 @@ export default function AdminStudents() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingStudent, setEditingStudent] = useState(null)
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    grade: '',
+    medical_info: '',
+    emergency_contact: ''
+  })
 
   useEffect(() => {
     if (churchId) {
@@ -50,6 +60,33 @@ export default function AdminStudents() {
       console.error('❌ Error loading students:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleEdit = (student) => {
+    setEditingStudent(student)
+    setEditForm({
+      full_name: student.full_name || '',
+      email: student.email || '',
+      phone: student.phone || '',
+      grade: student.grade || '',
+      medical_info: student.medical_info || '',
+      emergency_contact: student.emergency_contact || ''
+    })
+    setShowEditModal(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingStudent) return
+
+    try {
+      await api.updateStudent(editingStudent.id, editForm, churchId)
+      setShowEditModal(false)
+      setEditingStudent(null)
+      await loadStudents()
+    } catch (error) {
+      console.error('Error updating student:', error)
+      alert('Failed to update student')
     }
   }
 
@@ -148,7 +185,7 @@ export default function AdminStudents() {
                         <p><span className="text-gray-600 dark:text-gray-400">Phone:</span> {student.phone || 'N/A'}</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(student)}>
                           <Edit className="w-4 h-4 mr-1" />
                           Edit
                         </Button>
@@ -193,7 +230,7 @@ export default function AdminStudents() {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(student)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
@@ -226,6 +263,89 @@ export default function AdminStudents() {
               <Button onClick={() => setShowAddModal(false)} className="w-full">
                 Close
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Student Modal */}
+        {showEditModal && editingStudent && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full p-6 my-8">
+              <h2 className="text-2xl font-bold mb-6">Edit Student</h2>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit_full_name">Full Name *</Label>
+                  <Input
+                    id="edit_full_name"
+                    value={editForm.full_name}
+                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                    placeholder="Student's full name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_email">Email</Label>
+                  <Input
+                    id="edit_email"
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    placeholder="student@example.com"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit_phone">Phone</Label>
+                    <Input
+                      id="edit_phone"
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit_grade">Grade</Label>
+                    <Input
+                      id="edit_grade"
+                      value={editForm.grade}
+                      onChange={(e) => setEditForm({ ...editForm, grade: e.target.value })}
+                      placeholder="9"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="edit_medical">Medical Information</Label>
+                  <Input
+                    id="edit_medical"
+                    value={editForm.medical_info}
+                    onChange={(e) => setEditForm({ ...editForm, medical_info: e.target.value })}
+                    placeholder="Allergies, medications, etc."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_emergency">Emergency Contact</Label>
+                  <Input
+                    id="edit_emergency"
+                    value={editForm.emergency_contact}
+                    onChange={(e) => setEditForm({ ...editForm, emergency_contact: e.target.value })}
+                    placeholder="Name: John Doe, Phone: (555) 123-4567"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button onClick={handleSaveEdit} className="flex-1">
+                  Save Changes
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingStudent(null)
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
         )}
