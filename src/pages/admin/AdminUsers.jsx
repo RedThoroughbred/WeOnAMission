@@ -315,8 +315,9 @@ export default function AdminUsers() {
                   >
                     <option value="parent">Parent</option>
                     <option value="student">Student</option>
-                    <option value="admin">Admin</option>
+                    <option value="admin">Church Admin</option>
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">Church admins can manage this church's data</p>
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
@@ -381,7 +382,7 @@ export default function AdminUsers() {
                   >
                     <option value="parent">Parent</option>
                     <option value="student">Student</option>
-                    <option value="admin">Admin</option>
+                    <option value="admin">Church Admin</option>
                   </select>
                 </div>
               </div>
