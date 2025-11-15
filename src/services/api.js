@@ -196,7 +196,16 @@ export const api = {
       .order('submitted_at', { ascending: false })
 
     if (error) throw error
-    return data || []
+
+    // Convert storage paths to public URLs
+    const memoriesWithUrls = (data || []).map(memory => ({
+      ...memory,
+      photo_url: memory.photo_path
+        ? sb.storage.from('trip-photos').getPublicUrl(memory.photo_path).data.publicUrl
+        : null
+    }))
+
+    return memoriesWithUrls
   },
 
   async getPendingMemories(churchId) {
@@ -209,7 +218,16 @@ export const api = {
       .order('submitted_at', { ascending: false })
 
     if (error) throw error
-    return data || []
+
+    // Convert storage paths to public URLs
+    const memoriesWithUrls = (data || []).map(memory => ({
+      ...memory,
+      photo_url: memory.photo_path
+        ? sb.storage.from('trip-photos').getPublicUrl(memory.photo_path).data.publicUrl
+        : null
+    }))
+
+    return memoriesWithUrls
   },
 
   async updateMemoryStatus(memoryId, status, churchId) {
