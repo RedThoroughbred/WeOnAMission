@@ -459,33 +459,50 @@ export const api = {
   async createUser({ email, password, full_name, phone, role, church_id }) {
     const sb = getSupabase()
 
-    // Create auth user with autoConfirm for admin-created users
+    console.log('🔧 Creating user:', { email, role, church_id })
+
+    // Check if user already exists in database
+    const { data: existingUser } = await sb
+      .from('users')
+      .select('id, email')
+      .eq('email', email)
+      .maybeSingle()
+
+    if (existingUser) {
+      console.log('⚠️ User already exists in database:', existingUser)
+      throw new Error('A user with this email already exists')
+    }
+
+    // Create auth user
     const { data: authData, error: authError } = await sb.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          full_name
-        },
+        data: { full_name },
         emailRedirectTo: window.location.origin
       }
     })
 
     if (authError) {
-      console.error('Auth signup error:', authError)
+      console.error('❌ Auth signup error:', authError)
+      if (authError.message?.includes('already registered') || authError.status === 409) {
+        throw new Error('This email is already registered. Please use a different email or delete the existing user first.')
+      }
       throw authError
     }
 
     if (!authData?.user?.id) {
+      console.error('❌ No user ID returned from signup')
       throw new Error('Failed to create auth user - no user ID returned')
     }
 
     console.log('✅ Auth user created:', authData.user.id)
 
-    // Small delay to ensure auth record is committed
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Longer delay to ensure auth record is committed
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     // Create user record in database
+    console.log('📝 Inserting user into database...')
     const { data, error } = await sb
       .from('users')
       .insert([{
@@ -500,8 +517,9 @@ export const api = {
       .single()
 
     if (error) {
-      console.error('Database insert error:', error)
-      throw error
+      console.error('❌ Database insert error:', error)
+      console.error('Error details:', { code: error.code, message: error.message, details: error.details })
+      throw new Error(`Failed to create user record: ${error.message}`)
     }
 
     console.log('✅ Database user created:', data)
