@@ -20,12 +20,8 @@ supabaseInstance.auth.getSession().then(({ data, error }) => {
   console.error('❌ Supabase connection test ERROR:', err)
 })
 
-// Also try to use window.CONFIG if available (fallback)
+// ALWAYS return the same instance to ensure session sharing
 export const getSupabase = () => {
-  // Try window.CONFIG first if available (allows for runtime config updates)
-  if (window.CONFIG?.supabase?.url && window.CONFIG?.supabase?.anonKey) {
-    return createClient(window.CONFIG.supabase.url, window.CONFIG.supabase.anonKey)
-  }
   return supabaseInstance
 }
 

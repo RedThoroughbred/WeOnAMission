@@ -40,10 +40,12 @@ export const AuthProvider = ({ children }) => {
     const setupAuthListener = async () => {
       const sb = getSupabase()
       const { data: { subscription } } = sb.auth.onAuthStateChange(
-        async (_event, session) => {
+        async (event, session) => {
+          console.log('🔔 Auth state changed:', event, 'Session:', session ? 'exists' : 'null')
           setUser(session?.user || null)
 
           if (session?.user) {
+            console.log('👤 User logged in:', session.user.email)
             const { data } = await sb
               .from('users')
               .select('*')
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }) => {
               .single()
             setUserProfile(data)
           } else {
+            console.log('👤 User logged out')
             setUserProfile(null)
           }
         }
