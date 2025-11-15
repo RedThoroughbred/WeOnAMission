@@ -456,6 +456,29 @@ export const api = {
     if (error) throw error
   },
 
+  async sendPasswordResetEmail(email) {
+    const sb = getSupabase()
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    })
+
+    if (error) throw error
+    return { success: true }
+  },
+
+  async updateUserPassword(userId, newPassword) {
+    const sb = getSupabase()
+
+    // Note: This requires admin privileges in Supabase
+    // For now, we'll use the Auth Admin API to update the password
+    const { data, error } = await sb.auth.admin.updateUserById(userId, {
+      password: newPassword
+    })
+
+    if (error) throw error
+    return data
+  },
+
   async createUser({ email, password, full_name, phone, role, church_id }) {
     const sb = getSupabase()
 

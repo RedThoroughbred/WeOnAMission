@@ -9,6 +9,8 @@ export default function SuperAdminUsers() {
   const [churches, setChurches] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
   const [addForm, setAddForm] = useState({
     full_name: '',
     email: '',
@@ -16,6 +18,14 @@ export default function SuperAdminUsers() {
     phone: '',
     role: 'parent',
     church_id: ''
+  })
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    role: '',
+    church_id: '',
+    new_password: ''
   })
 
   useEffect(() => {
@@ -81,6 +91,69 @@ export default function SuperAdminUsers() {
     } catch (error) {
       console.error('Error creating user:', error)
       alert('Failed to create user: ' + error.message)
+    }
+  }
+
+  const handleEdit = (user) => {
+    setEditingUser(user)
+    setEditForm({
+      full_name: user.full_name || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      role: user.role || 'parent',
+      church_id: user.church_id || '',
+      new_password: ''
+    })
+    setShowEditModal(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editForm.full_name || !editForm.email) {
+      alert('Please fill in required fields (Name, Email)')
+      return
+    }
+
+    try {
+      // Update user profile
+      await api.updateUser(editingUser.id, {
+        full_name: editForm.full_name,
+        email: editForm.email,
+        phone: editForm.phone || null,
+        role: editForm.role,
+        church_id: editForm.church_id
+      })
+
+      // Update password if provided
+      if (editForm.new_password && editForm.new_password.length >= 6) {
+        try {
+          await api.updateUserPassword(editingUser.id, editForm.new_password)
+          alert('User updated successfully, including password!')
+        } catch (pwError) {
+          console.error('Password update failed:', pwError)
+          alert('User profile updated, but password update failed: ' + pwError.message)
+        }
+      } else {
+        alert('User updated successfully!')
+      }
+
+      setShowEditModal(false)
+      setEditingUser(null)
+      await loadUsers()
+    } catch (error) {
+      console.error('Error updating user:', error)
+      alert('Failed to update user: ' + error.message)
+    }
+  }
+
+  const handleSendPasswordReset = async (user) => {
+    if (!confirm(`Send password reset email to ${user.email}?`)) return
+
+    try {
+      await api.sendPasswordResetEmail(user.email)
+      alert(`Password reset email sent to ${user.email}!`)
+    } catch (error) {
+      console.error('Error sending password reset:', error)
+      alert('Failed to send password reset email: ' + error.message)
     }
   }
 
@@ -167,7 +240,7 @@ export default function SuperAdminUsers() {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(user)}>
                           <Edit className="w-4 h-4 mr-1" />
                           Edit
                         </Button>
@@ -210,7 +283,7 @@ export default function SuperAdminUsers() {
                           </td>
                           <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{user.phone || '-'}</td>
                           <td className="py-3 px-4 text-right">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </td>
@@ -223,6 +296,109 @@ export default function SuperAdminUsers() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit User Modal */}
+        {showEditModal && editingUser && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full p-6 my-8">
+              <h2 className="text-2xl font-bold mb-6">Edit User: {editingUser.full_name}</h2>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit_church">Church *</Label>
+                  <select
+                    id="edit_church"
+                    value={editForm.church_id}
+                    onChange={(e) => setEditForm({ ...editForm, church_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select a church</option>
+                    {churches.map((church) => (
+                      <option key={church.id} value={church.id}>
+                        {church.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="edit_full_name">Full Name *</Label>
+                  <Input
+                    id="edit_full_name"
+                    value={editForm.full_name}
+                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                    placeholder="User's full name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_email">Email *</Label>
+                  <Input
+                    id="edit_email"
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    placeholder="user@example.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_phone">Phone</Label>
+                  <Input
+                    id="edit_phone"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_role">Role *</Label>
+                  <select
+                    id="edit_role"
+                    value={editForm.role}
+                    onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="parent">Parent</option>
+                    <option value="student">Student</option>
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">Super Admin</option>
+                  </select>
+                </div>
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <Label htmlFor="edit_password">New Password (optional)</Label>
+                  <Input
+                    id="edit_password"
+                    type="password"
+                    value={editForm.new_password}
+                    onChange={(e) => setEditForm({ ...editForm, new_password: e.target.value })}
+                    placeholder="Leave blank to keep current password"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Only enter a password if you want to change it (minimum 6 characters)</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSendPasswordReset(editingUser)}
+                    className="mt-2"
+                  >
+                    Send Password Reset Email
+                  </Button>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button onClick={handleSaveEdit} className="flex-1">
+                  Save Changes
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingUser(null)
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Add User Modal */}
         {showAddModal && (
