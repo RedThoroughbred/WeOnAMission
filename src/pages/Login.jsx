@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { Button } from '../components/ui'
@@ -13,8 +13,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [isSignUp, setIsSignUp] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn, user } = useAuth()
   const navigate = useNavigate()
+
+  // Redirect when user logs in successfully
+  useEffect(() => {
+    if (user && !error) {
+      console.log('✅ User detected, redirecting to /home')
+      navigate('/home')
+    }
+  }, [user, error, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -24,13 +32,29 @@ export default function Login() {
     console.log('🔐 Login attempt started...', { email })
 
     try {
-      const result = await signIn(email, password)
-      console.log('✅ Login successful!', result)
-      navigate('/home')
+      // Start the login attempt
+      signIn(email, password)
+        .then(result => {
+          console.log('✅ Login successful!', result)
+          // Navigation will happen via useEffect when user state updates
+        })
+        .catch(err => {
+          console.error('❌ Login failed:', err)
+          setError(err.message || 'Invalid email or password')
+          setLoading(false)
+        })
+
+      // Give it 10 seconds for the auth state to change
+      // If it doesn't happen, show an error
+      setTimeout(() => {
+        if (!user) {
+          console.warn('⏱️ Login taking too long, but may still succeed via auth listener')
+          setLoading(false)
+        }
+      }, 10000)
     } catch (err) {
       console.error('❌ Login failed:', err)
       setError(err.message || 'Invalid email or password')
-    } finally {
       setLoading(false)
     }
   }
