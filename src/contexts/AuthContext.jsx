@@ -99,17 +99,10 @@ export const AuthProvider = ({ children }) => {
       console.log('🔑 AuthContext: Supabase client obtained')
       console.log('🔑 AuthContext: Making API call to Supabase...')
 
-      // Add timeout to prevent hanging forever
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Login request timed out after 30 seconds. Please check your internet connection.')), 30000)
-      )
-
-      const loginPromise = sb.auth.signInWithPassword({
+      const { data, error: authError } = await sb.auth.signInWithPassword({
         email,
         password
       })
-
-      const { data, error: authError } = await Promise.race([loginPromise, timeoutPromise])
 
       console.log('🔑 AuthContext: Sign in response received', { data, error: authError })
 
