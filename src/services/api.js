@@ -489,4 +489,148 @@ export const api = {
     if (error) throw error
     return data
   },
+
+  // ==================== Parent-Student Relationships ====================
+
+  async getParentStudents(parentId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('parent_students')
+      .select(`
+        *,
+        students!student_id (
+          id,
+          full_name,
+          grade,
+          date_of_birth,
+          medical_info,
+          allergies,
+          dietary_restrictions,
+          phone,
+          email,
+          user_id,
+          church_id
+        )
+      `)
+      .eq('parent_id', parentId)
+      .order('is_primary', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getStudentParents(studentId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('parent_students')
+      .select(`
+        *,
+        users!parent_id (
+          id,
+          full_name,
+          email,
+          phone,
+          role
+        )
+      `)
+      .eq('student_id', studentId)
+      .order('is_primary', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async addParentStudent({ parent_id, student_id, relationship, is_primary }) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('parent_students')
+      .insert([{
+        parent_id,
+        student_id,
+        relationship: relationship || null,
+        is_primary: is_primary || false
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async removeParentStudent(parentStudentId) {
+    const sb = getSupabase()
+    const { error } = await sb
+      .from('parent_students')
+      .delete()
+      .eq('id', parentStudentId)
+
+    if (error) throw error
+  },
+
+  async updateParentStudent(parentStudentId, updates) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('parent_students')
+      .update(updates)
+      .eq('id', parentStudentId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async getParentsByChurch(churchId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('users')
+      .select('*')
+      .eq('church_id', churchId)
+      .eq('role', 'parent')
+      .order('full_name')
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getStudentDetails(studentId) {
+    const sb = getSupabase()
+
+    // Get student info
+    const { data: student, error: studentError } = await sb
+      .from('students')
+      .select('*')
+      .eq('id', studentId)
+      .single()
+
+    if (studentError) throw studentError
+
+    // Get parents
+    const parents = await this.getStudentParents(studentId)
+
+    // Get payments for this student
+    const { data: payments, error: paymentsError } = await sb
+      .from('payments')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false })
+
+    if (paymentsError) throw paymentsError
+
+    // Get documents for this student
+    const { data: documents, error: documentsError } = await sb
+      .from('documents')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false })
+
+    if (documentsError) throw documentsError
+
+    return {
+      ...student,
+      parents,
+      payments: payments || [],
+      documents: documents || []
+    }
+  },
 }

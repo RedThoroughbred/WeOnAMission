@@ -25,6 +25,7 @@ import TripMemories from './pages/student/TripMemories'
 import AdminPortal from './pages/AdminPortal'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminStudents from './pages/admin/AdminStudents'
+import AdminParents from './pages/admin/AdminParents'
 import AdminPayments from './pages/admin/AdminPayments'
 import AdminDocuments from './pages/admin/AdminDocuments'
 import AdminEvents from './pages/admin/AdminEvents'
@@ -100,6 +101,7 @@ function App() {
                 <Route path="/admin" element={<AdminPortal />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/students" element={<AdminStudents />} />
+                <Route path="/admin/parents" element={<AdminParents />} />
                 <Route path="/admin/payments" element={<AdminPayments />} />
                 <Route path="/admin/documents" element={<AdminDocuments />} />
                 <Route path="/admin/events" element={<AdminEvents />} />

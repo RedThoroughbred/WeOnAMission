@@ -9,6 +9,7 @@ export default function AdminUsers() {
   const { churchId, church } = useTenant()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [roleFilter, setRoleFilter] = useState('all')
   const [showEditModal, setShowEditModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
@@ -145,9 +146,28 @@ export default function AdminUsers() {
           </Button>
         </div>
 
+        {/* Role Filter */}
+        <div className="flex items-center gap-3">
+          <Label htmlFor="role-filter" className="text-sm font-medium whitespace-nowrap">Filter by role:</Label>
+          <select
+            id="role-filter"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            <option value="all">All Roles</option>
+            <option value="parent">Parents</option>
+            <option value="student">Students</option>
+            <option value="admin">Admins</option>
+          </select>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>{users.length} User{users.length !== 1 ? 's' : ''}</CardTitle>
+            <CardTitle>
+              {roleFilter === 'all' ? users.length : users.filter(u => u.role === roleFilter).length} User{((roleFilter === 'all' ? users.length : users.filter(u => u.role === roleFilter).length) !== 1) ? 's' : ''}
+              {roleFilter !== 'all' && <span className="text-gray-500 dark:text-gray-400 font-normal ml-2">({roleFilter})</span>}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -164,11 +184,18 @@ export default function AdminUsers() {
                   Add Your First User
                 </Button>
               </div>
-            ) : (
-              <>
-                {/* Mobile: Card view */}
-                <div className="grid gap-4 sm:hidden">
-                  {users.map((user) => (
+            ) : (() => {
+              const filteredUsers = roleFilter === 'all' ? users : users.filter(u => u.role === roleFilter)
+              return filteredUsers.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">No users found with role: {roleFilter}</p>
+                </div>
+              ) : (
+                <>
+                  {/* Mobile: Card view */}
+                  <div className="grid gap-4 sm:hidden">
+                    {filteredUsers.map((user) => (
                     <div key={user.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -220,7 +247,7 @@ export default function AdminUsers() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user) => (
+                    {filteredUsers.map((user) => (
                       <tr key={user.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
@@ -256,7 +283,8 @@ export default function AdminUsers() {
                 </table>
                 </div>
               </>
-            )}
+              )
+            })()}
           </CardContent>
         </Card>
 

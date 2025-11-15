@@ -16,6 +16,10 @@ export default function Students() {
   const [students, setStudents] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [studentDetails, setStudentDetails] = useState(null)
+  const [loadingDetails, setLoadingDetails] = useState(false)
   const [editingStudent, setEditingStudent] = useState(null)
   const [formData, setFormData] = useState({
     full_name: '',
@@ -99,6 +103,21 @@ export default function Students() {
     }
   }
 
+  const handleViewStudent = async (student) => {
+    setSelectedStudent(student)
+    setShowDetailModal(true)
+    setLoadingDetails(true)
+    try {
+      const details = await api.getStudentDetails(student.id)
+      setStudentDetails(details)
+    } catch (error) {
+      console.error('Error loading student details:', error)
+      alert('Failed to load student details')
+    } finally {
+      setLoadingDetails(false)
+    }
+  }
+
   const filteredStudents = students.filter(student =>
     student.full_name.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -168,7 +187,11 @@ export default function Students() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredStudents.map((student) => (
-              <Card key={student.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={student.id}
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => handleViewStudent(student)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -207,7 +230,10 @@ export default function Students() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleEditStudent(student)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEditStudent(student)
+                    }}
                   >
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
@@ -216,7 +242,10 @@ export default function Students() {
                     variant="ghost"
                     size="sm"
                     className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                    onClick={() => handleDeleteStudent(student.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteStudent(student.id)
+                    }}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -346,6 +375,174 @@ export default function Students() {
               </Button>
             </ModalFooter>
           </form>
+        </Modal>
+
+        {/* Student Detail Modal */}
+        <Modal
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false)
+            setSelectedStudent(null)
+            setStudentDetails(null)
+          }}
+          title={selectedStudent?.full_name || 'Student Details'}
+          size="xl"
+        >
+          <ModalContent>
+            {loadingDetails ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading details...</p>
+              </div>
+            ) : studentDetails ? (
+              <div className="space-y-6">
+                {/* Student Info */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Student Information</h3>
+                  <div className="grid gap-3 sm:grid-cols-2 text-sm">
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Grade:</span>{' '}
+                      <span className="text-gray-900 dark:text-white font-medium">{studentDetails.grade || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Date of Birth:</span>{' '}
+                      <span className="text-gray-900 dark:text-white font-medium">
+                        {studentDetails.date_of_birth || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <span className="text-gray-600 dark:text-gray-400">Emergency Contact:</span>{' '}
+                      <span className="text-gray-900 dark:text-white font-medium">
+                        {studentDetails.emergency_contact_name || 'N/A'}
+                        {studentDetails.emergency_contact_phone && ` - ${studentDetails.emergency_contact_phone}`}
+                      </span>
+                    </div>
+                    {studentDetails.medical_info && (
+                      <div className="sm:col-span-2">
+                        <span className="text-gray-600 dark:text-gray-400">Medical Info:</span>{' '}
+                        <span className="text-gray-900 dark:text-white font-medium">{studentDetails.medical_info}</span>
+                      </div>
+                    )}
+                    {studentDetails.allergies && (
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Allergies:</span>{' '}
+                        <span className="text-gray-900 dark:text-white font-medium">{studentDetails.allergies}</span>
+                      </div>
+                    )}
+                    {studentDetails.dietary_restrictions && (
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Dietary:</span>{' '}
+                        <span className="text-gray-900 dark:text-white font-medium">{studentDetails.dietary_restrictions}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Parents */}
+                {studentDetails.parents && studentDetails.parents.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Parents/Guardians</h3>
+                    <div className="space-y-2">
+                      {studentDetails.parents.map((parentRel) => (
+                        <div key={parentRel.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">{parentRel.users.full_name}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">{parentRel.users.email}</div>
+                            {parentRel.users.phone && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{parentRel.users.phone}</div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            {parentRel.relationship && (
+                              <Badge variant="outline" className="mb-1">{parentRel.relationship}</Badge>
+                            )}
+                            {parentRel.is_primary && (
+                              <Badge variant="success">Primary</Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Payments */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                    Payment History ({studentDetails.payments?.length || 0})
+                  </h3>
+                  {studentDetails.payments && studentDetails.payments.length > 0 ? (
+                    <div className="space-y-2">
+                      {studentDetails.payments.map((payment) => (
+                        <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+                          <div>
+                            <div className="text-gray-600 dark:text-gray-400">
+                              {new Date(payment.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-medium text-gray-900 dark:text-white">${payment.amount}</div>
+                            <Badge variant={payment.status === 'paid' ? 'success' : 'warning'}>
+                              {payment.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No payments recorded yet</p>
+                  )}
+                </div>
+
+                {/* Documents */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                    Documents ({studentDetails.documents?.length || 0})
+                  </h3>
+                  {studentDetails.documents && studentDetails.documents.length > 0 ? (
+                    <div className="space-y-2">
+                      {studentDetails.documents.map((doc) => (
+                        <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">{doc.title}</div>
+                            <div className="text-gray-600 dark:text-gray-400">
+                              {new Date(doc.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                          <Badge variant={
+                            doc.status === 'approved' ? 'success' :
+                            doc.status === 'rejected' ? 'destructive' : 'warning'
+                          }>
+                            {doc.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No documents uploaded yet</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 dark:text-gray-400">No details available</p>
+            )}
+          </ModalContent>
+          <ModalFooter>
+            <Button
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowDetailModal(false)
+                handleEditStudent(selectedStudent)
+              }}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Student
+            </Button>
+            <Button onClick={() => setShowDetailModal(false)}>
+              Close
+            </Button>
+          </ModalFooter>
         </Modal>
       </div>
     </PortalLayout>

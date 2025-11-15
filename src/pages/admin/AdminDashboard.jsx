@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PortalLayout from '../../components/layout/PortalLayout'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, StatCard, Progress } from '../../components/ui'
-import { Users, DollarSign, FileText, Image, Calendar, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react'
+import { Users, DollarSign, FileText, Image, Calendar, TrendingUp, AlertCircle, CheckCircle, UserCog } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
 import { useTenant } from '../../hooks/useTenant'
 import { api } from '../../services/api'
@@ -80,6 +80,14 @@ export default function AdminDashboard() {
             >
               <Users className="w-4 h-4 mr-2" />
               Manage Students
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/admin/parents')}
+              className="border-white text-white hover:bg-white/10"
+            >
+              <UserCog className="w-4 h-4 mr-2" />
+              Manage Parents
             </Button>
             <Button
               variant="outline"

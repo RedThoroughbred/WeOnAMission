@@ -34,6 +34,7 @@ const navigation = {
   admin: [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Students', href: '/admin/students', icon: Users },
+    { name: 'Parents', href: '/admin/parents', icon: UserCog },
     { name: 'Users', href: '/admin/users', icon: UserCog },
     { name: 'Payments', href: '/admin/payments', icon: DollarSign },
     { name: 'Documents', href: '/admin/documents', icon: FileText },
