@@ -13,23 +13,37 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log('🔐 Initializing auth...')
         const sb = getSupabase()
         const { data: { session } } = await sb.auth.getSession()
+        console.log('🔐 Session:', session ? `exists for ${session.user.email}` : 'none')
         setUser(session?.user || null)
 
         // Fetch user profile if logged in
         if (session?.user) {
-          const { data } = await sb
+          console.log('🔐 Fetching initial user profile...')
+          const { data, error } = await sb
             .from('users')
             .select('*')
             .eq('id', session.user.id)
             .single()
-          setUserProfile(data)
+
+          if (error) {
+            console.error('❌ Failed to fetch initial user profile:', error)
+            setUserProfile(null)
+          } else if (data) {
+            console.log('✅ Initial user profile loaded:', data)
+            setUserProfile(data)
+          } else {
+            console.warn('⚠️ No user profile found in database')
+            setUserProfile(null)
+          }
         }
       } catch (err) {
-        console.error('Error initializing auth:', err)
+        console.error('❌ Error initializing auth:', err)
         setError(err.message)
       } finally {
+        console.log('🔐 Auth initialization complete')
         setLoading(false)
       }
     }
@@ -46,12 +60,23 @@ export const AuthProvider = ({ children }) => {
 
           if (session?.user) {
             console.log('👤 User logged in:', session.user.email)
-            const { data } = await sb
+            console.log('👤 Fetching user profile from database...')
+            const { data, error } = await sb
               .from('users')
               .select('*')
               .eq('id', session.user.id)
               .single()
-            setUserProfile(data)
+
+            if (error) {
+              console.error('❌ Failed to fetch user profile:', error)
+              setUserProfile(null)
+            } else if (data) {
+              console.log('✅ User profile loaded:', data)
+              setUserProfile(data)
+            } else {
+              console.warn('⚠️ No user profile found in database for user:', session.user.id)
+              setUserProfile(null)
+            }
           } else {
             console.log('👤 User logged out')
             setUserProfile(null)
