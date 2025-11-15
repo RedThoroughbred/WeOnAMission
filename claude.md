@@ -4,9 +4,13 @@
 
 This is a **multi-tenant SaaS platform** for coordinating student volunteer/mission trips across multiple churches. Each church gets its own separate instance with its own events, FAQs, resources, and user management.
 
-**Tech Stack**: Vanilla HTML/CSS/JavaScript + Supabase (PostgreSQL database, authentication, file storage)
+**Tech Stack**: React 18.2 + Vite 5.0 + Supabase (PostgreSQL database, authentication, file storage)
 
-**Architecture**: Multi-tenant with row-level isolation using `church_id` on all tables
+**Architecture**:
+- Modern React SPA with React Router for navigation
+- Multi-tenant with row-level isolation using `church_id` on all tables
+- Context-based state management (AuthContext, TenantContext, ThemeContext)
+- Component-based UI with Tailwind CSS + custom components
 
 **Target Users**:
 - **Super Admins** (Platform): Create churches, promote church admins, manage platform
@@ -23,32 +27,44 @@ This is a **multi-tenant SaaS platform** for coordinating student volunteer/miss
 - Document upload and approval workflow
 - Payment tracking and management
 
-**Deployment**: Static hosting (Vercel/Netlify) with Supabase backend
+**Deployment**: Vite build → Static hosting (Vercel/Netlify) with Supabase backend
 
 ## Project Status
 
 ### ✅ Complete & Production Ready
 
+**React Migration (Current Version):**
+- **Framework**: React 18.2 with Vite 5.0 build tool
+- **Routing**: React Router v6.20.0 for SPA navigation
+- **State Management**: Context API (AuthContext, TenantContext, ThemeContext)
+- **Styling**: Tailwind CSS 3.3 with custom design system
+- **Components**: Reusable UI components (Button, Card, Input, etc.)
+- **Build**: ES modules with code splitting (React vendor, Supabase vendor, Query vendor)
+
 **Multi-Tenant Infrastructure:**
 - Database schema with 12+ tables, all with `church_id` isolation
 - RLS policies for multi-tenant data isolation
 - Storage buckets with security policies
-- Complete API wrapper (`api.js`) with 70+ functions including church-aware queries
-- Church context detection system (`tenant.js`) - detects church from URL or query param
-- Multi-tenant routing throughout all pages
+- Complete API service (`src/services/api.js`) with 90+ functions including church-aware queries
+- Church context detection system (TenantContext) - detects church from user profile
+- Multi-tenant routing throughout all pages with role-based access control
 
-**Portal Pages (All Complete):**
-- **Landing Page** (`landing.html`) - Shows all available churches
-- **Login Page** (`login.html`) - Church-aware authentication
-- **Parent Portal** (`parent-portal.html`) - Student management, documents, payments
-- **Student Portal** (`student-portal.html`) - Submit memories and view events
-- **Admin Portal** (`admin-portal.html`) - Manage students, payments, documents, memories, events, resources
-- **Questions Dashboard** (`questions-dashboard.html`) - Admin responds to submitted questions
-- **Content Management** (`content-management.html`) - Admin manages FAQs and content
-- **Nice to Know** (`nice-to-know.html`) - Public FAQ and content viewer
-- **Super Admin Portal** (`super-admin-portal.html`) - Create churches and manage users
+**Portal Pages (React Components):**
+- **Landing Page** (`src/pages/Landing.jsx`) - Shows all available churches
+- **Login Page** (`src/pages/Login.jsx`) - Church-aware authentication with Supabase
+- **Parent Portal** (`src/pages/parent/*`) - Student management, documents, payments
+  - ParentDashboard, Students, Payments, Documents
+- **Student Portal** (`src/pages/student/*`) - Submit memories and view events
+  - StudentDashboard, TripMemories
+- **Admin Portal** (`src/pages/admin/*`) - Comprehensive management dashboard
+  - AdminDashboard, AdminStudents, AdminPayments, AdminDocuments
+  - AdminEvents, AdminMemories, AdminQuestions, AdminSettings
+  - **AdminUsers** (NEW) - User management with mobile-responsive design
+  - ContentManagement
+- **Super Admin Portal** (`src/pages/superadmin/*`) - Platform management
+  - SuperAdmin, Churches, Users, Settings
 
-**Recent Additions (Latest Session):**
+**Recent Fixes & Features (Current Session):**
 - ✨ **Question Submission System** - Red question mark (❓) button on all portals (admin-portal, content-management, questions-dashboard, super-admin-portal)
 - 📎 **File Attachment Support** - Users can upload files (PDF, DOC, DOCX, JPG, PNG, GIF, TXT) with questions, max 5MB
 - 🖼️ **Image Preview Modal** - Images display in fullscreen modal with download/open in new tab options
@@ -122,54 +138,88 @@ Each church is **completely isolated**:
 ## File Structure
 
 ```
-mission-trip-platform/
-├── Core Configuration
-│   ├── config.example.js           # Template for configuration
-│   ├── config.js                   # Actual config (gitignored, user creates)
-│   └── tenant.js                   # Church context detection
+WeOnAMission/
+├── public/                         # Static assets
+│   ├── config.js                   # Public configuration (Supabase URL/key, default settings)
+│   └── vite.svg                    # Vite logo
 │
-├── Backend/API Layer
-│   ├── api.js                      # All Supabase operations (80+ functions)
-│   ├── auth.js                     # Authentication and helpers
-│   └── theme.js                    # Dark/light theme toggle and persistence
+├── src/                            # React application source
+│   ├── components/                 # Reusable React components
+│   │   ├── layout/
+│   │   │   ├── PortalLayout.jsx    # Main layout wrapper
+│   │   │   ├── PortalHeader.jsx    # Header with menu toggle
+│   │   │   └── PortalSidebar.jsx   # Role-based navigation
+│   │   └── ui/                     # UI components (Button, Card, Input, etc.)
+│   │       └── index.js            # Component exports
+│   │
+│   ├── contexts/                   # React Context providers
+│   │   ├── AuthContext.jsx         # Authentication state
+│   │   ├── TenantContext.jsx       # Church/tenant detection
+│   │   └── ThemeContext.jsx        # Dark/light mode
+│   │
+│   ├── hooks/                      # Custom React hooks
+│   │   ├── useAuth.js              # Auth context hook
+│   │   └── useTenant.js            # Tenant context hook
+│   │
+│   ├── lib/                        # Utility libraries
+│   │   ├── config.js               # Supabase client initialization
+│   │   ├── supabaseConfig.ts       # Hardcoded Supabase credentials
+│   │   ├── queryClient.js          # React Query configuration
+│   │   └── utils.js                # Helper utilities (cn, etc.)
+│   │
+│   ├── pages/                      # Page components (routes)
+│   │   ├── Landing.jsx             # Church selection page
+│   │   ├── Login.jsx               # Authentication page
+│   │   ├── Home.jsx                # Role-based home redirect
+│   │   ├── parent/                 # Parent portal pages
+│   │   │   ├── ParentDashboard.jsx
+│   │   │   ├── Students.jsx
+│   │   │   ├── Payments.jsx
+│   │   │   └── Documents.jsx
+│   │   ├── student/                # Student portal pages
+│   │   │   ├── StudentDashboard.jsx
+│   │   │   └── TripMemories.jsx
+│   │   ├── admin/                  # Admin portal pages
+│   │   │   ├── AdminPortal.jsx     # Redirects to dashboard
+│   │   │   ├── AdminDashboard.jsx
+│   │   │   ├── AdminStudents.jsx   # Student management with edit
+│   │   │   ├── AdminUsers.jsx      # User management (NEW)
+│   │   │   ├── AdminPayments.jsx
+│   │   │   ├── AdminDocuments.jsx
+│   │   │   ├── AdminEvents.jsx
+│   │   │   ├── AdminMemories.jsx   # Trip memories with images
+│   │   │   ├── AdminQuestions.jsx
+│   │   │   ├── AdminSettings.jsx
+│   │   │   └── ContentManagement.jsx
+│   │   └── superadmin/             # Super admin portal
+│   │       ├── SuperAdmin.jsx
+│   │       ├── Churches.jsx
+│   │       ├── Users.jsx           # All users across churches
+│   │       └── Settings.jsx
+│   │
+│   ├── services/                   # API services
+│   │   └── api.js                  # All Supabase operations (90+ functions)
+│   │
+│   ├── App.jsx                     # Main app with routing
+│   ├── main.jsx                    # Entry point (NO StrictMode)
+│   └── index.css                   # Tailwind CSS imports
 │
-├── Portal Pages (All Multi-Tenant)
-│   ├── landing.html                # Church selection page
-│   ├── login.html                  # Church-aware authentication
-│   ├── index.html                  # Church home page (events/FAQs/resources)
-│   ├── parent-portal.html          # Parent dashboard
-│   ├── student-portal.html         # Student dashboard
-│   ├── admin-portal.html           # Church admin dashboard
-│   ├── questions-dashboard.html    # Admin question management
-│   ├── content-management.html     # Admin content editor
-│   ├── nice-to-know.html          # Public FAQ viewer
-│   └── super-admin-portal.html     # Platform admin dashboard
+├── old-vanilla-js-backup/         # Original vanilla JS version
 │
-├── Styling
-│   └── styles.css                  # Modern design system (700+ lines)
-│
-├── Documentation
+├── Documentation/
 │   ├── README.md                   # Setup and deployment guide
-│   ├── claude.md                   # This file - context for AI
-│   ├── QUICK-START.md              # 30-minute getting started
-│   ├── TODO.md                     # What needs to be built
-│   ├── SYSTEM_OVERVIEW.md          # Complete system documentation
-│   ├── CHURCH_ONBOARDING_FLOW.md   # Church setup workflow
-│   ├── ADMIN_PROMOTION_GUIDE.md    # How to promote admins
-│   ├── MULTI_TENANT_ARCHITECTURE.md # Multi-tenant design details
-│   ├── UI_DESIGN_SYSTEM.md         # Design tokens and components
-│   ├── QUICK_REFERENCE.md          # Quick lookup cheat sheet
-│   ├── VISUAL_GUIDE.md             # ASCII diagrams
-│   └── DOCUMENTATION_INDEX.md      # Navigation guide for all docs
+│   ├── claude.md                   # This file - AI context
+│   └── *.md                        # Other documentation files
 │
-├── Database
-│   ├── schema.sql                  # Complete database schema
-│   ├── migration-to-multitenant.sql # Multi-tenant migration
-│   └── SIMPLE_FIX.sql              # Common fixes
+├── Configuration Files
+│   ├── package.json                # npm dependencies
+│   ├── vite.config.js              # Vite build configuration
+│   ├── tailwind.config.js          # Tailwind CSS configuration
+│   ├── postcss.config.js           # PostCSS configuration
+│   └── .eslintrc.cjs               # ESLint configuration
 │
-└── Testing & Deployment Guides
-    ├── TESTING_ADMIN_PROMOTION.md
-    └── TRINITY_SETUP_AND_TESTING.md
+└── Database
+    └── schema.sql                  # Complete database schema
 ```
 
 ## Database Schema
