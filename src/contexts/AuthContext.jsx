@@ -94,15 +94,26 @@ export const AuthProvider = ({ children }) => {
     setLoading(true)
     setError(null)
     try {
+      console.log('🔑 AuthContext: Attempting sign in...')
       const sb = getSupabase()
+      console.log('🔑 AuthContext: Supabase client obtained')
+
       const { data, error: authError } = await sb.auth.signInWithPassword({
         email,
         password
       })
 
-      if (authError) throw authError
+      console.log('🔑 AuthContext: Sign in response received', { data, error: authError })
+
+      if (authError) {
+        console.error('🔑 AuthContext: Sign in error:', authError)
+        throw authError
+      }
+
+      console.log('🔑 AuthContext: Sign in successful!')
       return data
     } catch (err) {
+      console.error('🔑 AuthContext: Exception during sign in:', err)
       setError(err.message)
       throw err
     } finally {

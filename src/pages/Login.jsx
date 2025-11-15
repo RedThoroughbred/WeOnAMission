@@ -21,10 +21,14 @@ export default function Login() {
     setLoading(true)
     setError(null)
 
+    console.log('🔐 Login attempt started...', { email })
+
     try {
-      await signIn(email, password)
+      const result = await signIn(email, password)
+      console.log('✅ Login successful!', result)
       navigate('/home')
     } catch (err) {
+      console.error('❌ Login failed:', err)
       setError(err.message || 'Invalid email or password')
     } finally {
       setLoading(false)

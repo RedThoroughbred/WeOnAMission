@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                   <CardTitle className="text-amber-900 dark:text-amber-100">
                     Action Required
                   </CardTitle>
-                  <CardDescription className="text-amber-700 dark:text-amber-300 mt-2">
+                  <div className="text-amber-700 dark:text-amber-300 mt-2">
                     <ul className="list-disc list-inside space-y-1">
                       {stats.pendingDocuments > 0 && (
                         <li>{stats.pendingDocuments} documents awaiting review</li>
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
                         <li>{stats.pendingMemories} trip memories awaiting approval</li>
                       )}
                     </ul>
-                  </CardDescription>
+                  </div>
                 </div>
               </div>
             </CardHeader>
