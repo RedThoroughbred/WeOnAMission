@@ -12,7 +12,8 @@ import {
   Image,
   LayoutDashboard,
   Shield,
-  UserCog
+  UserCog,
+  FileEdit
 } from 'lucide-react'
 
 const navigation = {
@@ -41,6 +42,7 @@ const navigation = {
     { name: 'Events', href: '/admin/events', icon: Calendar },
     { name: 'Trip Memories', href: '/admin/memories', icon: Image },
     { name: 'Questions', href: '/admin/questions', icon: HelpCircle },
+    { name: 'Content', href: '/admin/content', icon: FileEdit },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ],
   superadmin: [

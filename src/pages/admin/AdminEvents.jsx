@@ -1,14 +1,37 @@
 import React, { useState, useEffect } from 'react'
 import PortalLayout from '../../components/layout/PortalLayout'
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui'
-import { Calendar } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, Modal } from '../../components/ui'
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock } from 'lucide-react'
 import { useTenant } from '../../hooks/useTenant'
+import { useAuth } from '../../hooks/useAuth'
 import { api } from '../../services/api'
+
+const EVENT_TYPES = [
+  { value: 'meeting', label: 'Meeting', color: 'blue' },
+  { value: 'deadline', label: 'Deadline', color: 'red' },
+  { value: 'activity', label: 'Activity', color: 'green' },
+  { value: 'preparation', label: 'Preparation', color: 'purple' },
+  { value: 'travel', label: 'Travel', color: 'amber' },
+  { value: 'fundraiser', label: 'Fundraiser', color: 'pink' },
+  { value: 'other', label: 'Other', color: 'gray' },
+]
 
 export default function AdminEvents() {
   const { churchId, church } = useTenant()
+  const { user } = useAuth()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editingEvent, setEditingEvent] = useState(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    event_date: '',
+    event_time: '',
+    location: '',
+    event_type: 'other',
+    display_on_calendar: true
+  })
 
   useEffect(() => {
     if (churchId) {
@@ -28,33 +51,294 @@ export default function AdminEvents() {
     }
   }
 
+  const handleAdd = () => {
+    setEditingEvent(null)
+    setFormData({
+      name: '',
+      description: '',
+      event_date: '',
+      event_time: '',
+      location: '',
+      event_type: 'other',
+      display_on_calendar: true
+    })
+    setShowModal(true)
+  }
+
+  const handleEdit = (event) => {
+    setEditingEvent(event)
+    setFormData({
+      name: event.name || '',
+      description: event.description || '',
+      event_date: event.event_date || '',
+      event_time: event.event_time || '',
+      location: event.location || '',
+      event_type: event.event_type || 'other',
+      display_on_calendar: event.display_on_calendar ?? true
+    })
+    setShowModal(true)
+  }
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.event_date) {
+      alert('Please fill in event name and date')
+      return
+    }
+
+    try {
+      if (editingEvent) {
+        await api.updateEvent(editingEvent.id, formData, churchId)
+        alert('Event updated!')
+      } else {
+        await api.createEvent({
+          ...formData,
+          church_id: churchId,
+          created_by: user.id
+        })
+        alert('Event created!')
+      }
+      setShowModal(false)
+      await loadEvents()
+    } catch (error) {
+      console.error('Error saving event:', error)
+      alert('Failed to save event: ' + error.message)
+    }
+  }
+
+  const handleDelete = async (event) => {
+    if (!confirm(`Delete event "${event.name}"? This cannot be undone.`)) return
+
+    try {
+      await api.deleteEvent(event.id, churchId)
+      alert('Event deleted!')
+      await loadEvents()
+    } catch (error) {
+      console.error('Error deleting event:', error)
+      alert('Failed to delete event: ' + error.message)
+    }
+  }
+
+  const getEventTypeColor = (type) => {
+    const eventType = EVENT_TYPES.find(t => t.value === type)
+    return eventType ? eventType.color : 'gray'
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
   return (
     <PortalLayout title="Event Management" role="admin">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Events</h1>
-          {church && <p className="text-gray-600 dark:text-gray-400">Managing events for {church.name}</p>}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Events</h1>
+            {church && <p className="text-gray-600 dark:text-gray-400">Managing events for {church.name}</p>}
+          </div>
+          <Button onClick={handleAdd} size="lg">
+            <Plus className="w-5 h-5 mr-2" />
+            Add Event
+          </Button>
         </div>
+
         <Card>
-          <CardHeader><CardTitle>{events.length} Events</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>{events.length} Event{events.length !== 1 ? 's' : ''}</CardTitle>
+          </CardHeader>
           <CardContent>
-            {loading ? <p>Loading...</p> : events.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading events...</p>
+              </div>
+            ) : events.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">No events yet</p>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">No events yet</p>
+                <Button onClick={handleAdd}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Event
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 {events.map((event) => (
-                  <div key={event.id} className="border p-4 rounded-lg">
-                    <p className="font-medium">{event.title}</p>
-                    <p className="text-sm text-gray-600">{new Date(event.event_date).toLocaleDateString()}</p>
+                  <div
+                    key={event.id}
+                    className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                            {event.name}
+                          </h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded bg-${getEventTypeColor(event.event_type)}-100 text-${getEventTypeColor(event.event_type)}-800 dark:bg-${getEventTypeColor(event.event_type)}-900 dark:text-${getEventTypeColor(event.event_type)}-200`}>
+                            {EVENT_TYPES.find(t => t.value === event.event_type)?.label || event.event_type}
+                          </span>
+                          {!event.display_on_calendar && (
+                            <span className="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                              Hidden
+                            </span>
+                          )}
+                        </div>
+                        {event.description && (
+                          <p className="text-gray-600 dark:text-gray-400 mb-3">{event.description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>{formatDate(event.event_date)}</span>
+                          </div>
+                          {event.event_time && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              <span>{event.event_time}</span>
+                            </div>
+                          )}
+                          {event.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              <span>{event.location}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(event)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(event)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Add/Edit Event Modal */}
+        {showModal && (
+          <Modal onClose={() => setShowModal(false)}>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full p-6">
+              <h2 className="text-2xl font-bold mb-6">
+                {editingEvent ? 'Edit Event' : 'Add New Event'}
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Event Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Youth Group Meeting"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Event details..."
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="event_date">Date *</Label>
+                    <Input
+                      id="event_date"
+                      type="date"
+                      value={formData.event_date}
+                      onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="event_time">Time</Label>
+                    <Input
+                      id="event_time"
+                      type="time"
+                      value={formData.event_time}
+                      onChange={(e) => setFormData({ ...formData, event_time: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="Church building, Room 205"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="event_type">Event Type</Label>
+                  <select
+                    id="event_type"
+                    value={formData.event_type}
+                    onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    {EVENT_TYPES.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="display_on_calendar"
+                    checked={formData.display_on_calendar}
+                    onChange={(e) => setFormData({ ...formData, display_on_calendar: e.target.checked })}
+                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  />
+                  <Label htmlFor="display_on_calendar" className="mb-0">
+                    Display on public calendar
+                  </Label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button onClick={handleSave} className="flex-1">
+                  {editingEvent ? 'Save Changes' : 'Create Event'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
       </div>
     </PortalLayout>
   )
