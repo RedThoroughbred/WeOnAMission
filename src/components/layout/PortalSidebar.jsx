@@ -18,17 +18,17 @@ import {
 
 const navigation = {
   parent: [
-    { name: 'Dashboard', href: '/home', icon: Home },
-    { name: 'My Students', href: '/students', icon: Users },
-    { name: 'Payments', href: '/payments', icon: DollarSign },
-    { name: 'Documents', href: '/documents', icon: FileText },
-    { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Dashboard', href: '/parent', icon: Home },
+    { name: 'My Students', href: '/parent/students', icon: Users },
+    { name: 'Payments', href: '/parent/payments', icon: DollarSign },
+    { name: 'Documents', href: '/parent/documents', icon: FileText },
+    { name: 'Events', href: '/parent/events', icon: Calendar },
     { name: 'Help & FAQ', href: '/help', icon: HelpCircle },
   ],
   student: [
-    { name: 'Dashboard', href: '/home', icon: Home },
-    { name: 'Trip Memories', href: '/memories', icon: Image },
-    { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Dashboard', href: '/student', icon: Home },
+    { name: 'Trip Memories', href: '/student/memories', icon: Image },
+    { name: 'Events', href: '/student/events', icon: Calendar },
     { name: 'Documents', href: '/documents', icon: FileText },
     { name: 'Help & FAQ', href: '/help', icon: HelpCircle },
   ],

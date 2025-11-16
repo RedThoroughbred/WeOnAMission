@@ -1,10 +1,54 @@
 import React, { useState, useEffect } from 'react'
 import PortalLayout from '../../components/layout/PortalLayout'
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, Modal } from '../../components/ui'
-import { Calendar, Plus, Edit, Trash2, MapPin, Clock } from 'lucide-react'
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Download } from 'lucide-react'
 import { useTenant } from '../../hooks/useTenant'
 import { useAuth } from '../../hooks/useAuth'
 import { api } from '../../services/api'
+
+// Helper function to generate iCal file
+const generateICalFile = (event) => {
+  const formatDate = (date, time) => {
+    const d = new Date(date)
+    if (time) {
+      const [hours, minutes] = time.split(':')
+      d.setHours(parseInt(hours), parseInt(minutes))
+    }
+    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+  }
+
+  const startDate = formatDate(event.event_date, event.event_time)
+  const endDate = formatDate(event.event_date, event.event_time ?
+    `${parseInt(event.event_time.split(':')[0]) + 1}:${event.event_time.split(':')[1]}` :
+    null)
+
+  const ical = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Mission Trip Platform//EN
+BEGIN:VEVENT
+UID:${event.id}@missiontrip.com
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${startDate}
+DTEND:${endDate}
+SUMMARY:${event.name}
+DESCRIPTION:${event.description || ''}
+LOCATION:${event.location || ''}
+END:VEVENT
+END:VCALENDAR`
+
+  return ical
+}
+
+const downloadICalFile = (event) => {
+  const icalContent = generateICalFile(event)
+  const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `${event.name.replace(/\s+/g, '_')}.ics`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 
 const EVENT_TYPES = [
   { value: 'meeting', label: 'Meeting', color: 'blue' },
@@ -211,6 +255,14 @@ export default function AdminEvents() {
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadICalFile(event)}
+                          title="Add to Calendar"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => handleEdit(event)}>
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -232,16 +284,16 @@ export default function AdminEvents() {
         </Card>
 
         {/* Add/Edit Event Modal */}
-        {showModal && (
-          <Modal onClose={() => setShowModal(false)}>
-            <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full p-6">
-              <h2 className="text-2xl font-bold mb-6">
-                {editingEvent ? 'Edit Event' : 'Add New Event'}
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Event Name *</Label>
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingEvent ? 'Edit Event' : 'Add New Event'}
+          size="lg"
+        >
+          <div className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Event Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -322,23 +374,22 @@ export default function AdminEvents() {
                     Display on public calendar
                   </Label>
                 </div>
-              </div>
 
               <div className="flex gap-3 mt-6">
-                <Button onClick={handleSave} className="flex-1">
-                  {editingEvent ? 'Save Changes' : 'Create Event'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
+              <Button onClick={handleSave} className="flex-1">
+                {editingEvent ? 'Save Changes' : 'Create Event'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
               </div>
             </div>
-          </Modal>
-        )}
+          </div>
+        </Modal>
       </div>
     </PortalLayout>
   )

@@ -16,10 +16,12 @@ import ParentDashboard from './pages/parent/ParentDashboard'
 import Students from './pages/parent/Students'
 import Payments from './pages/parent/Payments'
 import Documents from './pages/parent/Documents'
+import ParentEvents from './pages/parent/Events'
 
 // Student Portal
 import StudentDashboard from './pages/student/StudentDashboard'
 import TripMemories from './pages/student/TripMemories'
+import StudentEvents from './pages/student/Events'
 
 // Admin Portal
 import AdminPortal from './pages/AdminPortal'
@@ -89,13 +91,15 @@ function App() {
 
                 {/* Parent Portal Routes */}
                 <Route path="/parent" element={<ParentDashboard />} />
-                <Route path="/students" element={<Students />} />
-                <Route path="/payments" element={<Payments />} />
-                <Route path="/documents" element={<Documents />} />
+                <Route path="/parent/students" element={<Students />} />
+                <Route path="/parent/payments" element={<Payments />} />
+                <Route path="/parent/documents" element={<Documents />} />
+                <Route path="/parent/events" element={<ParentEvents />} />
 
                 {/* Student Portal Routes */}
                 <Route path="/student" element={<StudentDashboard />} />
                 <Route path="/student/memories" element={<TripMemories />} />
+                <Route path="/student/events" element={<StudentEvents />} />
 
                 {/* Admin Portal Routes */}
                 <Route path="/admin" element={<AdminPortal />} />
