@@ -32,7 +32,7 @@ const navigation = {
     { name: 'Help & FAQ', href: '/help', icon: HelpCircle },
   ],
   admin: [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Students', href: '/admin/students', icon: Users },
     { name: 'Parents', href: '/admin/parents', icon: UserCog },
     { name: 'Users', href: '/admin/users', icon: UserCog },
@@ -76,6 +76,7 @@ export default function PortalSidebar({ role = 'parent', isOpen, onClose }) {
             <NavLink
               key={item.name}
               to={item.href}
+              end
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
