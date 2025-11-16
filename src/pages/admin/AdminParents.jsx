@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import PortalLayout from '../../components/layout/PortalLayout'
-import { Card, CardHeader, CardTitle, CardContent, Button } from '../../components/ui'
-import { UserCog, Users, Phone, Mail, Shield } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, Modal } from '../../components/ui'
+import { UserCog, Users, Phone, Mail, Shield, Edit, Trash2 } from 'lucide-react'
 import { api } from '../../services/api'
 import { useTenant } from '../../hooks/useTenant'
 
@@ -10,6 +10,13 @@ export default function AdminParents() {
   const [parents, setParents] = useState([])
   const [parentStudents, setParentStudents] = useState({}) // Map of parentId -> students[]
   const [loading, setLoading] = useState(true)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingParent, setEditingParent] = useState(null)
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    email: '',
+    phone: ''
+  })
 
   useEffect(() => {
     if (churchId) {
@@ -41,6 +48,44 @@ export default function AdminParents() {
       console.error('❌ Error loading parents:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleEdit = (parent) => {
+    setEditingParent(parent)
+    setEditForm({
+      full_name: parent.full_name || '',
+      email: parent.email || '',
+      phone: parent.phone || ''
+    })
+    setShowEditModal(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingParent) return
+
+    try {
+      await api.updateUser(editingParent.id, editForm, churchId)
+      setShowEditModal(false)
+      setEditingParent(null)
+      alert('Parent updated successfully!')
+      await loadParents()
+    } catch (error) {
+      console.error('Error updating parent:', error)
+      alert('Failed to update parent: ' + error.message)
+    }
+  }
+
+  const handleDelete = async (parentId) => {
+    if (!confirm('Are you sure you want to delete this parent? This cannot be undone.')) return
+
+    try {
+      await api.deleteUser(parentId, churchId)
+      alert('Parent deleted successfully!')
+      await loadParents()
+    } catch (error) {
+      console.error('Error deleting parent:', error)
+      alert('Failed to delete parent: ' + error.message)
     }
   }
 
@@ -105,7 +150,7 @@ export default function AdminParents() {
                             <span className="font-medium">{students.length} Student{students.length !== 1 ? 's' : ''}</span>
                           </div>
                           {students.length > 0 && (
-                            <ul className="space-y-1 text-sm">
+                            <ul className="space-y-1 text-sm mb-3">
                               {students.map((ps) => (
                                 <li key={ps.id} className="text-gray-700 dark:text-gray-300">
                                   • {ps.students.full_name}
@@ -124,6 +169,20 @@ export default function AdminParents() {
                             </ul>
                           )}
                         </div>
+                        <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(parent)}>
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(parent.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     )
                   })}
@@ -138,6 +197,7 @@ export default function AdminParents() {
                         <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Email</th>
                         <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Phone</th>
                         <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Students</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -181,6 +241,21 @@ export default function AdminParents() {
                                 </div>
                               )}
                             </td>
+                            <td className="py-3 px-4 text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button variant="outline" size="sm" onClick={() => handleEdit(parent)}>
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDelete(parent.id)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
                           </tr>
                         )
                       })}
@@ -191,6 +266,63 @@ export default function AdminParents() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Parent Modal */}
+        <Modal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          title="Edit Parent"
+          size="lg"
+        >
+          <div className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="full_name">Full Name *</Label>
+                <Input
+                  id="full_name"
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  placeholder="parent@example.com"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button onClick={handleSaveEdit} className="flex-1">
+                  Save Changes
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </div>
     </PortalLayout>
   )

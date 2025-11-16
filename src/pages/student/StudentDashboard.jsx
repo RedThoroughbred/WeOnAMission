@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useTenant } from '../../hooks/useTenant'
 import PortalLayout from '../../components/layout/PortalLayout'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, StatCard } from '../../components/ui'
 import { Image, Calendar, FileText, Heart, Plus, MapPin, Clock } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
+import { api } from '../../services/api'
 
 export default function StudentDashboard() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
+  const { churchId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     memoriesSubmitted: 0,
@@ -20,30 +23,33 @@ export default function StudentDashboard() {
   const [recentMemories, setRecentMemories] = useState([])
 
   useEffect(() => {
-    loadDashboardData()
-  }, [])
+    if (churchId && userProfile) {
+      loadDashboardData()
+    }
+  }, [churchId, userProfile])
 
   const loadDashboardData = async () => {
     setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Load memories for this student user
+      const memories = await api.getMemoriesForStudentUser(userProfile.id, churchId)
+      const approvedMemories = memories.filter(m => m.status === 'approved')
+
+      // Load events
+      const events = await api.getEvents(churchId)
+      const publicEvents = events.filter(e => e.display_on_calendar !== false)
+      const futureEvents = publicEvents.filter(e => new Date(e.event_date) >= new Date())
+      const sortedEvents = futureEvents.sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
 
       setStats({
-        memoriesSubmitted: 5,
-        memoriesApproved: 3,
-        upcomingEvents: 3,
-        documentsComplete: 4
+        memoriesSubmitted: memories.length,
+        memoriesApproved: approvedMemories.length,
+        upcomingEvents: futureEvents.length,
+        documentsComplete: 0 // TODO: Get from documents API when available
       })
 
-      setUpcomingEvents([
-        { id: 1, name: 'Fundraiser Dinner', event_date: '2025-12-01', event_type: 'fundraiser', location: 'Church Hall' },
-        { id: 2, name: 'Pre-Trip Meeting', event_date: '2025-12-15', event_type: 'meeting', location: 'Youth Room' }
-      ])
-
-      setRecentMemories([
-        { id: 1, title: 'Helping at the School', status: 'approved', submitted_at: '2025-11-20' },
-        { id: 2, title: 'Village Tour', status: 'pending', submitted_at: '2025-11-22' }
-      ])
+      setUpcomingEvents(sortedEvents.slice(0, 5)) // Show next 5 events
+      setRecentMemories(memories.slice(0, 5)) // Show latest 5 memories
     } catch (error) {
       console.error('Error loading dashboard:', error)
     } finally {

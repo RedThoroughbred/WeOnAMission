@@ -174,7 +174,7 @@ export const api = {
     const sb = getSupabase()
     const { data, error } = await sb
       .from('documents')
-      .update({ status, reviewed_at: new Date().toISOString() })
+      .update({ status })
       .eq('id', documentId)
       .eq('church_id', churchId)
       .select()
@@ -230,11 +230,110 @@ export const api = {
     return memoriesWithUrls
   },
 
-  async updateMemoryStatus(memoryId, status, churchId) {
+  async getMemoriesForStudent(studentId, churchId) {
     const sb = getSupabase()
     const { data, error } = await sb
       .from('trip_memories')
-      .update({ status, reviewed_at: new Date().toISOString() })
+      .select('*')
+      .eq('student_id', studentId)
+      .eq('church_id', churchId)
+      .order('submitted_at', { ascending: false })
+
+    if (error) throw error
+
+    // Convert storage paths to public URLs
+    const memoriesWithUrls = (data || []).map(memory => ({
+      ...memory,
+      photo_url: memory.photo_path
+        ? sb.storage.from('trip-photos').getPublicUrl(memory.photo_path).data.publicUrl
+        : null
+    }))
+
+    return memoriesWithUrls
+  },
+
+  async getMemoriesForStudentUser(userId, churchId) {
+    const sb = getSupabase()
+
+    // First, find the student record for this user
+    const { data: student, error: studentError } = await sb
+      .from('students')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('church_id', churchId)
+      .single()
+
+    if (studentError) throw studentError
+    if (!student) return []
+
+    // Now get memories for this student
+    return this.getMemoriesForStudent(student.id, churchId)
+  },
+
+  async submitTripMemoryForUser(userId, title, content, photoFile, churchId) {
+    const sb = getSupabase()
+
+    // First, find the student record for this user
+    const { data: student, error: studentError } = await sb
+      .from('students')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('church_id', churchId)
+      .single()
+
+    if (studentError) throw studentError
+    if (!student) throw new Error('Student record not found')
+
+    // Upload photo if provided
+    let photoPath = null
+    if (photoFile) {
+      const fileExt = photoFile.name.split('.').pop()
+      const fileName = `${student.id}/${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await sb.storage
+        .from('trip-photos')
+        .upload(fileName, photoFile)
+
+      if (uploadError) throw uploadError
+      photoPath = fileName
+    }
+
+    // Create the memory record
+    const { data, error } = await sb
+      .from('trip_memories')
+      .insert([{
+        student_id: student.id,
+        church_id: churchId,
+        title,
+        content,
+        photo_path: photoPath,
+        status: 'pending',
+        submitted_at: new Date().toISOString()
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateMemoryStatus(memoryId, status, churchId) {
+    const sb = getSupabase()
+
+    // Get current user for approved_by field
+    const { data: { user } } = await sb.auth.getUser()
+
+    const updateData = { status }
+
+    // Set approved_at and approved_by when approving
+    if (status === 'approved') {
+      updateData.approved_at = new Date().toISOString()
+      updateData.approved_by = user?.id || null
+    }
+
+    const { data, error } = await sb
+      .from('trip_memories')
+      .update(updateData)
       .eq('id', memoryId)
       .eq('church_id', churchId)
       .select()
@@ -675,5 +774,311 @@ export const api = {
       payments: payments || [],
       documents: documents || []
     }
+  },
+
+  // ==================== USER QUESTIONS & FAQ ====================
+
+  // Submit a question (any user role)
+  async submitQuestion(questionText, questionType, churchId) {
+    const sb = getSupabase()
+    const { data: { user } } = await sb.auth.getUser()
+
+    if (!user) throw new Error('Must be logged in to submit questions')
+
+    // Get user email from users table
+    const { data: userProfile } = await sb
+      .from('users')
+      .select('email')
+      .eq('id', user.id)
+      .single()
+
+    const { data, error } = await sb
+      .from('user_questions')
+      .insert([{
+        user_id: user.id,
+        email: userProfile?.email || user.email,
+        question: questionText,
+        question_type: questionType || 'question',
+        church_id: churchId,
+        status: 'submitted'
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  // Get all questions for a church (admin only)
+  async getQuestions(churchId, status = null) {
+    const sb = getSupabase()
+    let query = sb
+      .from('user_questions')
+      .select('*')
+      .eq('church_id', churchId)
+      .order('created_at', { ascending: false})
+
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    return data || []
+  },
+
+  // Get questions submitted by current user
+  async getMyQuestions(churchId) {
+    const sb = getSupabase()
+    const { data: { user } } = await sb.auth.getUser()
+
+    if (!user) return []
+
+    const { data, error } = await sb
+      .from('user_questions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('church_id', churchId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  // Respond to a question (admin only)
+  async respondToQuestion(questionId, responseText, isFaq, churchId) {
+    const sb = getSupabase()
+    const { data: { user } } = await sb.auth.getUser()
+
+    if (!user) throw new Error('Must be logged in to respond to questions')
+
+    const { data, error } = await sb
+      .from('question_responses')
+      .insert([{
+        question_id: questionId,
+        response_by: user.id,
+        response: responseText,
+        is_faq: isFaq || false,
+        church_id: churchId
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+
+    // Update question status to complete
+    await sb
+      .from('user_questions')
+      .update({ status: 'complete' })
+      .eq('id', questionId)
+      .eq('church_id', churchId)
+
+    return data
+  },
+
+  // Convert question/response to FAQ
+  async convertToFaq(questionId, category, churchId) {
+    const sb = getSupabase()
+    const { data: { user } } = await sb.auth.getUser()
+
+    // Get the question and its response
+    const { data: question, error: questionError } = await sb
+      .from('user_questions')
+      .select(`
+        *,
+        question_responses (
+          response,
+          is_faq
+        )
+      `)
+      .eq('id', questionId)
+      .eq('church_id', churchId)
+      .single()
+
+    if (questionError) throw questionError
+    if (!question.question_responses || question.question_responses.length === 0) {
+      throw new Error('Question must be answered before converting to FAQ')
+    }
+
+    const response = question.question_responses[0]
+
+    // Create FAQ entry
+    const { data: faq, error: faqError } = await sb
+      .from('faqs')
+      .insert([{
+        question: question.question,
+        answer: response.response,
+        category: category || 'General',
+        church_id: churchId,
+        created_by: user.id,
+        display: true
+      }])
+      .select()
+      .single()
+
+    if (faqError) throw faqError
+
+    // Mark response as FAQ
+    await sb
+      .from('question_responses')
+      .update({ is_faq: true })
+      .eq('question_id', questionId)
+      .eq('church_id', churchId)
+
+    return faq
+  },
+
+  // Get all FAQs for a church (public)
+  async getFaqs(churchId, category = null) {
+    const sb = getSupabase()
+    let query = sb
+      .from('faqs')
+      .select('*')
+      .eq('church_id', churchId)
+      .eq('display', true)
+      .order('category', { ascending: true })
+      .order('created_at', { ascending: false })
+
+    if (category) {
+      query = query.eq('category', category)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    return data || []
+  },
+
+  // Get FAQ categories for a church
+  async getFaqCategories(churchId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('faqs')
+      .select('category')
+      .eq('church_id', churchId)
+      .eq('display', true)
+
+    if (error) throw error
+
+    // Get unique categories
+    const categories = [...new Set(data.map(f => f.category))]
+    return categories.filter(c => c) // Remove null/undefined
+  },
+
+  // Create FAQ directly (admin only)
+  async createFaq(question, answer, category, churchId) {
+    const sb = getSupabase()
+    const { data: { user } } = await sb.auth.getUser()
+
+    const { data, error } = await sb
+      .from('faqs')
+      .insert([{
+        question,
+        answer,
+        category: category || 'General',
+        church_id: churchId,
+        created_by: user?.id,
+        display: true
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  // Update FAQ (admin only)
+  async updateFaq(faqId, updates, churchId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('faqs')
+      .update(updates)
+      .eq('id', faqId)
+      .eq('church_id', churchId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  // Delete FAQ (admin only)
+  async deleteFaq(faqId, churchId) {
+    const sb = getSupabase()
+    const { error } = await sb
+      .from('faqs')
+      .delete()
+      .eq('id', faqId)
+      .eq('church_id', churchId)
+
+    if (error) throw error
+  },
+
+  // ==================== RESOURCES ====================
+
+  // Get all resources for a church
+  async getResources(churchId, resourceType = null) {
+    const sb = getSupabase()
+    let query = sb
+      .from('resources')
+      .select('*')
+      .eq('church_id', churchId)
+      .order('created_at', { ascending: false })
+
+    if (resourceType) {
+      query = query.eq('resource_type', resourceType)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    return data || []
+  },
+
+  // Create resource (admin only)
+  async createResource(name, description, url, resourceType, churchId) {
+    const sb = getSupabase()
+    const { data: { user } } = await sb.auth.getUser()
+
+    const { data, error } = await sb
+      .from('resources')
+      .insert([{
+        name,
+        description,
+        url,
+        resource_type: resourceType || 'document',
+        church_id: churchId,
+        created_by: user?.id
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  // Update resource (admin only)
+  async updateResource(resourceId, updates, churchId) {
+    const sb = getSupabase()
+    const { data, error } = await sb
+      .from('resources')
+      .update(updates)
+      .eq('id', resourceId)
+      .eq('church_id', churchId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  // Delete resource (admin only)
+  async deleteResource(resourceId, churchId) {
+    const sb = getSupabase()
+    const { error } = await sb
+      .from('resources')
+      .delete()
+      .eq('id', resourceId)
+      .eq('church_id', churchId)
+
+    if (error) throw error
   },
 }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import PortalLayout from '../../components/layout/PortalLayout'
-import { Button, Card, CardHeader, CardTitle, CardContent, Input, Label } from '../../components/ui'
+import { Button, Card, CardHeader, CardTitle, CardContent, Input, Label, Modal } from '../../components/ui'
 import { Plus, Edit, Trash2, FileText, Backpack, Globe, Lightbulb } from 'lucide-react'
 import { useTenant } from '../../hooks/useTenant'
+import { useAuth } from '../../hooks/useAuth'
 import { getSupabase } from '../../lib/config'
 
 const SECTIONS = [
@@ -14,9 +15,17 @@ const SECTIONS = [
 
 export default function ContentManagement() {
   const { churchId, church } = useTenant()
+  const { user } = useAuth()
   const [activeSection, setActiveSection] = useState('faqs')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    translation: ''
+  })
 
   useEffect(() => {
     if (churchId && activeSection) {
@@ -35,7 +44,7 @@ export default function ContentManagement() {
         .select('*')
         .eq('church_id', churchId)
         .eq('section', activeSection)
-        .order('display_order')
+        .order('order_index')
 
       if (error) throw error
 
@@ -46,6 +55,90 @@ export default function ContentManagement() {
       setItems([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAdd = () => {
+    setEditingItem(null)
+    setFormData({
+      title: '',
+      content: '',
+      translation: ''
+    })
+    setShowModal(true)
+  }
+
+  const handleEdit = (item) => {
+    setEditingItem(item)
+
+    // For Spanish phrases, parse translation and pronunciation from content
+    let translation = ''
+    let content = item.content || ''
+
+    if (activeSection === 'phrases' && item.content) {
+      const parts = item.content.split('\nPronunciation: ')
+      translation = parts[0] || ''
+      content = parts[1] || ''
+    }
+
+    setFormData({
+      title: item.title || '',
+      content: content,
+      translation: translation
+    })
+    setShowModal(true)
+  }
+
+  const handleSave = async () => {
+    if (!formData.title.trim()) {
+      alert('Please enter a title')
+      return
+    }
+
+    try {
+      const sb = getSupabase()
+
+      // For Spanish phrases, combine translation and pronunciation into content
+      let contentValue = formData.content
+      if (activeSection === 'phrases' && formData.translation) {
+        contentValue = formData.translation + (formData.content ? `\nPronunciation: ${formData.content}` : '')
+      }
+
+      if (editingItem) {
+        // Update existing item
+        const { error } = await sb
+          .from('content_items')
+          .update({
+            title: formData.title,
+            content: contentValue
+          })
+          .eq('id', editingItem.id)
+          .eq('church_id', churchId)
+
+        if (error) throw error
+        alert('Item updated successfully!')
+      } else {
+        // Create new item
+        const { error } = await sb
+          .from('content_items')
+          .insert({
+            church_id: churchId,
+            section: activeSection,
+            title: formData.title,
+            content: contentValue,
+            order_index: items.length,
+            created_by: user?.id
+          })
+
+        if (error) throw error
+        alert('Item created successfully!')
+      }
+
+      setShowModal(false)
+      await loadSectionItems()
+    } catch (error) {
+      console.error('Error saving item:', error)
+      alert('Failed to save item: ' + error.message)
     }
   }
 
@@ -62,10 +155,11 @@ export default function ContentManagement() {
 
       if (error) throw error
 
+      alert('Item deleted successfully!')
       await loadSectionItems()
     } catch (error) {
       console.error('Error deleting item:', error)
-      alert('Failed to delete item')
+      alert('Failed to delete item: ' + error.message)
     }
   }
 
@@ -116,7 +210,7 @@ export default function ContentManagement() {
                 <Icon className="w-6 h-6" />
                 {currentSection?.name}
               </CardTitle>
-              <Button size="lg">
+              <Button size="lg" onClick={handleAdd}>
                 <Plus className="w-5 h-5 mr-2" />
                 Add Item
               </Button>
@@ -134,7 +228,7 @@ export default function ContentManagement() {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   No {currentSection?.name.toLowerCase()} yet
                 </p>
-                <Button>
+                <Button onClick={handleAdd}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Your First Item
                 </Button>
@@ -156,26 +250,32 @@ export default function ContentManagement() {
                             {item.title}
                           </h3>
                         </div>
-                        {item.content && (
+                        {item.content && activeSection === 'phrases' ? (
+                          <>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
+                              {item.content.split('\nPronunciation: ')[0]}
+                            </p>
+                            {item.content.includes('\nPronunciation: ') && (
+                              <p className="text-gray-500 dark:text-gray-500 text-sm italic mt-1">
+                                {item.content.split('\nPronunciation: ')[1]}
+                              </p>
+                            )}
+                          </>
+                        ) : item.content ? (
                           <p className="text-gray-600 dark:text-gray-400 text-sm">
                             {item.content}
                           </p>
-                        )}
-                        {item.translation && (
-                          <p className="text-gray-500 dark:text-gray-500 text-sm italic mt-1">
-                            {item.translation}
-                          </p>
-                        )}
+                        ) : null}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -207,6 +307,81 @@ export default function ContentManagement() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Add/Edit Modal */}
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingItem ? 'Edit Item' : 'Add New Item'}
+          size="lg"
+        >
+          <div className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">
+                  {activeSection === 'phrases' ? 'Phrase' : 'Title'} *
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder={
+                    activeSection === 'phrases' ? 'Hello'
+                      : activeSection === 'packing' ? 'Sunscreen'
+                        : activeSection === 'tips' ? 'Pack Light'
+                          : 'Question or title'
+                  }
+                />
+              </div>
+
+              {activeSection === 'phrases' && (
+                <div>
+                  <Label htmlFor="translation">Translation *</Label>
+                  <Input
+                    id="translation"
+                    value={formData.translation}
+                    onChange={(e) => setFormData({ ...formData, translation: e.target.value })}
+                    placeholder="Hola"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="content">
+                  {activeSection === 'faqs' ? 'Answer'
+                    : activeSection === 'phrases' ? 'Pronunciation (optional)'
+                      : 'Description (optional)'}
+                </Label>
+                <textarea
+                  id="content"
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder={
+                    activeSection === 'faqs' ? 'The answer to this question...'
+                      : activeSection === 'phrases' ? 'OH-lah'
+                        : activeSection === 'packing' ? 'SPF 50+ recommended'
+                          : 'Additional details...'
+                  }
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button onClick={handleSave} className="flex-1">
+                  {editingItem ? 'Save Changes' : 'Create Item'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </div>
     </PortalLayout>
   )

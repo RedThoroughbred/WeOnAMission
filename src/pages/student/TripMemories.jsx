@@ -4,14 +4,20 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badg
 import Modal, { ModalContent, ModalFooter } from '../../components/ui/Modal'
 import { Image, Upload, Plus, Heart, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
+import { useAuth } from '../../hooks/useAuth'
+import { useTenant } from '../../hooks/useTenant'
+import { api } from '../../services/api'
 
 export default function TripMemories() {
+  const { userProfile } = useAuth()
+  const { churchId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [memories, setMemories] = useState([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [imagePreview, setImagePreview] = useState(null)
   const [uploadFile, setUploadFile] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -20,44 +26,21 @@ export default function TripMemories() {
   const fileInputRef = useRef(null)
 
   useEffect(() => {
-    loadMemories()
-  }, [])
+    if (churchId && userProfile) {
+      loadMemories()
+    }
+  }, [churchId, userProfile])
 
   const loadMemories = async () => {
     setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      setMemories([
-        {
-          id: 1,
-          title: 'Helping at the School',
-          content: 'Today we helped paint classrooms and play with the kids. It was amazing to see their smiles!',
-          photo_url: null,
-          status: 'approved',
-          submitted_at: '2025-11-20',
-          approved_at: '2025-11-21'
-        },
-        {
-          id: 2,
-          title: 'Village Tour',
-          content: 'We toured the village and met so many wonderful people. The culture here is beautiful.',
-          photo_url: null,
-          status: 'pending',
-          submitted_at: '2025-11-22'
-        },
-        {
-          id: 3,
-          title: 'Building Project',
-          content: 'Working on the new community center. Hard work but so rewarding!',
-          photo_url: null,
-          status: 'rejected',
-          submitted_at: '2025-11-15',
-          rejection_reason: 'Please add more details about the project'
-        }
-      ])
+      // For students, we need to find their student record using their user ID
+      // The student table has a user_id column that links to the users table
+      const data = await api.getMemoriesForStudentUser(userProfile.id, churchId)
+      setMemories(data || [])
     } catch (error) {
       console.error('Error loading memories:', error)
+      setMemories([])
     } finally {
       setLoading(false)
     }
@@ -102,21 +85,29 @@ export default function TripMemories() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
 
     try {
-      const newMemory = {
-        id: Date.now(),
-        ...formData,
-        photo_url: imagePreview,
-        status: 'pending',
-        submitted_at: new Date().toISOString().split('T')[0]
-      }
+      // Submit the memory with photo
+      await api.submitTripMemoryForUser(
+        userProfile.id,
+        formData.title,
+        formData.content,
+        uploadFile, // This is the actual file object
+        churchId
+      )
 
-      setMemories([newMemory, ...memories])
+      alert('Memory submitted successfully! It will be reviewed by an administrator.')
       setShowAddModal(false)
       resetForm()
+
+      // Reload memories
+      await loadMemories()
     } catch (error) {
       console.error('Error submitting memory:', error)
+      alert('Failed to submit memory: ' + error.message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -353,12 +344,12 @@ export default function TripMemories() {
             </ModalContent>
 
             <ModalFooter>
-              <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>
+              <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} disabled={submitting}>
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={submitting}>
                 <Heart className="w-4 h-4 mr-2" />
-                Share Memory
+                {submitting ? 'Submitting...' : 'Share Memory'}
               </Button>
             </ModalFooter>
           </form>

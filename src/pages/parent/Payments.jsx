@@ -4,8 +4,11 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badg
 import Modal, { ModalContent, ModalFooter } from '../../components/ui/Modal'
 import { DollarSign, Plus, TrendingUp, Calendar, CreditCard, Download } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
+import { api } from '../../services/api'
+import { useTenant } from '../../hooks/useTenant'
 
 export default function Payments() {
+  const { churchId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState([])
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -19,42 +22,50 @@ export default function Payments() {
   })
 
   useEffect(() => {
-    loadPaymentData()
-  }, [])
+    if (churchId) {
+      loadPaymentData()
+    }
+  }, [churchId])
 
   const loadPaymentData = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API calls
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Get real student data with payment summaries
+      const myStudents = await api.getMyStudents()
 
-      const mockStudents = [
-        {
-          id: 1,
-          full_name: 'John Doe',
-          total_cost: 2500,
-          total_paid: 1500,
-          balance_due: 1000
-        },
-        {
-          id: 2,
-          full_name: 'Jane Doe',
-          total_cost: 2500,
-          total_paid: 1000,
-          balance_due: 1500
-        }
-      ]
+      // Get payment summaries for each student
+      const studentsWithPayments = await Promise.all(
+        myStudents.map(async (student) => {
+          const summary = await api.getPaymentSummary(student.id)
+          return {
+            id: student.id,
+            full_name: student.full_name,
+            total_cost: summary?.trip_cost || 2500, // Default to 2500 if not set
+            total_paid: summary?.total_paid || 0,
+            balance_due: summary?.balance_due || (summary?.trip_cost || 2500)
+          }
+        })
+      )
 
-      const mockHistory = [
-        { id: 1, student_id: 1, student_name: 'John Doe', amount: 500, payment_date: '2025-11-01', payment_type: 'check', notes: 'Initial deposit' },
-        { id: 2, student_id: 1, student_name: 'John Doe', amount: 1000, payment_date: '2025-11-15', payment_type: 'card', notes: '' },
-        { id: 3, student_id: 2, student_name: 'Jane Doe', amount: 1000, payment_date: '2025-11-10', payment_type: 'cash', notes: 'Fundraiser proceeds' }
-      ]
+      setStudents(studentsWithPayments)
 
-      setStudents(mockStudents)
-      setPaymentHistory(mockHistory)
-      if (mockStudents.length > 0) {
-        setSelectedStudent(mockStudents[0])
+      // Get payment history for all students
+      const allPayments = []
+      for (const student of myStudents) {
+        const history = await api.getPaymentHistory(student.id)
+        const formattedHistory = history.map(payment => ({
+          ...payment,
+          student_name: student.full_name
+        }))
+        allPayments.push(...formattedHistory)
+      }
+
+      // Sort by date descending
+      allPayments.sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))
+      setPaymentHistory(allPayments)
+
+      if (studentsWithPayments.length > 0) {
+        setSelectedStudent(studentsWithPayments[0])
       }
     } catch (error) {
       console.error('Error loading payment data:', error)
@@ -78,33 +89,28 @@ export default function Payments() {
     if (!selectedStudent) return
 
     try {
-      // TODO: Replace with actual API call
-      const newPayment = {
-        id: Date.now(),
-        student_id: selectedStudent.id,
-        student_name: selectedStudent.full_name,
-        amount: parseFloat(formData.amount),
-        payment_date: formData.payment_date,
-        payment_type: formData.payment_type,
-        notes: formData.notes
-      }
+      const amount = parseFloat(formData.amount)
 
-      setPaymentHistory([newPayment, ...paymentHistory])
+      // Save payment to database using real API
+      await api.addPayment(
+        selectedStudent.id,
+        amount,
+        formData.payment_date,
+        formData.payment_type,
+        formData.notes
+      )
 
-      // Update student totals
-      setStudents(students.map(s =>
-        s.id === selectedStudent.id
-          ? {
-              ...s,
-              total_paid: s.total_paid + newPayment.amount,
-              balance_due: s.balance_due - newPayment.amount
-            }
-          : s
-      ))
+      // Show success message
+      alert('Payment added successfully!')
 
+      // Close modal
       setShowAddPaymentModal(false)
+
+      // Reload all payment data to get updated totals
+      await loadPaymentData()
     } catch (error) {
       console.error('Error adding payment:', error)
+      alert('Failed to add payment: ' + error.message)
     }
   }
 

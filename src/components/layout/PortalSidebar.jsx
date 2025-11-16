@@ -13,7 +13,9 @@ import {
   LayoutDashboard,
   Shield,
   UserCog,
-  FileEdit
+  FileEdit,
+  FolderOpen,
+  MessageSquare
 } from 'lucide-react'
 
 const navigation = {
@@ -23,14 +25,19 @@ const navigation = {
     { name: 'Payments', href: '/parent/payments', icon: DollarSign },
     { name: 'Documents', href: '/parent/documents', icon: FileText },
     { name: 'Events', href: '/parent/events', icon: Calendar },
-    { name: 'Help & FAQ', href: '/help', icon: HelpCircle },
+    { name: 'Resources', href: '/parent/resources', icon: FolderOpen },
+    { name: 'My Questions', href: '/parent/questions', icon: MessageSquare },
+    { name: 'FAQ', href: '/parent/faq', icon: HelpCircle },
   ],
   student: [
     { name: 'Dashboard', href: '/student', icon: Home },
     { name: 'Trip Memories', href: '/student/memories', icon: Image },
     { name: 'Events', href: '/student/events', icon: Calendar },
-    { name: 'Documents', href: '/documents', icon: FileText },
-    { name: 'Help & FAQ', href: '/help', icon: HelpCircle },
+    { name: 'Resources', href: '/student/resources', icon: FolderOpen },
+    { name: 'My Questions', href: '/student/questions', icon: MessageSquare },
+    { name: 'FAQ', href: '/student/faq', icon: HelpCircle },
+    // TODO: Add documents page when ready
+    // { name: 'Documents', href: '/student/documents', icon: FileText },
   ],
   admin: [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -40,8 +47,10 @@ const navigation = {
     { name: 'Payments', href: '/admin/payments', icon: DollarSign },
     { name: 'Documents', href: '/admin/documents', icon: FileText },
     { name: 'Events', href: '/admin/events', icon: Calendar },
+    { name: 'Resources', href: '/admin/resources', icon: FolderOpen },
     { name: 'Trip Memories', href: '/admin/memories', icon: Image },
-    { name: 'Questions', href: '/admin/questions', icon: HelpCircle },
+    { name: 'Questions', href: '/admin/questions', icon: MessageSquare },
+    { name: 'FAQ', href: '/admin/faq', icon: HelpCircle },
     { name: 'Content', href: '/admin/content', icon: FileEdit },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ],
@@ -49,6 +58,8 @@ const navigation = {
     { name: 'Dashboard', href: '/super-admin', icon: Shield },
     { name: 'Churches', href: '/super-admin/churches', icon: Home },
     { name: 'Users', href: '/super-admin/users', icon: Users },
+    { name: 'My Questions', href: '/super-admin/questions', icon: MessageSquare },
+    { name: 'FAQ', href: '/super-admin/faq', icon: HelpCircle },
     { name: 'Settings', href: '/super-admin/settings', icon: Settings },
   ]
 }

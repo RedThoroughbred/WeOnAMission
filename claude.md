@@ -64,15 +64,34 @@ This is a **multi-tenant SaaS platform** for coordinating student volunteer/miss
 - **Super Admin Portal** (`src/pages/superadmin/*`) - Platform management
   - SuperAdmin, Churches, Users, Settings
 
-**Recent Fixes & Features (Current Session):**
-- ✨ **Question Submission System** - Red question mark (❓) button on all portals (admin-portal, content-management, questions-dashboard, super-admin-portal)
-- 📎 **File Attachment Support** - Users can upload files (PDF, DOC, DOCX, JPG, PNG, GIF, TXT) with questions, max 5MB
-- 🖼️ **Image Preview Modal** - Images display in fullscreen modal with download/open in new tab options
-- 📱 **Mobile-Optimized** - Three ways to close preview modal (top button, outside click, bottom close button)
-- 🔧 **Centralized Upload Logic** - File uploads handled via `API.uploadFile()` with better error handling
-- ⚡ **Graceful Degradation** - Questions saved even if file upload fails, with fallback `[File: filename]` reference
-- 🎨 **Header Standardization** - All portals now have consistent 70px min-height on mobile with 44px touch target buttons
-- 📱 **Mobile Menu Fixes** - Fixed side menu scrolling with `max-height: 100vh` and text wrapping on attachment filenames
+**Recent Fixes & Features (Latest Session - 2025-11-15):**
+- 💰 **Payment System Connected** - Parent payment form now saves to database using real API
+  - Loads actual student data with payment summaries from Supabase
+  - `api.addPayment()` saves payments permanently to database
+  - Automatic recalculation of totals and balances after payment submission
+  - Parents can track payment history with real-time updates
+  - Admin payment dashboard shows all payments across students
+- 📋 **Admin Dashboard Updates** - Changed "Review Documents" to "Review Questions"
+  - Better reflects the Q&A workflow where admins respond to user questions
+  - Updated both header buttons and quick actions section
+  - Uses MessageSquare icon for consistency
+- 🐛 **Mobile Layout Fixes** - Fixed resource button overflow on mobile devices
+  - AdminResources page now uses same responsive layout as Events
+  - Buttons properly contained within card boundaries on all screen sizes
+  - Applied `flex flex-col sm:flex-row` pattern for mobile-first design
+- ✅ **Parent Management** - Added edit/delete functionality to AdminParents
+  - Edit parent details (name, email, phone)
+  - Delete parents with confirmation dialog
+  - Matches functionality of AdminStudents page
+  - Mobile-responsive card and desktop table views
+
+**Previous Session Features:**
+- ✨ **Question Submission System** - Red question mark (❓) button on all portals
+- 📎 **File Attachment Support** - Users can upload files with questions, max 5MB
+- 🖼️ **Image Preview Modal** - Images display in fullscreen modal with download/open options
+- 📱 **Mobile-Optimized** - Complete mobile responsiveness across all portals
+- 🔧 **Centralized Upload Logic** - File uploads handled via `API.uploadFile()`
+- 🎨 **Header Standardization** - Consistent 70px min-height on mobile with 44px touch targets
 - 🌓 **Dark Mode Support** - Complete dark theme support across all dashboard pages
 
 **Previous Additions:**

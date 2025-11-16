@@ -39,12 +39,20 @@ END:VCALENDAR`
   return ical
 }
 
-const downloadICalFile = (event) => {
+const addToCalendar = (event) => {
   const icalContent = generateICalFile(event)
-  const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' })
+
+  // Create a data URI that will trigger the calendar app to open
+  const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icalContent)
+
+  // Try to open directly in calendar app
   const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
+  link.href = dataUri
   link.download = `${event.name.replace(/\s+/g, '_')}.ics`
+  link.target = '_blank'
+
+  // Some browsers/OS combinations will open the calendar app directly
+  // Others will download the file which can then be opened
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -217,9 +225,9 @@ export default function AdminEvents() {
                     key={event.id}
                     className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                             {event.name}
                           </h3>
@@ -254,11 +262,11 @@ export default function AdminEvents() {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2 ml-4">
+                      <div className="flex gap-2 shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => downloadICalFile(event)}
+                          onClick={() => addToCalendar(event)}
                           title="Add to Calendar"
                         >
                           <Download className="w-4 h-4" />
@@ -294,98 +302,98 @@ export default function AdminEvents() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name">Event Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Youth Group Meeting"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Event details..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="event_date">Date *</Label>
                   <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Youth Group Meeting"
+                    id="event_date"
+                    type="date"
+                    value={formData.event_date}
+                    onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
-                  <textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Event details..."
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="event_date">Date *</Label>
-                    <Input
-                      id="event_date"
-                      type="date"
-                      value={formData.event_date}
-                      onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="event_time">Time</Label>
-                    <Input
-                      id="event_time"
-                      type="time"
-                      value={formData.event_time}
-                      onChange={(e) => setFormData({ ...formData, event_time: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="event_time">Time</Label>
                   <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="Church building, Room 205"
+                    id="event_time"
+                    type="time"
+                    value={formData.event_time}
+                    onChange={(e) => setFormData({ ...formData, event_time: e.target.value })}
                   />
                 </div>
+              </div>
 
-                <div>
-                  <Label htmlFor="event_type">Event Type</Label>
-                  <select
-                    id="event_type"
-                    value={formData.event_type}
-                    onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  >
-                    {EVENT_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="Church building, Room 205"
+                />
+              </div>
 
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="display_on_calendar"
-                    checked={formData.display_on_calendar}
-                    onChange={(e) => setFormData({ ...formData, display_on_calendar: e.target.checked })}
-                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                  />
-                  <Label htmlFor="display_on_calendar" className="mb-0">
-                    Display on public calendar
-                  </Label>
-                </div>
+              <div>
+                <Label htmlFor="event_type">Event Type</Label>
+                <select
+                  id="event_type"
+                  value={formData.event_type}
+                  onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
+                  {EVENT_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="display_on_calendar"
+                  checked={formData.display_on_calendar}
+                  onChange={(e) => setFormData({ ...formData, display_on_calendar: e.target.checked })}
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <Label htmlFor="display_on_calendar" className="mb-0">
+                  Display on public calendar
+                </Label>
+              </div>
 
               <div className="flex gap-3 mt-6">
-              <Button onClick={handleSave} className="flex-1">
-                {editingEvent ? 'Save Changes' : 'Create Event'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowModal(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
+                <Button onClick={handleSave} className="flex-1">
+                  {editingEvent ? 'Save Changes' : 'Create Event'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           </div>

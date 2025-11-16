@@ -35,12 +35,20 @@ END:VCALENDAR`
   return ical
 }
 
-const downloadICalFile = (event) => {
+const addToCalendar = (event) => {
   const icalContent = generateICalFile(event)
-  const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' })
+
+  // Create a data URI that will trigger the calendar app to open
+  const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icalContent)
+
+  // Try to open directly in calendar app
   const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
+  link.href = dataUri
   link.download = `${event.name.replace(/\s+/g, '_')}.ics`
+  link.target = '_blank'
+
+  // Some browsers/OS combinations will open the calendar app directly
+  // Others will download the file which can then be opened
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -88,9 +96,9 @@ export default function EventsList({ events, canEdit = false, onEdit, onDelete }
           key={event.id}
           className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-md transition-shadow"
         >
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   {event.name}
                 </h3>
@@ -125,11 +133,11 @@ export default function EventsList({ events, canEdit = false, onEdit, onDelete }
                 )}
               </div>
             </div>
-            <div className="flex gap-2 ml-4">
+            <div className="flex gap-2 shrink-0">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => downloadICalFile(event)}
+                onClick={() => addToCalendar(event)}
                 title="Add to Calendar"
               >
                 <Download className="w-4 h-4" />
