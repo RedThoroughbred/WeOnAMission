@@ -243,18 +243,20 @@ export default function PortalHeader({ title, onMenuToggle, menuOpen }) {
                       </div>
                       Admin Portal
                     </button>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false)
-                        navigate('/super-admin')
-                      }}
-                      className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/50 flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      </div>
-                      Super Admin Portal
-                    </button>
+                    {(userProfile?.role === 'superadmin' || userProfile?.role === 'admin') && (
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false)
+                          navigate('/super-admin')
+                        }}
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/50 flex items-center justify-center">
+                          <Shield className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        </div>
+                        Super Admin Portal
+                      </button>
+                    )}
 
                     <div className="my-2 h-px bg-gray-200 dark:bg-gray-700"></div>
 

@@ -29,15 +29,22 @@ export default function ProtectedRoute({ requiredRole, children }) {
     const userRole = userProfile.role || 'parent'
     console.log('🔒 ProtectedRoute check - Required:', requiredRole, 'User has:', userRole)
 
-    // Super admin can access everything
-    if (userRole === 'superadmin') {
+    // Super admin and admin can access everything (including super-admin routes)
+    if (userRole === 'superadmin' || userRole === 'admin') {
       return
     }
 
     // Check if user has required role
-    if (requiredRole === 'superadmin' && userRole !== 'superadmin') {
-      console.warn('Access denied: Super admin required')
-      navigate('/login', { replace: true })
+    if (requiredRole === 'superadmin' && userRole !== 'superadmin' && userRole !== 'admin') {
+      console.warn('Access denied: Super admin required, user is:', userRole)
+      // Redirect to appropriate portal based on user's actual role
+      if (userRole === 'parent') {
+        navigate('/parent', { replace: true })
+      } else if (userRole === 'student') {
+        navigate('/student', { replace: true })
+      } else {
+        navigate('/login', { replace: true })
+      }
       return
     }
 
