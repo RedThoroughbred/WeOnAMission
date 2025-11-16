@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import PortalLayout from '../../components/layout/PortalLayout'
 import { Card, CardHeader, CardTitle, CardContent, Button } from '../../components/ui'
 import { MessageSquare, Plus, CheckCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react'
@@ -7,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { api } from '../../services/api'
 
 export default function MyQuestions() {
+  const location = useLocation()
   const { churchId, church } = useTenant()
   const { user, userProfile } = useAuth()
   const [questions, setQuestions] = useState([])
@@ -15,6 +17,16 @@ export default function MyQuestions() {
   const [questionText, setQuestionText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [expandedQuestions, setExpandedQuestions] = useState(new Set())
+
+  // Determine portal role based on URL path
+  const getPortalRole = () => {
+    const path = location.pathname
+    if (path.startsWith('/super-admin')) return 'superadmin'
+    if (path.startsWith('/admin')) return 'admin'
+    if (path.startsWith('/student')) return 'student'
+    if (path.startsWith('/parent')) return 'parent'
+    return userProfile?.role || 'parent'
+  }
 
   useEffect(() => {
     if (churchId) {
@@ -100,7 +112,7 @@ export default function MyQuestions() {
   }
 
   return (
-    <PortalLayout title="My Questions" role={userProfile?.role || 'parent'}>
+    <PortalLayout title="My Questions" role={getPortalRole()}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
